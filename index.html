@@ -372,14 +372,15 @@
                         <h3 class="font-bold text-zamrud-900">Filter Data</h3>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold text-zamrud-600 mb-1"><i class="fa-regular fa-calendar text-emas-500 mr-1"></i> Periode Bulan</label>
-                            <input type="month" id="filter-bulan" class="w-full border border-zamrud-100 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emas-500 outline-none text-slate-700">
+                            <label class="block text-xs font-semibold text-zamrud-600 mb-1">Periode Bulan</label>
+                            <select id="filter-bulan" onchange="applyAdminFilters()" class="w-full border border-zamrud-100 rounded-lg px-3 py-2 text-sm outline-none text-slate-700 cursor-pointer">
+                                </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-zamrud-600 mb-1"><i class="fa-solid fa-layer-group text-emas-500 mr-1"></i> Kategori Pengajar</label>
-                            <select id="filter-kategori" class="w-full border border-zamrud-100 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emas-500 outline-none text-slate-700">
+                            <label class="block text-xs font-semibold text-zamrud-600 mb-1">Kategori Pengajar</label>
+                            <select id="filter-kategori" onchange="applyAdminFilters()" class="w-full border border-zamrud-100 rounded-lg px-3 py-2 text-sm outline-none text-slate-700 cursor-pointer">
                                 <option value="ALL">Semua Kategori</option>
                                 <option value="Tahfidz">Tahfidz</option>
                                 <option value="Ta'lim Umum">Ta'lim Umum</option>
@@ -388,11 +389,6 @@
                         </div>
                     </div>
                     
-                    <div class="flex justify-end">
-                        <button type="button" onclick="applyAdminFilters()" class="bg-zamrud-600 hover:bg-zamrud-700 text-white px-5 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition shadow-md shadow-zamrud-600/30">
-                            <i class="fa-solid fa-magnifying-glass"></i> Tampilkan
-                        </button>
-                    </div>
                 </div>
 
                 <!-- Summary Cards -->
@@ -561,12 +557,8 @@
             if (screenName === 'admin-rekap') {
                 if (currentUser.role !== 'admin') return navigate('home');
                 
-                // Set default input bulan ke bulan ini jika belum diisi
-                if(!document.getElementById('filter-bulan').value){
-                    const now = new Date();
-                    document.getElementById('filter-bulan').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-                }
-                
+                // Panggil ini agar dropdown terisi bulan yang benar saat dibuka
+                populateBulanDropdown(); 
                 applyAdminFilters();
             }
         }
@@ -938,13 +930,14 @@
         function applyAdminFilters() {
             if (!currentUser || currentUser.role !== 'admin') return;
 
-            const filterBulan = document.getElementById('filter-bulan').value; // format YYYY-MM
+            const filterBulan = document.getElementById('filter-bulan').value; 
             const filterKategori = document.getElementById('filter-kategori').value;
 
-            // Set Label Periode di Tabel
-            document.getElementById('label-periode-tabel').innerText = filterBulan ? filterBulan : '';
+            // Set Label Periode di Tabel agar menggunakan Teks (cth: Juli 2026)
+            const dropdownBulan = document.getElementById('filter-bulan');
+            document.getElementById('label-periode-tabel').innerText = dropdownBulan.options[dropdownBulan.selectedIndex] ? dropdownBulan.options[dropdownBulan.selectedIndex].text : '';
 
-            // 1. Dapatkan daftar User (Ekstrak dari absensiData secara unik)
+            // 1. Ekstrak daftar User secara unik dari riwayat absen
             const userMap = new Map();
             absensiData.forEach(item => {
                 if (!userMap.has(item.username)) {
@@ -955,61 +948,46 @@
                     });
                 }
             });
-            
-            // Tambahkan data dummy peserta jika di mode simulasi agar daftar tidak kosong
-            if (!hasGAS) {
-                MOCK_USERS.filter(u => u.role === 'pengajar').forEach(u => {
-                    if (!userMap.has(u.username)) {
-                        userMap.set(u.username, { username: u.username, nama: u.name, kategori: u.kategori });
-                    }
-                });
-            }
 
             let userList = Array.from(userMap.values());
 
-            // Filter Kategori
+            // 2. Filter Kategori
             if (filterKategori !== 'ALL') {
                 userList = userList.filter(u => u.kategori === filterKategori);
             }
 
-            // 2. Filter data absensi berdasarkan Bulan
+            // 3. Filter data absensi berdasarkan Bulan
             let filteredAbsen = absensiData;
             if (filterBulan) {
                 filteredAbsen = filteredAbsen.filter(item => item.tanggal.startsWith(filterBulan));
             }
 
-            // 3. Kalkulasi dan Render ke Tabel
+            // 4. Kalkulasi dan Render ke Tabel
             const tableBody = document.getElementById('admin-rekap-table');
             tableBody.innerHTML = '';
 
             let totalSesiGlobal = 0;
-            let totalHariGlobal = new Set(); // Set digunakan untuk menghitung hari unik
+            let totalHariGlobal = new Set(); 
 
             if (userList.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-400">Tidak ada data</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-400">Tidak ada data pengajar</td></tr>`;
             } else {
                 userList.forEach((user, index) => {
-                    // Ambil absensi khusus user ini di bulan terpilih
                     const userAbsen = filteredAbsen.filter(a => a.username === user.username);
-                    
                     const totalSesi = userAbsen.length;
                     
-                    // Hitung jumlah hari hadir yang unik (1 hari bisa banyak sesi, dihitung 1 hari)
                     const hariHadirSet = new Set(userAbsen.map(a => a.tanggal));
                     const totalHari = hariHadirSet.size;
 
-                    // Tambahkan ke statistik global
                     totalSesiGlobal += totalSesi;
-                    userAbsen.forEach(a => totalHariGlobal.add(a.tanggal + '_' + a.username)); // Unik per hari per orang
+                    userAbsen.forEach(a => totalHariGlobal.add(a.tanggal + '_' + a.username));
 
-                    // Estimasi Persentase (Asumsi: 1 bulan maksimal ~60 sesi untuk 100%)
                     const MAX_SESI = 60; 
                     let persentase = 0;
                     if (totalSesi > 0) {
                         persentase = Math.min(100, Math.round((totalSesi / MAX_SESI) * 100));
                     }
 
-                    // Tentukan warna progress bar berdasarkan persentase
                     let barColor = 'bg-red-500';
                     let textColor = 'text-red-600';
                     if (persentase >= 75) { barColor = 'bg-zamrud-500'; textColor = 'text-zamrud-600'; }
@@ -1038,7 +1016,6 @@
                 });
             }
 
-            // Update Kartu Statistik di atas
             document.getElementById('stat-total-sesi').innerText = totalSesiGlobal;
             document.getElementById('stat-total-hari').innerText = totalHariGlobal.size;
         }
@@ -1255,7 +1232,47 @@
                 }
             );
 
-        }                  
+        } 
+        function populateBulanDropdown() {
+            const dropdown = document.getElementById('filter-bulan');
+            if (!dropdown) return;
+
+            const namaBulanList = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            const bulanSet = new Set();
+            
+            // Masukkan bulan saat ini sebagai default agar selalu ada opsi meskipun data kosong
+            const now = new Date();
+            const currentMonthValue = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            bulanSet.add(currentMonthValue);
+
+            // Ekstrak bulan dari data absensi yang ada
+            absensiData.forEach(item => {
+                if (item.tanggal) {
+                    const ym = item.tanggal.substring(0, 7); // Ambil format YYYY-MM
+                    bulanSet.add(ym);
+                }
+            });
+
+            // Urutkan dari yang terbaru (Z-A)
+            const sortedBulan = Array.from(bulanSet).sort().reverse();
+
+            // Simpan pilihan sebelumnya (jika ada) agar tidak reset saat direfresh
+            const currentValue = dropdown.value || currentMonthValue;
+
+            // Kosongkan dan isi ulang dropdown
+            dropdown.innerHTML = '';
+            sortedBulan.forEach(ym => {
+                const [year, month] = ym.split('-');
+                const teksBulan = `${namaBulanList[parseInt(month, 10) - 1]} ${year}`;
+                
+                const option = document.createElement('option');
+                option.value = ym;
+                option.text = teksBulan;
+                dropdown.appendChild(option);
+            });
+
+            dropdown.value = currentValue;
+        }                 
     </script>
 </body>
 </html>
