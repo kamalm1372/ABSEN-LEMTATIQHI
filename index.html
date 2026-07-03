@@ -13,7 +13,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
@@ -27,22 +26,10 @@
                     },
                     colors: {
                         zamrud: {
-                            50: '#EAF4EE',
-                            100: '#CFE6D9',
-                            300: '#6FAE8B',
-                            500: '#1D6E4C',
-                            600: '#14532D',
-                            700: '#0F4025',
-                            900: '#0B3D2E',
-                            950: '#082922',
+                            50: '#EAF4EE', 100: '#CFE6D9', 300: '#6FAE8B', 500: '#1D6E4C', 600: '#14532D', 700: '#0F4025', 900: '#0B3D2E', 950: '#082922',
                         },
                         emas: {
-                            50: '#FCF8EC',
-                            100: '#F5E6B8',
-                            300: '#E2C158',
-                            500: '#D4AF37',
-                            600: '#B8860B',
-                            700: '#93690A',
+                            50: '#FCF8EC', 100: '#F5E6B8', 300: '#E2C158', 500: '#D4AF37', 600: '#B8860B', 700: '#93690A',
                         },
                         gading: '#FAF7F0',
                     }
@@ -55,112 +42,53 @@
         :root {
             --star-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%23D4AF37' stroke-width='0.6' opacity='0.35'%3E%3Crect x='18' y='18' width='36' height='36'/%3E%3Crect x='18' y='18' width='36' height='36' transform='rotate(45 36 36)'/%3E%3C/g%3E%3C/svg%3E");
         }
-
         body {
             background: #E9E4D8 radial-gradient(circle at 50% 0%, #F3EFE4 0%, #E4DECE 55%, #DAD3BF 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            color: #1F2937;
+            display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: 'Inter', sans-serif; color: #1F2937;
         }
-
         h1, h2, h3, .font-display { font-family: 'Cormorant Garamond', serif; }
 
-        /* Mobile App Container */
+        /* App Container */
         #app-container {
-            width: 100%;
-            max-width: 414px;
-            height: 100vh;
-            max-height: 100vh;
-            background-color: #FAF7F0;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            width: 100%; max-width: 414px; height: 100vh; max-height: 100vh; background-color: #FAF7F0; position: relative; overflow: hidden; display: flex; flex-direction: column;
             box-shadow: 0 30px 60px -20px rgba(11, 61, 46, 0.45), 0 0 0 1px rgba(212, 175, 55, 0.25);
         }
-
         @media (min-width: 415px) {
-            #app-container {
-                height: 90vh;
-                border-radius: 28px;
-            }
+            #app-container { height: 90vh; border-radius: 28px; }
         }
 
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
 
         .app-screen {
-            display: none;
-            flex: 1;
-            overflow-y: auto;
-            padding-bottom: 88px;
-            animation: fadeIn 0.35s ease-in-out;
+            display: none; flex: 1; overflow-y: auto; padding-bottom: 88px; animation: fadeIn 0.35s ease-in-out;
         }
         .app-screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .gold-rule { height: 1px; background: linear-gradient(90deg, transparent, #D4AF37 50%, transparent); }
 
-        .gold-rule {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #D4AF37 50%, transparent);
-        }
-
-        /* Loading Overlay */
+        /* Loader */
         #global-loader {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(11, 61, 46, 0.92);
-            z-index: 9999;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(11, 61, 46, 0.92); z-index: 9999; display: none; justify-content: center; align-items: center; flex-direction: column;
         }
-
         .spinner {
-            border: 3px solid rgba(212, 175, 55, 0.25);
-            border-top: 3px solid #D4AF37;
-            border-radius: 50%;
-            width: 42px;
-            height: 42px;
-            animation: spin 0.9s linear infinite;
+            border: 3px solid rgba(212, 175, 55, 0.25); border-top: 3px solid #D4AF37; border-radius: 50%; width: 42px; height: 42px; animation: spin 0.9s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Buttons */
         .btn-gold {
-            background: linear-gradient(135deg, #E2C158 0%, #D4AF37 45%, #B8860B 100%);
-            color: #0B3D2E;
-            box-shadow: 0 10px 24px -8px rgba(212, 175, 55, 0.55);
-            border: 1px solid rgba(255,255,255,0.35);
+            background: linear-gradient(135deg, #E2C158 0%, #D4AF37 45%, #B8860B 100%); color: #0B3D2E; box-shadow: 0 10px 24px -8px rgba(212, 175, 55, 0.55); border: 1px solid rgba(255,255,255,0.35);
         }
         .btn-gold:active { transform: scale(0.97); }
 
-        /* Nav */
         .nav-btn.is-active { color: #B8860B; }
         .nav-btn.is-active .nav-icon { color: #0F4025; }
-
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); }
 
-        .filter-chip.is-active {
-            background: #082922;
-            border-color: #D4AF37;
-            color: #F5E6B8;
-        }
-        .rekap-card{
-            transition:all .25s ease;
-        }
-
-        .rekap-card:hover{
-            transform:translateY(-2px);
-        }
+        .filter-chip.is-active { background: #082922; border-color: #D4AF37; color: #F5E6B8; }
+        .rekap-card{ transition:all .25s ease; }
+        .rekap-card:hover{ transform:translateY(-2px); }
     </style>
 </head>
 <body>
@@ -204,7 +132,7 @@
                         </button>
                     </form>
                 </div>
-                <div class="mt-4 text-center text-xs text-white">
+                <div class="mt-6 text-center text-xs text-white/50">
                     Copyright LEMTATIQHI Al-Ittifaqiah Indralaya 2026
                 </div>
             </div>
@@ -216,7 +144,7 @@
                 <div class="flex justify-between items-center mb-6 relative z-10">
                     <div>
                         <p class="text-xs tracking-[0.15em] uppercase" style="color:#E2C158;">Assalamu'alaikum, Ustadz/ah</p>
-                        <h2 class="text-white text-xm font-heading font-bold truncate w-50" id="user-greeting-name">Nama Pengajar</h2>
+                        <h2 class="text-white text-xl font-heading font-bold truncate w-48" id="user-greeting-name">Nama Pengajar</h2>
                     </div>
                     <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background: rgba(212,175,55,0.18); border: 1px solid rgba(212,175,55,0.5);">
                         <i class="fa-solid fa-user-circle text-2xl" style="color:#F5E6B8;"></i>
@@ -241,7 +169,7 @@
                     </div>
 
                     <div class="flex flex-col gap-3 mt-2" id="session-cards">
-                        <div id="card-PAGI" onclick="pilihSesi('PAGI')" class="flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
+                        <div id="card-PAGI" onclick="pilihSesi('PAGI')" class="flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm transition">
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 text-xl">
                                     <i class="fa-solid fa-sun"></i>
@@ -254,7 +182,7 @@
                             <div id="badge-PAGI" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
                         </div>
 
-                        <div id="card-SORE" onclick="pilihSesi('SORE')" class="flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
+                        <div id="card-SORE" onclick="pilihSesi('SORE')" class="flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm transition">
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 text-xl">
                                     <i class="fa-solid fa-clock"></i>
@@ -267,7 +195,7 @@
                             <div id="badge-SORE" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
                         </div>
 
-                        <div id="card-MALAM" onclick="pilihSesi('MALAM')" class="flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
+                        <div id="card-MALAM" onclick="pilihSesi('MALAM')" class="flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm transition">
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 text-xl">
                                     <i class="fa-solid fa-moon"></i>
@@ -400,7 +328,7 @@
                             <i class="fa-solid fa-rotate-left mr-1"></i> Reset
                         </button>
                         <button type="button" onclick="exportRekapCSV()" class="flex-1 py-2.5 rounded-xl btn-gold text-sm font-semibold">
-                            <i class="fa-solid fa-file-arrow-down mr-1"></i> Export PDF
+                            <i class="fa-solid fa-file-arrow-down mr-1"></i> Export CSV
                         </button>
                     </div>
                 </div>
@@ -494,7 +422,7 @@
         let absensiData = safeParse('lem_absensi', []);
         let capturedPhotoBase64 = null;
         let adminSesiFilter = 'ALL';
-        let activeSesi = ""; // Menyimpan sesi yang diklik
+        let activeSesi = "";
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -556,13 +484,8 @@
             if (!user || !pass) return;
 
             btn.disabled = true;
-
             btn.dataset.oldText = btn.innerHTML;
-
-            btn.innerHTML = `
-            <i class="fa-solid fa-spinner fa-spin mr-2"></i>
-            Memverifikasi...
-            `;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Memverifikasi...`;
 
             fetchAPI('checkLogin', { username: user, password: pass })
                 .then(function(response) {
@@ -573,7 +496,6 @@
                         safeStorage.setItem('lem_user', JSON.stringify(response.user));
                         currentUser = response.user;
                         initApp();
-                        fetchRiwayat();
                         
                         Swal.fire({
                             toast: true, position: 'top-end', icon: 'success',
@@ -585,23 +507,19 @@
                     }
                 })
                 .catch(function(error) {
-                    showLoading(false);
                     btn.disabled = false;
+                    btn.innerHTML = btn.dataset.oldText;
                     Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.', confirmButtonColor: '#B8860B' });
                 });
         }
 
         function initApp() {
-
             document.getElementById('user-greeting-name').innerText = currentUser.name;
             document.getElementById('profile-name').innerText = currentUser.name;
-            document.getElementById('profile-role').innerText =
-                currentUser.role === 'admin' ? 'Administrator' : 'Pengajar';
-            document.getElementById('profile-kategori').innerText =
-                currentUser.kategori;
+            document.getElementById('profile-role').innerText = currentUser.role === 'admin' ? 'Administrator' : 'Pengajar';
+            document.getElementById('profile-kategori').innerText = currentUser.kategori;
 
             const adminMenu = document.getElementById('menu-admin-laporan');
-
             if (currentUser.role === 'admin') {
                 adminMenu.classList.remove('hidden');
                 adminMenu.classList.add('flex');
@@ -610,18 +528,12 @@
                 adminMenu.classList.remove('flex');
             }
 
-            // Masuk ke Home
             navigate("home");
+            loadRekap(); // Load lokal dulu
 
-            // Tampilkan data lokal dulu (langsung)
-            loadRekap();
-
-            // Jalankan sinkronisasi secara paralel
             Promise.all([
                 fetchRiwayat(),
-                fetchAPI("getTodayAttendance", {
-                    username: currentUser.username
-                })
+                fetchAPI("getTodayAttendance", { username: currentUser.username })
             ])
             .then(([_, sesiList]) => {
                 lockSession(sesiList);
@@ -629,7 +541,6 @@
             .catch(err => {
                 console.error(err);
             });
-
         }
 
         function lockSession(sesiList) {
@@ -644,7 +555,7 @@
                     card.classList.remove("cursor-pointer", "hover:shadow-md");
                     card.classList.add("opacity-70");
                     badge.className = "text-xs font-semibold px-3 py-1 rounded-full bg-green-50 text-green-600 border border-green-200";
-                    badge.innerText = "Hadir";
+                    badge.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Hadir';
                 } else {
                     card.onclick = () => pilihSesi(sesi);
                     card.classList.add("cursor-pointer", "hover:shadow-md");
@@ -668,7 +579,7 @@
         }
 
         function fetchRiwayat() {
-            if (!currentUser) return;
+            if (!currentUser) return Promise.resolve();
 
             return fetchAPI('getRiwayat', { username: currentUser.username, role: currentUser.role })
                 .then(function(data) {
@@ -729,10 +640,7 @@
             if (currentUser.role !== "admin") {
                 if (!isInTimeRange) {
                     Swal.fire({
-                        icon: 'error',
-                        title: 'Di Luar Jam',
-                        text: pesanWaktu,
-                        confirmButtonColor: '#B8860B'
+                        icon: 'error', title: 'Di Luar Jam', text: pesanWaktu, confirmButtonColor: '#B8860B'
                     });
                     return;
                 }
@@ -818,25 +726,16 @@
                         absensiData.unshift(dataAbsen);
                         try { safeStorage.setItem('lem_absensi', JSON.stringify(absensiData)); } catch(e){}
 
-                        // Langsung ubah status tombol
                         updateSessionUI(activeSesi);
-
-                        // Langsung refresh rekap dari data lokal
                         loadRekap();
 
                         Swal.fire({
-                            toast: true,
-                            position: "top-end",
-                            icon: "success",
+                            toast: true, position: "top-end", icon: "success",
                             title: `Absen ${activeSesi} berhasil`,
-                            showConfirmButton: false,
-                            timer: 1800,
-                            timerProgressBar: true
+                            showConfirmButton: false, timer: 1800, timerProgressBar: true
                         });
-                        // Refresh data di background
-                        setTimeout(() => {
-                            fetchRiwayat();
-                        }, 300);                        
+
+                        setTimeout(() => { fetchRiwayat(); }, 300);                        
                     } else {
                         Swal.fire({ icon: 'error', title: 'Gagal', text: response.message, confirmButtonColor: '#B8860B' });
                     }
@@ -846,6 +745,27 @@
                     Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.', confirmButtonColor: '#B8860B' });
                 });
         }
+
+        function updateSessionUI(sesi){
+            const card = document.getElementById(`card-${sesi}`);
+            const badge = document.getElementById(`badge-${sesi}`);
+            if(!card || !badge) return;
+
+            card.onclick = null;
+            card.classList.remove("cursor-pointer", "hover:shadow-md");
+            card.classList.add("opacity-70");
+            badge.className = "text-xs font-semibold px-3 py-1 rounded-full bg-green-50 text-green-600 border border-green-200";
+            badge.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Hadir';
+
+            card.animate(
+                [
+                    { transform: "scale(0.96)", boxShadow: "0 0 0 rgba(0,0,0,0)" },
+                    { transform: "scale(1.03)", boxShadow: "0 12px 24px rgba(34,197,94,.25)" },
+                    { transform: "scale(1)" }
+                ],
+                { duration: 350, easing: "ease-out" }
+            );
+        }                  
 
         // --- REKAP & UI LOGIC ---
         function loadRekap() {
@@ -980,7 +900,7 @@
         function exportRekapCSV() {
             const filtered = getFilteredAdminData();
             if (filtered.length === 0) {
-                Swal.fire({ icon: 'info', text: 'Tidak ada data untuk diekspor pada filter saat ini.', confirmButtonColor: '#B8860B' }); return;
+                Swal.fire({ icon: 'info', text: 'Tidak ada data untuk diekspor.', confirmButtonColor: '#B8860B' }); return;
             }
 
             const header = ['Nama', 'Username', 'Kategori', 'Tanggal', 'Waktu', 'Sesi'];
@@ -1017,7 +937,7 @@
             });
         }
 
-        // --- UTILITIES & PASSWORD MODAL ---
+        // --- UTILITIES & MODAL ---
         function updateClock() {
             const now = new Date();
             const dateEl = document.getElementById('current-date');
@@ -1036,6 +956,23 @@
             return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
         }
 
+        function formatJam(waktu) {
+            if (!waktu) return "-";
+            if (String(waktu).includes("T")) {
+                const d = new Date(waktu);
+                return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+            }
+            return waktu;
+        } 
+
+        function formatTanggal(tanggal) {
+            if (!tanggal) return "-";
+            const t = String(tanggal).split("T")[0];
+            const bagian = t.split("-");
+            if (bagian.length === 3) return `${bagian[2]}-${bagian[1]}-${bagian[0]}`;
+            return tanggal;
+        }
+
         function showLoading(show, text = "Memproses...") {
             const loader = document.getElementById('global-loader');
             document.getElementById('loader-text').innerText = text;
@@ -1043,7 +980,9 @@
         }
 
         function showInfo(title, text) { Swal.fire({ icon: 'info', title: title, text: text, confirmButtonColor: '#B8860B' }); }
+        
         function openChangePasswordModal(){ document.getElementById("passwordModal").classList.remove("hidden"); document.getElementById("passwordModal").classList.add("flex"); }
+        
         function closePasswordModal(){
             document.getElementById("passwordModal").classList.remove("flex"); document.getElementById("passwordModal").classList.add("hidden");
             document.getElementById("oldPassword").value = ""; document.getElementById("newPassword").value = ""; document.getElementById("confirmPassword").value = "";
@@ -1085,74 +1024,6 @@
                     Swal.fire({ icon: 'error', title: 'Error', text: 'Koneksi ke server gagal.', confirmButtonColor: '#B8860B' });
                 });
         }
-        function formatJam(waktu) {
-            if (!waktu) return "-";
-
-            if (String(waktu).includes("T")) {
-                const d = new Date(waktu);
-
-                return String(d.getHours()).padStart(2, "0") + ":" +
-                      String(d.getMinutes()).padStart(2, "0");
-            }
-
-            return waktu;
-        } 
-        function formatTanggal(tanggal) {
-            if (!tanggal) return "-";
-
-            const t = String(tanggal).split("T")[0];
-            const bagian = t.split("-");
-
-            if (bagian.length === 3) {
-                return `${bagian[2]}-${bagian[1]}-${bagian[0]}`;
-            }
-
-            return tanggal;
-        }
-        function updateSessionUI(sesi){
-
-            const card = document.getElementById(`card-${sesi}`);
-            const badge = document.getElementById(`badge-${sesi}`);
-
-            if(!card || !badge) return;
-
-            card.onclick = null;
-
-            card.classList.remove(
-                "cursor-pointer",
-                "hover:shadow-md"
-            );
-
-            card.classList.add("opacity-70");
-
-            badge.className =
-                "text-xs font-semibold px-3 py-1 rounded-full bg-green-50 text-green-600 border border-green-200";
-
-            badge.innerHTML =
-                '<i class="fa-solid fa-circle-check mr-1"></i> Hadir';
-
-            // ===== ANIMASI =====
-            card.animate(
-                [
-                    {
-                        transform: "scale(0.96)",
-                        boxShadow: "0 0 0 rgba(0,0,0,0)"
-                    },
-                    {
-                        transform: "scale(1.03)",
-                        boxShadow: "0 12px 24px rgba(34,197,94,.25)"
-                    },
-                    {
-                        transform: "scale(1)"
-                    }
-                ],
-                {
-                    duration: 350,
-                    easing: "ease-out"
-                }
-            );
-
-        }                  
     </script>
 </body>
 </html>
