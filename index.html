@@ -211,15 +211,31 @@
         </div>
 
         <div id="screen-home" class="app-screen hide-scroll bg-gading">
-            <div class="pt-8 pb-14 px-6 rounded-b-[32px] shadow-sm relative overflow-hidden" style="background: linear-gradient(135deg, #14532D, #0B3D2E);">
+            <div class="pt-8 pb-10 px-6 rounded-b-[32px] shadow-sm relative overflow-hidden" style="background: linear-gradient(135deg, #14532D, #0B3D2E);">
                 <div class="absolute inset-0" style="background-image: var(--star-pattern); opacity: 0.25;"></div>
-                <div class="flex justify-between items-center mb-6 relative z-10">
-                    <div>
-                        <p class="text-xs tracking-[0.15em] uppercase" style="color:#E2C158;">Assalamu'alaikum, Ustadz/ah</p>
-                        <h2 class="text-white text-xm font-heading font-bold truncate w-50" id="user-greeting-name">Nama Pengajar</h2>
+                
+                <div class="flex justify-between items-center mb-5 relative z-10">
+                    <div class="flex-1 min-w-0 pr-3">
+                        <p class="text-xs tracking-[0.15em] uppercase" style="color:#E2C158;">Assalamu'alaikum,</p>
+                        <h2 class="text-white text-xl font-heading font-bold truncate" id="user-greeting-name">Nama Pengajar</h2>
                     </div>
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background: rgba(212,175,55,0.18); border: 1px solid rgba(212,175,55,0.5);">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style="background: rgba(212,175,55,0.18); border: 1px solid rgba(212,175,55,0.5);">
                         <i class="fa-solid fa-user-circle text-2xl" style="color:#F5E6B8;"></i>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/20 relative z-10 shadow-inner">
+                    <div class="text-center flex-1 border-r border-white/20">
+                        <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Total Sesi</p>
+                        <p class="text-xl font-bold text-white font-heading leading-none" id="home-stat-sesi">0</p>
+                    </div>
+                    <div class="text-center flex-1 border-r border-white/20">
+                        <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Hari Hadir</p>
+                        <p class="text-xl font-bold text-white font-heading leading-none" id="home-stat-hari">0</p>
+                    </div>
+                    <div class="text-center flex-1">
+                        <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Persentase</p>
+                        <p class="text-xl font-bold text-emas-300 font-heading leading-none" id="home-stat-persen">0%</p>
                     </div>
                 </div>
             </div>
@@ -412,8 +428,8 @@
                     </div>
                 </div>
 
-                <!-- Table Data Statistik -->
-                <div class="bg-white rounded-2xl shadow-sm border border-emas-100 overflow-hidden">
+                <!-- Table Data Statistik -> Diubah menjadi Card List -->
+                <div class="bg-white rounded-2xl shadow-sm border border-emas-100 overflow-hidden mb-8">
                     <div class="p-4 border-b border-zamrud-50 bg-zamrud-50/50 flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <i class="fa-solid fa-users text-zamrud-700"></i>
@@ -424,22 +440,9 @@
                         </button>
                     </div>
                     
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm whitespace-nowrap">
-                            <thead class="bg-white text-gray-500 text-[10px] uppercase border-b border-gray-100 tracking-wider">
-                                <tr>
-                                    <th class="px-4 py-3 font-semibold">No</th>
-                                    <th class="px-4 py-3 font-semibold">Nama Pengajar</th>
-                                    <th class="px-4 py-3 font-semibold">Kategori</th>
-                                    <th class="px-4 py-3 font-semibold text-center">Total Kehadiran (Sesi)</th>
-                                    <th class="px-4 py-3 font-semibold text-center">Hari Hadir</th>
-                                    <th class="px-4 py-3 font-semibold text-center">Estimasi Persentase</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-rekap-table" class="divide-y divide-gray-50">
-                                <!-- Data diinjeksi via JS -->
-                            </tbody>
-                        </table>
+                    <!-- Wadah untuk list kartu (Tidak menggunakan table lagi) -->
+                    <div id="admin-rekap-table" class="p-3 flex flex-col gap-3 max-h-[65vh] overflow-y-auto hide-scroll">
+                        <!-- Data diinjeksi via JS -->
                     </div>
                 </div>
             </div>
@@ -452,7 +455,7 @@
             </button>
             <button type="button" onclick="navigate('rekap')" class="nav-btn flex-1 flex flex-col items-center py-2 gap-1 text-zamrud-300 transition" data-target="rekap">
                 <i class="fa-solid fa-list-check text-xl mb-1 nav-icon"></i>
-                <span class="text-[10px] font-medium">Rekap Absen</span>
+                <span class="text-[10px] font-medium">Riwayat Absen</span>
             </button>
             <button type="button" onclick="navigate('profile')" class="nav-btn flex-1 flex flex-col items-center py-2 gap-1 text-zamrud-300 transition" data-target="profile">
                 <i class="fa-solid fa-circle-user text-xl mb-1 nav-icon"></i>
@@ -544,6 +547,7 @@
         function navigate(screenName) {
             showScreen(screenName);
 
+            // Mengatur warna tombol menu aktif di bawah
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('is-active');
                 btn.classList.add('text-zamrud-300');
@@ -554,12 +558,29 @@
                 activeBtn.classList.add('is-active');
             }
 
+            // Logika Halaman Admin Rekap
             if (screenName === 'admin-rekap') {
                 if (currentUser.role !== 'admin') return navigate('home');
-                
-                // Panggil ini agar dropdown terisi bulan yang benar saat dibuka
                 populateBulanDropdown(); 
                 applyAdminFilters();
+            }
+
+            // Logika Halaman Riwayat Absen (Rekap)
+            if (screenName === 'rekap') {
+                loadRekap();
+                
+                // UX FIX: Tampilkan loading jika memori kosong agar user tidak bingung
+                if (absensiData.length === 0) {
+                    showLoading(true, "Memuat Riwayat...");
+                    fetchRiwayat().then(() => {
+                        showLoading(false);
+                    }).catch(() => {
+                        showLoading(false);
+                    });
+                } else {
+                    // Melakukan refresh data di latar belakang secara senyap
+                    fetchRiwayat();
+                }
             }
         }
 
@@ -710,6 +731,7 @@
                         return item;
                     });
                     safeStorage.setItem('lem_absensi', JSON.stringify(absensiData));
+                    updateHomeStats();
                     if (document.getElementById('screen-rekap').classList.contains('active')) loadRekap();
                     if (document.getElementById('screen-admin-rekap').classList.contains('active')) applyAdminFilters();
                 })
@@ -856,6 +878,7 @@
 
                         // Langsung refresh rekap dari data lokal
                         loadRekap();
+                        updateHomeStats();
 
                         Swal.fire({
                             toast: true,
@@ -886,44 +909,131 @@
             const emptyState = document.getElementById('rekap-empty');
 
             let myData = absensiData;
+            // Jika bukan admin, filter datanya hanya milik user yang login
             if (currentUser.role !== 'admin') {
                 myData = absensiData.filter(item => item.username === currentUser.username);
             }
 
-            document.querySelectorAll('#rekap-list .rekap-card').forEach(el => el.remove());
+            // Hapus elemen riwayat yang lama sebelum memuat ulang
+            document.querySelectorAll('#rekap-list .rekap-group').forEach(el => el.remove());
 
             if (myData.length === 0) {
                 emptyState.style.display = 'block';
-            } else {
-                emptyState.style.display = 'none';
-                myData.forEach(item => {
-                    let badgeColor = item.sesi === 'PAGI' ? 'bg-sky-50 text-sky-700 border border-sky-100' :
-                                     item.sesi === 'SORE' ? 'bg-orange-50 text-orange-700 border border-orange-100' :
-                                     'bg-indigo-50 text-indigo-700 border border-indigo-100';
+                return;
+            }
+            emptyState.style.display = 'none';
 
-                    const card = document.createElement('div');
-                    card.className = 'rekap-card bg-white p-4 rounded-2xl shadow-sm border border-emas-100 mb-3 flex items-center justify-between';
-                    const titleText = currentUser.role === 'admin' ? item.nama : `Sesi ${item.sesi}`;
-                    const subtitleText = currentUser.role === 'admin' ? `Sesi ${item.sesi} • ${item.kategori}` : formatTanggal(item.tanggal);
+            // 1. KELOMPOKKAN DATA BERDASARKAN TANGGAL -> USERNAME
+            const groupedData = {};
+            
+            myData.forEach(item => {
+                if (!groupedData[item.tanggal]) {
+                    groupedData[item.tanggal] = {};
+                }
+                if (!groupedData[item.tanggal][item.username]) {
+                    groupedData[item.tanggal][item.username] = {
+                        nama: item.nama,
+                        kategori: item.kategori,
+                        sesi: {}
+                    };
+                }
+                // Simpan data sesi ke dalam user tersebut
+                groupedData[item.tanggal][item.username].sesi[item.sesi] = {
+                    waktu: item.waktu,
+                    foto: item.foto
+                };
+            });
 
-                    card.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-xl bg-zamrud-50 overflow-hidden flex-shrink-0 border border-emas-100 cursor-pointer" onclick="viewPhoto('${item.foto}')">
-                                <img src="${item.foto}" class="w-full h-full object-cover" alt="Foto">
-                            </div>
-                            <div>
-                                <h4 class="font-heading font-semibold text-zamrud-900 text-sm">${escapeHtml(titleText)}</h4>
-                                <p class="text-xs text-zamrud-300">${escapeHtml(subtitleText)}</p>
-                            </div>
+            // 2. RENDER KE HTML (Urutkan dari tanggal terbaru)
+            const sortedDates = Object.keys(groupedData).sort().reverse();
+
+            sortedDates.forEach(tanggal => {
+                const usersObj = groupedData[tanggal];
+                const usersArr = Object.values(usersObj);
+
+                // Buat Container Grup Tanggal
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'rekap-group mb-6';
+                
+                // Header Tanggal (Misal: 3 Juli 2026)
+                const dateHeader = document.createElement('div');
+                dateHeader.className = 'flex items-center gap-2 mb-3 px-1';
+                dateHeader.innerHTML = `
+                    <div class="w-1.5 h-4 rounded-full bg-emas-500"></div>
+                    <h3 class="font-heading font-bold text-zamrud-900 text-sm tracking-wide">${formatTanggalIndo(tanggal)}</h3>
+                `;
+                groupDiv.appendChild(dateHeader);
+
+                // Container List Pengajar di Tanggal tsb
+                const listContainer = document.createElement('div');
+                listContainer.className = 'flex flex-col gap-2.5';
+
+                usersArr.forEach(user => {
+                    // Cek ketersediaan sesi
+                    const dataPagi = user.sesi['PAGI'];
+                    const dataSore = user.sesi['SORE'];
+                    const dataMalam = user.sesi['MALAM'];
+
+                    // Buat Tombol/Indikator P S M
+                    const badgePagi = dataPagi 
+                        ? `<button onclick="viewDetailSesi('${dataPagi.foto}', '${dataPagi.waktu}', 'Pagi')" class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 font-bold text-xs flex items-center justify-center border border-amber-200 shadow-sm hover:bg-amber-200 transition">P</button>`
+                        : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">P</div>`;
+                    
+                    const badgeSore = dataSore 
+                        ? `<button onclick="viewDetailSesi('${dataSore.foto}', '${dataSore.waktu}', 'Sore')" class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 font-bold text-xs flex items-center justify-center border border-blue-200 shadow-sm hover:bg-blue-200 transition">S</button>`
+                        : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">S</div>`;
+                    
+                    const badgeMalam = dataMalam 
+                        ? `<button onclick="viewDetailSesi('${dataMalam.foto}', '${dataMalam.waktu}', 'Malam')" class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 font-bold text-xs flex items-center justify-center border border-indigo-200 shadow-sm hover:bg-indigo-200 transition">M</button>`
+                        : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">M</div>`;
+
+                    // Card Pengajar
+                    const userCard = document.createElement('div');
+                    userCard.className = 'bg-white p-3 rounded-xl shadow-sm border border-emas-100 flex items-center justify-between';
+                    
+                    // Jika admin, tampilkan nama pengajar. Jika user biasa, tampilkan tulisan "Absensi Anda"
+                    const namaTampil = currentUser.role === 'admin' ? escapeHtml(user.nama) : "Absensi Anda";
+                    const kategoriTampil = currentUser.role === 'admin' ? escapeHtml(user.kategori || '-') : escapeHtml(currentUser.role);
+
+                    userCard.innerHTML = `
+                        <div class="flex-1 min-w-0 pr-3">
+                            <h4 class="font-semibold text-zamrud-900 text-sm truncate">${namaTampil}</h4>
+                            <p class="text-[10px] text-zamrud-400 mt-0.5">${kategoriTampil}</p>
                         </div>
-                        <div class="text-right">
-                            <span class="inline-block px-2 py-1 rounded-md text-[10px] font-bold ${badgeColor} mb-1">${formatTanggal(item.tanggal)}</span>
-                            <div class="text-sm font-bold text-zamrud-600"><i class="fa-regular fa-clock text-xs text-emas-500 mr-1"></i>${formatJam(item.waktu)}</div>
+                        <div class="flex gap-1.5 shrink-0">
+                            ${badgePagi}
+                            ${badgeSore}
+                            ${badgeMalam}
                         </div>
                     `;
-                    container.appendChild(card);
+                    listContainer.appendChild(userCard);
                 });
-            }
+
+                groupDiv.appendChild(listContainer);
+                container.appendChild(groupDiv);
+            });
+        }
+        // Mengubah format "YYYY-MM-DD" menjadi "DD Bulan YYYY" (Contoh: 3 Juli 2026)
+        function formatTanggalIndo(tglStr) {
+            if(!tglStr) return '-';
+            const bulanArr = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            const parts = tglStr.split('-');
+            if(parts.length !== 3) return tglStr;
+            return `${parseInt(parts[2], 10)} ${bulanArr[parseInt(parts[1], 10)-1]} ${parts[0]}`;
+        }
+
+        // Fungsi Pop-Up saat tombol P/S/M diklik
+        function viewDetailSesi(fotoUrl, waktu, namaSesi) {
+            Swal.fire({
+                title: `Sesi ${namaSesi}`,
+                html: `<p class="text-sm font-medium text-zamrud-600 mb-3"><i class="fa-regular fa-clock mr-1"></i> Waktu Absen: ${formatJam(waktu)}</p>`,
+                imageUrl: fotoUrl,
+                imageAlt: 'Foto Absen',
+                showConfirmButton: true,
+                confirmButtonText: 'Tutup',
+                confirmButtonColor: '#0B3D2E',
+                customClass: { popup: 'rounded-2xl' }
+            });
         }
 
         // --- REKAP KESELURUHAN LOGIC (ADMIN) ---
@@ -993,26 +1103,44 @@
                     if (persentase >= 75) { barColor = 'bg-zamrud-500'; textColor = 'text-zamrud-600'; }
                     else if (persentase >= 40) { barColor = 'bg-orange-500'; textColor = 'text-orange-600'; }
 
-                    const tr = document.createElement('tr');
-                    tr.className = 'hover:bg-slate-50 transition';
-                    tr.innerHTML = `
-                        <td class="px-4 py-4 text-gray-500">${index + 1}</td>
-                        <td class="px-4 py-4 font-semibold text-zamrud-900">${escapeHtml(user.nama)}</td>
-                        <td class="px-4 py-4">
-                            <span class="bg-blue-50 text-blue-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-blue-100">${escapeHtml(user.kategori)}</span>
-                        </td>
-                        <td class="px-4 py-4 text-center font-bold text-blue-600 text-base">${totalSesi}</td>
-                        <td class="px-4 py-4 text-center font-bold text-zamrud-600 text-base">${totalHari}</td>
-                        <td class="px-4 py-4">
-                            <div class="flex items-center justify-center gap-2">
-                                <div class="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                    <div class="h-full ${barColor}" style="width: ${persentase}%"></div>
+                    // --- Desain Ulang UI Mobile (Card List) ---
+                    const card = document.createElement('div');
+                    card.className = 'bg-white p-3.5 rounded-xl border border-gray-100 shadow-sm flex flex-col gap-2 hover:border-emas-300 transition';
+                    
+                    card.innerHTML = `
+                        <!-- Bagian Header Kartu: Nama & Kategori -->
+                        <div class="flex justify-between items-start gap-2">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-bold text-gray-400">#${index + 1}</span>
+                                    <h4 class="font-bold text-zamrud-900 text-sm truncate">${escapeHtml(user.nama)}</h4>
                                 </div>
-                                <span class="text-xs font-bold ${textColor} w-8 text-right">${persentase}.0%</span>
+                                <p class="text-[10px] text-zamrud-500 mt-1 inline-block bg-zamrud-50 px-2 py-0.5 rounded-md border border-zamrud-100">${escapeHtml(user.kategori)}</p>
                             </div>
-                        </td>
+                        </div>
+                        
+                        <!-- Bagian Tengah Kartu: Angka Statistik -->
+                        <div class="flex items-center justify-between bg-slate-50 rounded-lg p-2 mt-1">
+                            <div class="text-center flex-1 border-r border-gray-200">
+                                <p class="text-[9px] text-gray-500 uppercase tracking-wide">Total Sesi</p>
+                                <p class="font-bold text-blue-600 text-sm">${totalSesi}</p>
+                            </div>
+                            <div class="text-center flex-1 border-r border-gray-200">
+                                <p class="text-[9px] text-gray-500 uppercase tracking-wide">Hari Hadir</p>
+                                <p class="font-bold text-zamrud-600 text-sm">${totalHari}</p>
+                            </div>
+                            <div class="text-center flex-1">
+                                <p class="text-[9px] text-gray-500 uppercase tracking-wide">Persentase</p>
+                                <p class="font-bold ${textColor} text-sm">${persentase}%</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Bagian Bawah Kartu: Progress Bar -->
+                        <div class="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden mt-1">
+                            <div class="h-full ${barColor} transition-all duration-500" style="width: ${persentase}%"></div>
+                        </div>
                     `;
-                    tableBody.appendChild(tr);
+                    tableBody.appendChild(card);
                 });
             }
 
@@ -1022,35 +1150,27 @@
 
         // Fungsi Export CSV yang disesuaikan
         function exportRekapCSV() {
-            if (currentUser.role !== 'admin') return;
+            if (!currentUser || currentUser.role !== 'admin') return;
             const filterBulan = document.getElementById('filter-bulan').value || 'Semua Waktu';
-            
-            // Mengambil baris data langsung dari tabel HTML agar sesuai dengan filter yang aktif
-            const tableRows = document.querySelectorAll('#admin-rekap-table tr');
-            if (tableRows.length === 0 || (tableRows.length === 1 && tableRows[0].innerText.includes('Tidak ada data'))) {
-                Swal.fire({ icon: 'info', text: 'Tidak ada data untuk diekspor.', confirmButtonColor: '#B8860B' }); return;
+            const filterKategori = document.getElementById('filter-kategori').value;
+
+            let filteredAbsen = absensiData;
+            if (filterBulan) filteredAbsen = filteredAbsen.filter(item => item.tanggal.startsWith(filterBulan));
+            if (filterKategori !== 'ALL') filteredAbsen = filteredAbsen.filter(item => item.kategori === filterKategori);
+
+            if (filteredAbsen.length === 0) {
+                Swal.fire({ icon: 'info', text: 'Tidak ada data untuk diekspor pada filter saat ini.', confirmButtonColor: '#B8860B' }); return;
             }
 
-            const header = ['No', 'Nama Pengajar', 'Kategori', 'Total Kehadiran (Sesi)', 'Hari Hadir', 'Estimasi Persentase'];
-            const rows = [];
-            
-            tableRows.forEach((tr) => {
-                const tds = tr.querySelectorAll('td');
-                if(tds.length === 6) {
-                    rows.push([
-                        tds[0].innerText, tds[1].innerText, tds[2].innerText, 
-                        tds[3].innerText, tds[4].innerText, tds[5].innerText
-                    ]);
-                }
-            });
-
+            const header = ['Nama', 'Username', 'Kategori', 'Tanggal', 'Waktu', 'Sesi'];
+            const rows = filteredAbsen.map(item => [item.nama, item.username, item.kategori, item.tanggal, item.waktu, item.sesi]);
             const csvContent = [header, ...rows].map(row => row.map(csvEscape).join(',')).join('\r\n');
 
             const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `Statistik_LEMTATIQHI_${filterBulan}.csv`;
+            link.download = `Rekap_Detail_LEMTATIQHI_${filterBulan}.csv`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1272,7 +1392,41 @@
             });
 
             dropdown.value = currentValue;
-        }                 
+        } 
+        // --- UPDATE STATISTIK BERANDA (PERSONAL) ---
+        function updateHomeStats() {
+            if (!currentUser) return;
+            
+            // Dapatkan bulan saat ini dengan format YYYY-MM
+            const now = new Date();
+            const currentBulan = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            
+            // Ambil hanya absensi milik user ini DAN khusus di bulan ini
+            const myAbsenBulanIni = absensiData.filter(item => 
+                item.username === currentUser.username && 
+                item.tanggal.startsWith(currentBulan)
+            );
+
+            // Kalkulasi
+            const totalSesi = myAbsenBulanIni.length;
+            const hariHadirSet = new Set(myAbsenBulanIni.map(a => a.tanggal));
+            const totalHari = hariHadirSet.size;
+
+            const MAX_SESI = 60; // Asumsi sebulan full 60 sesi
+            let persentase = 0;
+            if (totalSesi > 0) {
+                persentase = Math.min(100, Math.round((totalSesi / MAX_SESI) * 100));
+            }
+
+            // Tembak nilainya ke HTML
+            const statSesiEl = document.getElementById('home-stat-sesi');
+            const statHariEl = document.getElementById('home-stat-hari');
+            const statPersenEl = document.getElementById('home-stat-persen');
+
+            if(statSesiEl) statSesiEl.innerText = totalSesi;
+            if(statHariEl) statHariEl.innerText = totalHari;
+            if(statPersenEl) statPersenEl.innerText = `${persentase}%`;
+        }                
     </script>
 </body>
 </html>
