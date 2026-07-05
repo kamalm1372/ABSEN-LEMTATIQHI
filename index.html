@@ -221,9 +221,13 @@
                     <div class="flex-1 min-w-0 pr-3">
                         <p class="text-xs tracking-[0.15em] uppercase" style="color:#E2C158;">Assalamu'alaikum,</p>
                         <h2 class="text-white text-xl font-heading font-bold truncate" id="user-greeting-name">Nama Pengajar</h2>
+                        <!-- Tambahkan Badge Kategori di sini -->
+                        <span id="home-kategori-badge" class="inline-block bg-white/20 text-white text-[10px] font-medium px-2 py-0.5 rounded-md mt-1 backdrop-blur-sm border border-white/10">
+                            Kategori
+                        </span>
                     </div>
-                    <div id="home-avatar-wrap" class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden" style="background: rgba(212,175,55,0.18); border: 1px solid rgba(212,175,55,0.5);">
-                        <i id="home-avatar-placeholder" class="fa-solid fa-user-circle text-2xl" style="color:#F5E6B8;"></i>
+                    <div id="home-avatar-wrap" class="w-20 h-20 rounded-full flex items-center justify-center shrink-0 overflow-hidden shadow-lg border-2 border-white/30" style="background: rgba(212,175,55,0.25);">
+                        <i id="home-avatar-placeholder" class="fa-solid fa-user-circle text-5xl" style="color:#F5E6B8;"></i>
                         <img id="home-avatar-img" src="" class="hidden w-full h-full object-cover">
                     </div>
                 </div>
@@ -829,6 +833,7 @@
         function initApp() {
 
             document.getElementById('user-greeting-name').innerText = currentUser.name;
+            document.getElementById('home-kategori-badge').innerText = currentUser.kategori;
             document.getElementById('profile-name').innerText = currentUser.name;
             renderProfilePhoto();
             document.getElementById('profile-role').innerText =
@@ -1548,68 +1553,82 @@
                 const usersObj = groupedData[tanggal];
                 const usersArr = Object.values(usersObj);
 
-                // Buat Container Grup Tanggal
-                const groupDiv = document.createElement('div');
-                groupDiv.className = 'rekap-group mb-6';
-                
-                // Header Tanggal (Misal: 3 Juli 2026)
-                const dateHeader = document.createElement('div');
-                dateHeader.className = 'flex items-center gap-2 mb-3 px-1';
-                dateHeader.innerHTML = `
-                    <div class="w-1.5 h-4 rounded-full bg-emas-500"></div>
-                    <h3 class="font-heading font-bold text-zamrud-900 text-sm tracking-wide">${formatTanggalIndo(tanggal)}</h3>
-                `;
-                groupDiv.appendChild(dateHeader);
-
-                // Container List Pengajar di Tanggal tsb
-                const listContainer = document.createElement('div');
-                listContainer.className = 'flex flex-col gap-2.5';
-
-                usersArr.forEach(user => {
-                    // Cek ketersediaan sesi
+                if (currentUser.role !== 'admin') {
+                    // --- TAMPILAN PENGAJAR (1 Baris: Tanggal di Kiri, P S M di Kanan) ---
+                    const user = usersArr[0]; // Karena bukan admin, datanya pasti hanya 1 (dirinya sendiri)
                     const dataPagi = user.sesi['PAGI'];
                     const dataSore = user.sesi['SORE'];
                     const dataMalam = user.sesi['MALAM'];
 
-                    // Buat Tombol/Indikator P S M
-                    const badgePagi = dataPagi 
-                        ? buatBadgeSesi(dataPagi, 'Pagi', 'P', 'amber')
-                        : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">P</div>`;
-                    
-                    const badgeSore = dataSore 
-                        ? buatBadgeSesi(dataSore, 'Sore', 'S', 'blue')
-                        : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">S</div>`;
-                    
-                    const badgeMalam = dataMalam 
-                        ? buatBadgeSesi(dataMalam, 'Malam', 'M', 'indigo')
-                        : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">M</div>`;;
-
-                    // Card Pengajar
-                    const userCard = document.createElement('div');
-                    userCard.className = 'bg-white p-3 rounded-xl shadow-sm border border-emas-100 flex items-center justify-between';
-                    
-                    // Jika admin, tampilkan nama pengajar. Jika user biasa, tampilkan tulisan "Absensi Anda"
-                    const namaTampil = currentUser.role === 'admin' ? escapeHtml(user.nama) : "Absensi Anda";
-                    const kategoriTampil = currentUser.role === 'admin' ? escapeHtml(user.kategori || '-') : escapeHtml(currentUser.role);
-
+                    const badgePagi = dataPagi ? buatBadgeSesi(dataPagi, 'Pagi', 'P', 'amber') : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">P</div>`;
+                    const badgeSore = dataSore ? buatBadgeSesi(dataSore, 'Sore', 'S', 'blue') : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">S</div>`;
+                    const badgeMalam = dataMalam ? buatBadgeSesi(dataMalam, 'Malam', 'M', 'indigo') : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">M</div>`;
                     const adaPending = Object.values(user.sesi).some(s => s._pending);
-                    userCard.innerHTML = `
-                        <div class="flex-1 min-w-0 pr-3">
-                            <h4 class="font-semibold text-zamrud-900 text-sm truncate">${namaTampil}</h4>
-                            <p class="text-[10px] text-zamrud-400 mt-0.5">${kategoriTampil}</p>
-                            ${adaPending ? '<p class="text-[9px] text-amber-600 mt-0.5"><i class="fa-solid fa-clock-rotate-left mr-1"></i>Menunggu sinkronisasi</p>' : ''}
+
+                    // Buat Kartu Minimalis
+                    const card = document.createElement('div');
+                    card.className = 'rekap-group bg-white p-3.5 rounded-xl shadow-sm border border-emas-100 flex items-center justify-between mb-3';
+                    
+                    card.innerHTML = `
+                        <div class="flex-1 min-w-0 pr-3 border-l-4 border-emas-400 pl-2.5 rounded-l-sm">
+                            <h4 class="font-heading font-bold text-zamrud-900 text-sm leading-tight">${formatTanggalIndo(tanggal)}</h4>
+                            ${adaPending ? '<p class="text-[9px] text-amber-600 mt-1"><i class="fa-solid fa-clock-rotate-left mr-1"></i>Sinkronisasi...</p>' : ''}
                         </div>
-                        <div class="flex gap-1.5 shrink-0">
+                        <div class="flex gap-2 shrink-0">
                             ${badgePagi}
                             ${badgeSore}
                             ${badgeMalam}
                         </div>
                     `;
-                    listContainer.appendChild(userCard);
-                });
+                    container.appendChild(card);
 
-                groupDiv.appendChild(listContainer);
-                container.appendChild(groupDiv);
+                } else {
+                    // --- TAMPILAN ADMIN (Header Tanggal di atas, Daftar Nama Pengajar di bawahnya) ---
+                    const groupDiv = document.createElement('div');
+                    groupDiv.className = 'rekap-group mb-6';
+                    
+                    const dateHeader = document.createElement('div');
+                    dateHeader.className = 'flex items-center gap-2 mb-3 px-1';
+                    dateHeader.innerHTML = `
+                        <div class="w-1.5 h-4 rounded-full bg-emas-500"></div>
+                        <h3 class="font-heading font-bold text-zamrud-900 text-sm tracking-wide">${formatTanggalIndo(tanggal)}</h3>
+                    `;
+                    groupDiv.appendChild(dateHeader);
+
+                    const listContainer = document.createElement('div');
+                    listContainer.className = 'flex flex-col gap-2.5';
+
+                    usersArr.forEach(user => {
+                        const dataPagi = user.sesi['PAGI'];
+                        const dataSore = user.sesi['SORE'];
+                        const dataMalam = user.sesi['MALAM'];
+
+                        const badgePagi = dataPagi ? buatBadgeSesi(dataPagi, 'Pagi', 'P', 'amber') : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">P</div>`;
+                        const badgeSore = dataSore ? buatBadgeSesi(dataSore, 'Sore', 'S', 'blue') : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">S</div>`;
+                        const badgeMalam = dataMalam ? buatBadgeSesi(dataMalam, 'Malam', 'M', 'indigo') : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">M</div>`;
+
+                        const userCard = document.createElement('div');
+                        userCard.className = 'bg-white p-3 rounded-xl shadow-sm border border-emas-100 flex items-center justify-between';
+                        const adaPending = Object.values(user.sesi).some(s => s._pending);
+                        
+                        userCard.innerHTML = `
+                            <div class="flex-1 min-w-0 pr-3">
+                                <h4 class="font-semibold text-zamrud-900 text-sm truncate">${escapeHtml(user.nama)}</h4>
+                                <p class="text-[10px] text-zamrud-400 mt-0.5">${escapeHtml(user.kategori || '-')}</p>
+                                ${adaPending ? '<p class="text-[9px] text-amber-600 mt-0.5"><i class="fa-solid fa-clock-rotate-left mr-1"></i>Menunggu sinkronisasi</p>' : ''}
+                            </div>
+                            <div class="flex gap-1.5 shrink-0">
+                                ${badgePagi}
+                                ${badgeSore}
+                                ${badgeMalam}
+                            </div>
+                        `;
+                        listContainer.appendChild(userCard);
+                    });
+
+                    groupDiv.appendChild(listContainer);
+                    container.appendChild(groupDiv);
+                }
             });
         }
         // Mengubah format "YYYY-MM-DD" menjadi "DD Bulan YYYY" (Contoh: 3 Juli 2026)
