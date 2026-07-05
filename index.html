@@ -1713,28 +1713,32 @@
             fetchAPI('deleteAbsen', { id_absen: idAbsen, requesterUsername: currentUser.username, requesterRole: currentUser.role })
                 .then(function(res) {
                     if (res.status === 'success') {
-                        // 1. Hapus dari memori lokal agar UI langsung berubah instan
-                        absensiData = absensiData.filter(item => item.id_absen !== idAbsen);
-                        try { safeStorage.setItem('lem_absensi', JSON.stringify(absensiData)); } catch(e){}
+                        
+                        // 1. UPDATE LOKAL (Optimistic UI yang BENAR)
+                        // Cari data yang dibatalkan, lalu ubah statusnya menjadi 'DIBATALKAN' secara instan
+                        const targetIndex = absensiData.findIndex(item => item.id_absen === idAbsen);
+                        if (targetIndex !== -1) {
+                            absensiData[targetIndex].status = 'DIBATALKAN';
+                            try { safeStorage.setItem('lem_absensi', JSON.stringify(absensiData)); } catch(e){}
+                        }
 
-                        // 2. Render ulang semua halaman yang terpengaruh
+                        // 2. Render ulang semua halaman secara instan (tanpa menunggu server)
                         loadRekap();
                         updateHomeStats();
                         if (document.getElementById('screen-admin-rekap').classList.contains('active')) {
                             applyAdminFilters();
                         }
 
-                        // 3. Tarik data terbaru dari server di background + Update Kunci Tombol Home
-                        Promise.all([
-                            fetchRiwayat(),
-                            fetchAPI("getTodayAttendance", { username: currentUser.username })
-                        ]).then(([_, sesiList]) => {
-                            showLoading(false);
-                            lockSession(sesiList); // Membuka kembali tombol absen jika yang dihapus adalah absen hari ini
-                            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Absen berhasil dibatalkan', showConfirmButton: false, timer: 2000 });
-                        }).catch(() => {
-                            showLoading(false);
-                        });
+                        // 3. Hanya minta status kunci tombol Beranda dari server (jangan tarik riwayat keseluruhan dulu)
+                        fetchAPI("getTodayAttendance", { username: currentUser.username })
+                            .then(sesiList => {
+                                showLoading(false);
+                                lockSession(sesiList); // Membuka kembali tombol absen di Beranda
+                                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Absen berhasil dibatalkan', showConfirmButton: false, timer: 2000 });
+                            })
+                            .catch(() => {
+                                showLoading(false);
+                            });
 
                     } else {
                         showLoading(false);
