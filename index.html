@@ -254,8 +254,18 @@
                         <p class="text-xs text-zamrud-300 font-medium">Hari ini</p>
                         <p class="text-zamrud-900 font-heading font-semibold" id="current-date">Senin, 1 Jan 2024</p>
                     </div>
-                <div class="bg-zamrud-950 text-emas-300 px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2">
-                        <i class="fa-solid fa-clock"></i> <span id="current-time">00:00</span>
+                    
+                    <!-- Wadah Flex baru untuk Jam dan Tombol Refresh -->
+                    <div class="flex items-center gap-2">
+                        <!-- Tombol Refresh -->
+                        <button type="button" onclick="refreshAllData()" class="w-9 h-9 flex items-center justify-center rounded-lg bg-zamrud-50 text-zamrud-600 border border-zamrud-100 hover:bg-zamrud-100 active:scale-95 transition shadow-sm">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                        </button>
+                        
+                        <!-- Kotak Jam -->
+                        <div class="bg-zamrud-950 text-emas-300 px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2">
+                            <i class="fa-solid fa-clock"></i> <span id="current-time">00:00</span>
+                        </div>
                     </div>
                 </div>
 
@@ -424,7 +434,7 @@
                             <label class="block text-xs font-semibold text-zamrud-600 mb-1">Kategori Pengajar</label>
                             <select id="filter-kategori" onchange="applyAdminFilters()" class="w-full border border-zamrud-100 rounded-lg px-3 py-2 text-sm outline-none text-slate-700 cursor-pointer">
                                 <option value="ALL">Semua Kategori</option>
-                                <option value="Tahfidz">Tahfidz</option>
+                                <option value="Tahfidz" selected>Tahfidz</option>
                                 <option value="Ta'lim Umum">Ta'lim Umum</option>
                                 <option value="Ta'lim Khusus">Ta'lim Khusus</option>
                             </select>
@@ -1526,6 +1536,7 @@
                     waktu: item.waktu,
                     foto: item.foto,
                     id_absen: item.id_absen,
+                    status: item.status || 'AKTIF',
                     _pending: item._pending || false
                 };
             });
@@ -1562,16 +1573,16 @@
 
                     // Buat Tombol/Indikator P S M
                     const badgePagi = dataPagi 
-                        ? `<button onclick="viewDetailSesi('${dataPagi.foto}', '${dataPagi.waktu}', 'Pagi', '${dataPagi.id_absen}')" class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 font-bold text-xs flex items-center justify-center border border-amber-200 shadow-sm hover:bg-amber-200 transition">P</button>`
+                        ? buatBadgeSesi(dataPagi, 'Pagi', 'P', 'amber')
                         : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">P</div>`;
                     
                     const badgeSore = dataSore 
-                        ? `<button onclick="viewDetailSesi('${dataSore.foto}', '${dataSore.waktu}', 'Sore', '${dataSore.id_absen}')" class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 font-bold text-xs flex items-center justify-center border border-blue-200 shadow-sm hover:bg-blue-200 transition">S</button>`
+                        ? buatBadgeSesi(dataSore, 'Sore', 'S', 'blue')
                         : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">S</div>`;
                     
                     const badgeMalam = dataMalam 
-                        ? `<button onclick="viewDetailSesi('${dataMalam.foto}', '${dataMalam.waktu}', 'Malam', '${dataMalam.id_absen}')" class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 font-bold text-xs flex items-center justify-center border border-indigo-200 shadow-sm hover:bg-indigo-200 transition">M</button>`
-                        : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">M</div>`;
+                        ? buatBadgeSesi(dataMalam, 'Malam', 'M', 'indigo')
+                        : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">M</div>`;;
 
                     // Card Pengajar
                     const userCard = document.createElement('div');
@@ -1609,9 +1620,27 @@
             if(parts.length !== 3) return tglStr;
             return `${parseInt(parts[2], 10)} ${bulanArr[parseInt(parts[1], 10)-1]} ${parts[0]}`;
         }
+        // Membuat badge P/S/M, dengan tanda silang jika absen sudah dibatalkan admin
+        function buatBadgeSesi(dataSesi, namaSesi, huruf, warna) {
+            const dibatalkan = dataSesi.status === 'DIBATALKAN';
 
+            if (dibatalkan) {
+                // Tampilan khusus: abu-abu pudar + huruf dicoret + ikon silang kecil di pojok
+                return `
+                    <button onclick="viewDetailSesi('${dataSesi.foto}', '${dataSesi.waktu}', '${namaSesi}', '${dataSesi.id_absen}', true)"
+                        class="relative w-8 h-8 rounded-lg bg-gray-100 text-gray-400 font-bold text-xs flex items-center justify-center border border-gray-200 shadow-sm hover:bg-gray-200 transition">
+                        <span style="text-decoration: line-through; text-decoration-thickness: 1.5px;">${huruf}</span>
+                        <span class="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-red-500 text-white flex items-center justify-center" style="font-size: 8px;">
+                            <i class="fa-solid fa-xmark"></i>
+                        </span>
+                    </button>
+                `;
+            }
+
+            return `<button onclick="viewDetailSesi('${dataSesi.foto}', '${dataSesi.waktu}', '${namaSesi}', '${dataSesi.id_absen}', false)" class="w-8 h-8 rounded-lg bg-${warna}-100 text-${warna}-600 font-bold text-xs flex items-center justify-center border border-${warna}-200 shadow-sm hover:bg-${warna}-200 transition">${huruf}</button>`;
+        }
         // Fungsi Pop-Up saat tombol P/S/M diklik (desain modern, tanpa perlu scroll)
-        function viewDetailSesi(fotoUrl, waktu, namaSesi, idAbsen) {
+        function viewDetailSesi(fotoUrl, waktu, namaSesi, idAbsen, dibatalkan) {
             const iconSesi = {
                 'Pagi': 'fa-sun',
                 'Sore': 'fa-clock',
@@ -1619,11 +1648,14 @@
             }[namaSesi] || 'fa-clock';
 
             const isAdmin = currentUser && currentUser.role === 'admin';
+            const statusBadge = dibatalkan
+                ? `<span class="inline-block bg-red-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full mt-1"><i class="fa-solid fa-ban mr-1"></i>Dibatalkan Admin</span>`
+                : '';
 
             Swal.fire({
                 html: `
                     <div class="relative -mx-6 -mt-6">
-                        <img src="${fotoUrl}" alt="Foto Absen" class="w-full h-72 object-cover" style="border-radius: 20px 20px 0 0;">
+                        <img src="${fotoUrl}" alt="Foto Absen" class="w-full h-72 object-cover ${dibatalkan ? 'grayscale opacity-70' : ''}" style="border-radius: 20px 20px 0 0;">
                         <div class="absolute inset-0" style="background: linear-gradient(to top, rgba(11,61,46,0.85) 0%, rgba(11,61,46,0.15) 45%, transparent 70%); border-radius: 20px 20px 0 0;"></div>
                         <div class="absolute bottom-0 left-0 right-0 p-4 flex items-center justify-between">
                             <div class="flex items-center gap-2">
@@ -1633,6 +1665,7 @@
                                 <div class="text-left">
                                     <p class="text-white font-bold text-base leading-tight">Sesi ${namaSesi}</p>
                                     <p class="text-emas-100 text-xs leading-tight"><i class="fa-regular fa-clock mr-1"></i>${formatJam(waktu)}</p>
+                                    ${statusBadge}
                                 </div>
                             </div>
                         </div>
@@ -1641,8 +1674,8 @@
                 showConfirmButton: true,
                 confirmButtonText: '<i class="fa-solid fa-xmark mr-1"></i> Tutup',
                 confirmButtonColor: '#0B3D2E',
-                showDenyButton: isAdmin,
-                denyButtonText: '<i class="fa-solid fa-trash mr-1"></i> Hapus',
+                showDenyButton: isAdmin && !dibatalkan,
+                denyButtonText: '<i class="fa-solid fa-trash mr-1"></i> Batalkan Absen',
                 denyButtonColor: '#DC2626',
                 width: '22em',
                 padding: '0 0 1.2em',
@@ -1661,10 +1694,10 @@
         function konfirmasiHapusAbsen(idAbsen, namaSesi) {
             Swal.fire({
                 icon: 'warning',
-                title: 'Hapus Absen Ini?',
-                text: `Absen sesi ${namaSesi} akan dihapus permanen dan tidak bisa dikembalikan.`,
+                title: 'Batalkan Absen Ini?',
+                text: `Absen sesi ${namaSesi} akan ditandai sebagai dibatalkan. Pengajar akan melihat keterangan ini di riwayat mereka, dan sesi akan kembali berstatus belum absen.`,
                 showCancelButton: true,
-                confirmButtonText: 'Ya, Hapus',
+                confirmButtonText: 'Ya, Batalkan',
                 cancelButtonText: 'Batal',
                 confirmButtonColor: '#DC2626',
                 cancelButtonColor: '#9ca3af'
@@ -1676,20 +1709,35 @@
         }
 
         function hapusAbsen(idAbsen) {
-            showLoading(true, "Menghapus Absen...");
+            showLoading(true, "Membatalkan Absen...");
             fetchAPI('deleteAbsen', { id_absen: idAbsen, requesterUsername: currentUser.username, requesterRole: currentUser.role })
                 .then(function(res) {
-                    showLoading(false);
                     if (res.status === 'success') {
-                        // Hapus dari data lokal juga
+                        // 1. Hapus dari memori lokal agar UI langsung berubah instan
                         absensiData = absensiData.filter(item => item.id_absen !== idAbsen);
                         try { safeStorage.setItem('lem_absensi', JSON.stringify(absensiData)); } catch(e){}
 
+                        // 2. Render ulang semua halaman yang terpengaruh
                         loadRekap();
-                        if (document.getElementById('screen-admin-rekap').classList.contains('active')) applyAdminFilters();
+                        updateHomeStats();
+                        if (document.getElementById('screen-admin-rekap').classList.contains('active')) {
+                            applyAdminFilters();
+                        }
 
-                        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Absen berhasil dihapus', showConfirmButton: false, timer: 1800 });
+                        // 3. Tarik data terbaru dari server di background + Update Kunci Tombol Home
+                        Promise.all([
+                            fetchRiwayat(),
+                            fetchAPI("getTodayAttendance", { username: currentUser.username })
+                        ]).then(([_, sesiList]) => {
+                            showLoading(false);
+                            lockSession(sesiList); // Membuka kembali tombol absen jika yang dihapus adalah absen hari ini
+                            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Absen berhasil dibatalkan', showConfirmButton: false, timer: 2000 });
+                        }).catch(() => {
+                            showLoading(false);
+                        });
+
                     } else {
+                        showLoading(false);
                         Swal.fire({ icon: 'error', title: 'Gagal', text: res.message, confirmButtonColor: '#B8860B' });
                     }
                 })
@@ -2309,6 +2357,56 @@
                     console.error(err);
                 }
             }, 500); // Jeda sedikit agar loading screen sempat muncul
+        }
+        // --- FUNGSI REFRESH MANUAL ---
+        function refreshAllData() {
+            if (!navigator.onLine) {
+                Swal.fire({ icon: 'error', title: 'Offline', text: 'Tidak ada koneksi internet. Gagal menyinkronkan data.', confirmButtonColor: '#B8860B' });
+                return;
+            }
+
+            // Memutar ikon refresh agar terlihat interaktif
+            const btnIcon = document.querySelector('button[onclick="refreshAllData()"] i');
+            if (btnIcon) btnIcon.classList.add('fa-spin');
+
+            showLoading(true, "Menyinkronkan Data...");
+
+            // Siapkan pemanggilan API yang berjalan bersamaan (Paralel)
+            const promises = [
+                fetchRiwayat(), // Mengambil data absen terbaru & memicu render ulang (Beranda, Rekap, Admin)
+                fetchAPI("getTodayAttendance", { username: currentUser.username }) // Mengambil status absen hari ini
+            ];
+
+            // Jika dia Admin, paksa juga tarik ulang data daftar Pengajar terbaru
+            if (currentUser.role === 'admin') {
+                promises.push(fetchAllUsers());
+            }
+
+            Promise.all(promises)
+                .then(results => {
+                    const sesiList = results[1]; // Hasil dari getTodayAttendance
+
+                    // Buka/Tutup kembali gembok tombol sesi absen (Pagi/Sore/Malam)
+                    lockSession(sesiList);
+
+                    showLoading(false);
+                    if (btnIcon) btnIcon.classList.remove('fa-spin');
+
+                    Swal.fire({ 
+                        toast: true, 
+                        position: 'top-end', 
+                        icon: 'success', 
+                        title: 'Data berhasil disinkronkan', 
+                        showConfirmButton: false, 
+                        timer: 2000 
+                    });
+                })
+                .catch(err => {
+                    console.error("Gagal refresh:", err);
+                    showLoading(false);
+                    if (btnIcon) btnIcon.classList.remove('fa-spin');
+                    Swal.fire({ icon: 'error', text: 'Gagal menyinkronkan data dengan server.', confirmButtonColor: '#B8860B' });
+                });
         }                
     </script>
 </body>
