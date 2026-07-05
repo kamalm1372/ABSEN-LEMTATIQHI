@@ -326,9 +326,16 @@
                 <h2 class="text-xl font-heading font-bold text-zamrud-900">Riwayat Kehadiran</h2>
                 <p class="text-xs text-zamrud-300 mt-1 mb-3">Daftar absensi Anda</p>
 
-                <select id="filter-bulan-rekap" onchange="loadRekap()" class="w-full border border-zamrud-100 rounded-lg px-3 py-2 text-sm outline-none text-slate-700 cursor-pointer bg-white">
+                <select id="filter-bulan-rekap" onchange="loadRekap()" class="w-full border border-zamrud-100 rounded-lg px-3 py-2 text-sm outline-none text-slate-700 cursor-pointer bg-white mb-3">
                     <option value="ALL">Semua Periode</option>
                 </select>
+
+                <div class="flex gap-2 overflow-x-auto hide-scroll pb-1">
+                    <button type="button" data-kategori="ALL" onclick="setKategoriRekapFilter(this)" class="filter-chip flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border border-zamrud-100 text-zamrud-600 bg-white transition">Semua</button>
+                    <button type="button" data-kategori="Tahfidz" onclick="setKategoriRekapFilter(this)" class="filter-chip is-active flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border border-zamrud-100 text-zamrud-600 bg-white transition">Tahfidz</button>
+                    <button type="button" data-kategori="Ta'lim Umum" onclick="setKategoriRekapFilter(this)" class="filter-chip flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border border-zamrud-100 text-zamrud-600 bg-white transition">Ta'lim Umum</button>
+                    <button type="button" data-kategori="Ta'lim Khusus" onclick="setKategoriRekapFilter(this)" class="filter-chip flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border border-zamrud-100 text-zamrud-600 bg-white transition">Ta'lim Khusus</button>
+                </div>
             </div>
 
             <div class="p-5" id="rekap-list">
@@ -604,6 +611,18 @@
         let currentUser = safeParse('lem_user', null);
         let absensiData = safeParse('lem_absensi', []);
         let allUsersData = safeParse('lem_all_users', []);
+        let selectedKategoriRekap = 'Tahfidz';
+
+        function setKategoriRekapFilter(btn) {
+            selectedKategoriRekap = btn.dataset.kategori;
+
+            document.querySelectorAll('#screen-rekap .filter-chip').forEach(el => {
+                el.classList.remove('is-active');
+            });
+            btn.classList.add('is-active');
+
+            loadRekap();
+        }
         let capturedPhotoBase64 = null;
         let adminSesiFilter = 'ALL';
         let activeSesi = ""; // Menyimpan sesi yang diklik
@@ -1467,10 +1486,16 @@
             }
 
             // Filter berdasarkan bulan yang dipilih di dropdown
+            // Filter berdasarkan bulan yang dipilih di dropdown
             const filterDropdown = document.getElementById('filter-bulan-rekap');
             const selectedBulan = filterDropdown ? filterDropdown.value : 'ALL';
             if (selectedBulan && selectedBulan !== 'ALL') {
                 myData = myData.filter(item => item.tanggal && item.tanggal.startsWith(selectedBulan));
+            }
+
+            // Filter berdasarkan kategori yang dipilih di chip button
+            if (selectedKategoriRekap && selectedKategoriRekap !== 'ALL') {
+                myData = myData.filter(item => item.kategori === selectedKategoriRekap);
             }
 
             // Hapus elemen riwayat yang lama sebelum memuat ulang
@@ -1946,19 +1971,26 @@
             if (!dropdown) return;
 
             const namaBulanList = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            const isFirstLoad = !dropdown.dataset.initialized;
 
             let myData = absensiData;
             if (currentUser.role !== 'admin') {
                 myData = absensiData.filter(item => item.username === currentUser.username);
             }
 
+            const now = new Date();
+            const currentMonthValue = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
             const bulanSet = new Set();
+            bulanSet.add(currentMonthValue); // Pastikan bulan berjalan selalu tersedia sebagai opsi
             myData.forEach(item => {
                 if (item.tanggal) bulanSet.add(item.tanggal.substring(0, 7));
             });
 
             const sortedBulan = Array.from(bulanSet).sort().reverse();
-            const currentValue = dropdown.value || 'ALL';
+
+            // Kunjungan pertama -> default ke bulan berjalan. Kunjungan berikutnya -> pertahankan pilihan user.
+            const currentValue = isFirstLoad ? currentMonthValue : (dropdown.value || currentMonthValue);
 
             dropdown.innerHTML = '<option value="ALL">Semua Periode</option>';
             sortedBulan.forEach(ym => {
@@ -1969,9 +2001,10 @@
                 dropdown.appendChild(option);
             });
 
-            // Pertahankan pilihan sebelumnya jika masih ada di daftar opsi baru
             const stillExists = Array.from(dropdown.options).some(o => o.value === currentValue);
-            dropdown.value = stillExists ? currentValue : 'ALL';
+            dropdown.value = stillExists ? currentValue : currentMonthValue;
+
+            dropdown.dataset.initialized = 'true';
         }
 
         function populateBulanDropdown() {
