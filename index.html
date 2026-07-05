@@ -164,6 +164,24 @@
         .rekap-card:hover{
             transform:translateY(-2px);
         }
+
+        /* Skeleton Loader */
+        .skeleton {
+            background: linear-gradient(90deg, #e8e4d8 25%, #f2efe4 37%, #e8e4d8 63%);
+            background-size: 400% 100%;
+            animation: skeleton-shimmer 1.4s ease infinite;
+            border-radius: 8px;
+        }
+        @keyframes skeleton-shimmer {
+            0% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .skeleton-dark {
+            background: linear-gradient(90deg, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0.18) 37%, rgba(255,255,255,0.08) 63%);
+            background-size: 400% 100%;
+            animation: skeleton-shimmer 1.4s ease infinite;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
@@ -214,7 +232,75 @@
         </div>
 
         <div id="screen-home" class="app-screen hide-scroll bg-gading">
-            <div class="pt-8 pb-10 px-6 rounded-b-[32px] shadow-sm relative overflow-hidden" style="background: linear-gradient(135deg, #14532D, #0B3D2E);">
+
+            <!-- ===== SKELETON LOADER (tampil sampai data awal selesai dimuat) ===== -->
+            <div id="home-skeleton" class="hidden">
+                <div class="pt-8 pb-10 px-6 rounded-b-[32px] relative overflow-hidden" style="background: linear-gradient(135deg, #14532D, #0B3D2E);">
+                    <div class="flex justify-between items-center mb-5">
+                        <div class="flex-1 min-w-0 pr-3">
+                            <div class="skeleton-dark h-2.5 w-24 rounded mb-2"></div>
+                            <div class="skeleton-dark h-5 w-36 rounded mb-2"></div>
+                            <div class="skeleton-dark h-4 w-20 rounded-md"></div>
+                        </div>
+                        <div class="skeleton-dark w-20 h-20 rounded-full shrink-0"></div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-2xl p-3 border border-white/20">
+                        <div class="text-center flex-1 px-2"><div class="skeleton-dark h-6 w-8 mx-auto rounded"></div></div>
+                        <div class="text-center flex-1 px-2"><div class="skeleton-dark h-6 w-8 mx-auto rounded"></div></div>
+                        <div class="text-center flex-1 px-2"><div class="skeleton-dark h-6 w-8 mx-auto rounded"></div></div>
+                        <div class="text-center flex-1 px-2"><div class="skeleton-dark h-6 w-10 mx-auto rounded"></div></div>
+                    </div>
+                </div>
+
+                <div class="px-5 -mt-9 relative z-10">
+                    <div class="bg-white p-4 rounded-2xl shadow-md border border-emas-100 flex items-center justify-between mb-6">
+                        <div>
+                            <div class="skeleton h-2.5 w-14 rounded mb-2"></div>
+                            <div class="skeleton h-4 w-32 rounded"></div>
+                        </div>
+                        <div class="skeleton w-20 h-9 rounded-lg"></div>
+                    </div>
+
+                    <div class="bg-white rounded-3xl p-5 shadow-md border border-emas-100">
+                        <div class="skeleton h-4 w-40 rounded mb-4"></div>
+                        <div class="flex flex-col gap-3">
+                            <div class="flex items-center justify-between p-4 border border-emas-50 rounded-2xl">
+                                <div class="flex items-center gap-4">
+                                    <div class="skeleton w-12 h-12 rounded-full"></div>
+                                    <div>
+                                        <div class="skeleton h-4 w-16 rounded mb-2"></div>
+                                        <div class="skeleton h-3 w-24 rounded"></div>
+                                    </div>
+                                </div>
+                                <div class="skeleton w-20 h-6 rounded-full"></div>
+                            </div>
+                            <div class="flex items-center justify-between p-4 border border-emas-50 rounded-2xl">
+                                <div class="flex items-center gap-4">
+                                    <div class="skeleton w-12 h-12 rounded-full"></div>
+                                    <div>
+                                        <div class="skeleton h-4 w-16 rounded mb-2"></div>
+                                        <div class="skeleton h-3 w-24 rounded"></div>
+                                    </div>
+                                </div>
+                                <div class="skeleton w-20 h-6 rounded-full"></div>
+                            </div>
+                            <div class="flex items-center justify-between p-4 border border-emas-50 rounded-2xl">
+                                <div class="flex items-center gap-4">
+                                    <div class="skeleton w-12 h-12 rounded-full"></div>
+                                    <div>
+                                        <div class="skeleton h-4 w-16 rounded mb-2"></div>
+                                        <div class="skeleton h-3 w-24 rounded"></div>
+                                    </div>
+                                </div>
+                                <div class="skeleton w-20 h-6 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ===== END SKELETON LOADER ===== -->
+
+            <div id="home-real-content" class="pt-8 pb-10 px-6 rounded-b-[32px] shadow-sm relative overflow-hidden" style="background: linear-gradient(135deg, #14532D, #0B3D2E);">
                 <div class="absolute inset-0" style="background-image: var(--star-pattern); opacity: 0.25;"></div>
                 
                 <div class="flex justify-between items-center mb-5 relative z-10">
@@ -778,6 +864,9 @@
             screen.classList.add('active');
             screen.style.display = (screenId === 'login') ? 'flex' : 'block';
 
+            // Pastikan layar selalu dimulai dari paling atas, tidak tersangkut di posisi scroll sebelumnya
+            screen.scrollTop = 0;
+
             if (screenId === 'login') {
                 document.getElementById('bottom-nav').classList.add('hidden');
             } else {
@@ -851,11 +940,13 @@
                 adminNavBtn.classList.remove('flex');
             }
 
-            // Masuk ke Home
+            // Masuk ke Home, tampilkan skeleton terlebih dahulu sampai data terbaru siap
             navigate("home");
+            showHomeSkeleton(true);
 
-            // Tampilkan data lokal dulu (langsung)
+            // Tampilkan data lokal dulu (langsung) sebagai fallback isi awal
             loadRekap();
+            updateHomeStats();
 
             // Jalankan sinkronisasi secara paralel
             Promise.all([
@@ -866,9 +957,12 @@
             ])
             .then(([_, sesiList]) => {
                 lockSession(sesiList);
+                showHomeSkeleton(false);
             })
             .catch(err => {
                 console.error(err);
+                // Tetap tampilkan konten (dari data lokal/cache) walau sinkronisasi gagal
+                showHomeSkeleton(false);
             });
 
         }
@@ -1919,7 +2013,21 @@
             const d = new Date();
             return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
         }
+        function showHomeSkeleton(show) {
+            const skeleton = document.getElementById('home-skeleton');
+            const realContent = document.getElementById('home-real-content');
+            if (!skeleton || !realContent) return;
 
+            if (show) {
+                skeleton.classList.remove('hidden');
+                realContent.classList.add('hidden');
+            } else {
+                skeleton.classList.add('hidden');
+                realContent.classList.remove('hidden');
+            }
+        }
+
+    
         function showLoading(show, text = "Memproses...") {
             const loader = document.getElementById('global-loader');
             document.getElementById('loader-text').innerText = text;
