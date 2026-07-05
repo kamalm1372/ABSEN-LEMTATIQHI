@@ -15,6 +15,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -219,19 +222,24 @@
                         <p class="text-xs tracking-[0.15em] uppercase" style="color:#E2C158;">Assalamu'alaikum,</p>
                         <h2 class="text-white text-xl font-heading font-bold truncate" id="user-greeting-name">Nama Pengajar</h2>
                     </div>
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style="background: rgba(212,175,55,0.18); border: 1px solid rgba(212,175,55,0.5);">
-                        <i class="fa-solid fa-user-circle text-2xl" style="color:#F5E6B8;"></i>
+                    <div id="home-avatar-wrap" class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden" style="background: rgba(212,175,55,0.18); border: 1px solid rgba(212,175,55,0.5);">
+                        <i id="home-avatar-placeholder" class="fa-solid fa-user-circle text-2xl" style="color:#F5E6B8;"></i>
+                        <img id="home-avatar-img" src="" class="hidden w-full h-full object-cover">
                     </div>
                 </div>
 
                 <div class="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/20 relative z-10 shadow-inner">
                     <div class="text-center flex-1 border-r border-white/20">
-                        <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Total Sesi</p>
+                        <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Sesi Hadir</p>
                         <p class="text-xl font-bold text-white font-heading leading-none" id="home-stat-sesi">0</p>
                     </div>
                     <div class="text-center flex-1 border-r border-white/20">
                         <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Hari Hadir</p>
                         <p class="text-xl font-bold text-white font-heading leading-none" id="home-stat-hari">0</p>
+                    </div>
+                    <div class="text-center flex-1 border-r border-white/20">
+                        <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Total Hadir</p>
+                        <p class="text-xl font-bold text-emas-200 font-heading leading-none" id="home-stat-total">0</p>
                     </div>
                     <div class="text-center flex-1">
                         <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Persentase</p>
@@ -246,9 +254,19 @@
                         <p class="text-xs text-zamrud-300 font-medium">Hari ini</p>
                         <p class="text-zamrud-900 font-heading font-semibold" id="current-date">Senin, 1 Jan 2024</p>
                     </div>
-                    <div class="bg-zamrud-950 text-emas-300 px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2">
+                <div class="bg-zamrud-950 text-emas-300 px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2">
                         <i class="fa-solid fa-clock"></i> <span id="current-time">00:00</span>
                     </div>
+                </div>
+
+                <div id="offline-banner" class="hidden mt-3 px-4 py-2.5 rounded-xl bg-red-50 border border-red-200 flex items-center gap-2 text-red-600 text-xs font-medium">
+                    <i class="fa-solid fa-wifi-slash"></i>
+                    <span id="offline-banner-text">Tidak ada koneksi internet. Absen akan disimpan sementara.</span>
+                </div>
+
+                <div id="pending-sync-banner" class="hidden mt-3 px-4 py-2.5 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between text-amber-700 text-xs font-medium">
+                    <span><i class="fa-solid fa-clock-rotate-left mr-1"></i> <span id="pending-sync-count">0</span> absen menunggu sinkronisasi</span>
+                    <button type="button" onclick="syncPendingQueue()" class="underline font-semibold">Coba Lagi</button>
                 </div>
 
                 <div class="bg-white rounded-3xl p-5 shadow-md border border-emas-100 mb-6">
@@ -306,7 +324,11 @@
         <div id="screen-rekap" class="app-screen hide-scroll bg-gading">
             <div class="bg-white pt-8 pb-4 px-5 shadow-sm sticky top-0 z-20 border-b border-emas-100">
                 <h2 class="text-xl font-heading font-bold text-zamrud-900">Riwayat Kehadiran</h2>
-                <p class="text-xs text-zamrud-300 mt-1">Daftar absensi Anda bulan ini</p>
+                <p class="text-xs text-zamrud-300 mt-1 mb-3">Daftar absensi Anda</p>
+
+                <select id="filter-bulan-rekap" onchange="loadRekap()" class="w-full border border-zamrud-100 rounded-lg px-3 py-2 text-sm outline-none text-slate-700 cursor-pointer bg-white">
+                    <option value="ALL">Semua Periode</option>
+                </select>
             </div>
 
             <div class="p-5" id="rekap-list">
@@ -321,9 +343,16 @@
             <div class="pt-10 pb-20 px-5 text-center relative overflow-hidden" style="background: linear-gradient(135deg, #14532D, #0B3D2E);">
                 <div class="absolute inset-0" style="background-image: var(--star-pattern); opacity: 0.25;"></div>
                 <h2 class="text-white text-lg font-heading font-bold mb-6 relative z-10">Profil</h2>
-                <div class="w-24 h-24 mx-auto flex items-center justify-center relative z-10 rounded-full" style="background: radial-gradient(circle at 35% 30%, #FCF8EC, #F5E6B8 45%, #D4AF37 100%); box-shadow: 0 8px 24px -6px rgba(212,175,55,0.6);">
-                    <i class="fa-solid fa-user text-4xl" style="color:#0F4025;"></i>
+                <div class="relative z-10 w-24 h-24 mx-auto">
+                    <div id="profile-photo-wrap" onclick="triggerProfilePhoto()" class="w-24 h-24 flex items-center justify-center rounded-full overflow-hidden cursor-pointer" style="background: radial-gradient(circle at 35% 30%, #FCF8EC, #F5E6B8 45%, #D4AF37 100%); box-shadow: 0 8px 24px -6px rgba(212,175,55,0.6);">
+                        <i id="profile-photo-placeholder" class="fa-solid fa-user text-4xl" style="color:#0F4025;"></i>
+                        <img id="profile-photo-img" src="" class="hidden w-full h-full object-cover">
+                    </div>
+                    <button type="button" onclick="triggerProfilePhoto()" class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-zamrud-900 text-emas-300 flex items-center justify-center border-2 border-white shadow-md">
+                        <i class="fa-solid fa-camera text-xs"></i>
+                    </button>
                 </div>
+                <input type="file" id="profile-photo-input" accept="image/*" class="hidden">
             </div>
 
             <div class="px-5 -mt-12 relative z-20">
@@ -344,16 +373,6 @@
                         <i class="fa-solid fa-chevron-right text-emas-500 text-sm"></i>
                     </button>
 
-                    <button type="button" id="menu-admin-laporan" class="hidden w-full items-center justify-between p-4 border-b border-gray-50 hover:bg-zamrud-50 transition" onclick="navigate('admin-rekap')">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:#FCF8EC; color:#B8860B;">
-                                <i class="fa-solid fa-file-excel"></i>
-                            </div>
-                            <span class="text-sm font-medium text-gray-700">Rekap Keseluruhan</span>
-                        </div>
-                        <i class="fa-solid fa-chevron-right text-emas-500 text-sm"></i>
-                    </button>
-
                     <button type="button" class="w-full flex items-center justify-between p-4 hover:bg-red-50 transition" onclick="logout()">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center">
@@ -369,7 +388,7 @@
         <!-- ==================== SCREEN: ADMIN REKAP KESELURUHAN ==================== -->
         <div id="screen-admin-rekap" class="app-screen hide-scroll bg-gading">
             <div class="bg-white pt-8 pb-4 px-5 shadow-sm sticky top-0 z-20 border-b border-emas-100 flex items-center gap-3">
-                <button type="button" onclick="navigate('profile')" class="w-9 h-9 rounded-full bg-zamrud-50 text-zamrud-700 flex items-center justify-center hover:bg-zamrud-100 transition">
+                <button type="button" onclick="navigate('home')" class="w-9 h-9 rounded-full bg-zamrud-50 text-zamrud-700 flex items-center justify-center hover:bg-zamrud-100 transition">
                     <i class="fa-solid fa-arrow-left"></i>
                 </button>
                 <div>
@@ -408,23 +427,29 @@
                 </div>
 
                 <!-- Summary Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
                     <div class="bg-zamrud-600 rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
                         <div class="relative z-10">
-                            <p class="text-sm font-medium mb-1">(Sesi) مجموع الحضور</p>
                             <p class="text-4xl font-bold font-heading mb-1" id="stat-total-sesi">0</p>
-                            <p class="text-xs text-zamrud-100">Total Kehadiran (Semua Sesi)</p>
+                            <p class="text-xs text-zamrud-100">Sesi Hadir</p>
                         </div>
                         <i class="fa-solid fa-calendar-check absolute -right-2 -bottom-4 text-7xl opacity-20"></i>
                     </div>
                     
                     <div class="bg-zamrud-500 rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
                         <div class="relative z-10">
-                            <p class="text-sm font-medium mb-1">مجموع أيام الحضور</p>
                             <p class="text-4xl font-bold font-heading mb-1" id="stat-total-hari">0</p>
-                            <p class="text-xs text-zamrud-100">Total Hari Hadir</p>
+                            <p class="text-xs text-zamrud-100">Hari Hadir</p>
                         </div>
                         <i class="fa-solid fa-calendar-day absolute -right-2 -bottom-4 text-7xl opacity-20"></i>
+                    </div>
+
+                    <div class="bg-emas-600 rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
+                        <div class="relative z-10">
+                            <p class="text-4xl font-bold font-heading mb-1" id="stat-total-hadir">0</p>
+                            <p class="text-xs text-emas-50">Total Hadir</p>
+                        </div>
+                        <i class="fa-solid fa-star absolute -right-2 -bottom-4 text-7xl opacity-20"></i>
                     </div>
                 </div>
 
@@ -435,9 +460,12 @@
                             <i class="fa-solid fa-users text-zamrud-700"></i>
                             <h3 class="font-bold text-zamrud-900 text-sm">Data Statistik <span id="label-periode-tabel" class="text-emas-600 ml-2"></span></h3>
                         </div>
-                        <button onclick="exportRekapCSV()" class="text-xs font-semibold text-zamrud-600 hover:text-zamrud-800 bg-white px-3 py-1.5 rounded-lg border border-zamrud-200 shadow-sm transition flex items-center gap-1">
-                            <i class="fa-solid fa-download"></i> CSV
-                        </button>
+                        
+                        <div class="flex gap-2">
+                            <button onclick="exportRekapPDF()" class="text-xs font-semibold text-red-600 hover:text-red-800 bg-white px-3 py-1.5 rounded-lg border border-red-200 shadow-sm transition flex items-center gap-1">
+                                <i class="fa-solid fa-file-pdf"></i> PDF
+                            </button>
+                        </div>
                     </div>
                     
                     <!-- Wadah untuk list kartu (Tidak menggunakan table lagi) -->
@@ -457,12 +485,61 @@
                 <i class="fa-solid fa-list-check text-xl mb-1 nav-icon"></i>
                 <span class="text-[10px] font-medium">Riwayat Absen</span>
             </button>
+            <button type="button" id="nav-admin-rekap" onclick="navigate('admin-rekap')" class="nav-btn hidden flex-1 flex-col items-center py-2 gap-1 text-zamrud-300 transition" data-target="admin-rekap">
+                <i class="fa-solid fa-file-excel text-xl mb-1 nav-icon"></i>
+                <span class="text-[10px] font-medium">Rekap</span>
+            </button>
             <button type="button" onclick="navigate('profile')" class="nav-btn flex-1 flex flex-col items-center py-2 gap-1 text-zamrud-300 transition" data-target="profile">
                 <i class="fa-solid fa-circle-user text-xl mb-1 nav-icon"></i>
                 <span class="text-[10px] font-medium">Profil</span>
             </button>
         </div>
 
+    </div>
+
+    <div id="liveCameraModal" class="fixed inset-0 bg-black hidden items-center justify-center z-50 flex-col">
+        <div class="relative w-full max-w-sm mx-auto">
+            <video id="live-camera-video" autoplay playsinline muted class="w-full rounded-2xl bg-black" style="transform: scaleX(-1);"></video>
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="w-56 h-56 rounded-full border-4 border-emas-300/70"></div>
+            </div>
+            <p class="text-center text-white/80 text-xs mt-3">Posisikan wajah Anda di dalam lingkaran</p>
+        </div>
+        <div class="flex items-center gap-6 mt-6">
+            <button type="button" onclick="closeLiveCamera()" class="w-12 h-12 rounded-full bg-white/10 text-white flex items-center justify-center border border-white/30">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <button type="button" onclick="captureLiveCamera()" class="w-16 h-16 rounded-full bg-white flex items-center justify-center border-4 border-emas-400 shadow-lg">
+                <i class="fa-solid fa-camera text-zamrud-900 text-xl"></i>
+            </button>
+            <div class="w-12 h-12"></div> <!-- spacer agar tombol shutter tetap center -->
+        </div>
+        <canvas id="live-camera-canvas" class="hidden"></canvas>
+    </div>
+
+    <div id="cropModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-5 w-[92%] max-w-sm">
+            <h3 class="text-lg font-heading font-bold text-center text-zamrud-900 mb-1">Atur Posisi Foto</h3>
+            <p class="text-xs text-zamrud-300 text-center mb-4">Geser untuk memindahkan, gunakan slider untuk memperbesar</p>
+
+            <div id="crop-canvas-wrap" class="relative mx-auto rounded-full overflow-hidden touch-none select-none" style="width:240px; height:240px; background:#f1f1f1; cursor:grab;">
+                <canvas id="crop-canvas" width="240" height="240" class="absolute top-0 left-0"></canvas>
+                <div class="absolute inset-0 rounded-full pointer-events-none" style="box-shadow: 0 0 0 999px rgba(0,0,0,0.35);"></div>
+            </div>
+
+            <div class="mt-4 px-2">
+                <label class="text-xs font-medium text-zamrud-600 flex items-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass-minus"></i>
+                    <input type="range" id="crop-zoom" min="100" max="300" value="100" class="flex-1 accent-emas-500">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                </label>
+            </div>
+
+            <div class="flex gap-2 mt-5">
+                <button type="button" onclick="closeCropModal()" class="flex-1 py-3 rounded-xl bg-gray-200 font-semibold text-sm">Batal</button>
+                <button type="button" onclick="confirmCrop()" class="flex-1 py-3 rounded-xl btn-gold font-semibold text-sm">Gunakan Foto</button>
+            </div>
+        </div>
     </div>
 
     <div id="passwordModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
@@ -526,15 +603,76 @@
 
         let currentUser = safeParse('lem_user', null);
         let absensiData = safeParse('lem_absensi', []);
+        let allUsersData = safeParse('lem_all_users', []);
         let capturedPhotoBase64 = null;
         let adminSesiFilter = 'ALL';
         let activeSesi = ""; // Menyimpan sesi yang diklik
+        let pendingQueue = safeParse('lem_pending_queue', []); // Antrian absen yang belum terkirim
+        let isSyncingQueue = false;
+
+        function updateOfflineUI() {
+            const offlineBanner = document.getElementById('offline-banner');
+            const pendingBanner = document.getElementById('pending-sync-banner');
+            const pendingCount = document.getElementById('pending-sync-count');
+            if (!offlineBanner || !pendingBanner) return;
+
+            if (!navigator.onLine) {
+                offlineBanner.classList.remove('hidden');
+            } else {
+                offlineBanner.classList.add('hidden');
+            }
+
+            if (pendingQueue.length > 0) {
+                pendingCount.innerText = pendingQueue.length;
+                pendingBanner.classList.remove('hidden');
+            } else {
+                pendingBanner.classList.add('hidden');
+            }
+        }
+
+        function savePendingQueue() {
+            try { safeStorage.setItem('lem_pending_queue', JSON.stringify(pendingQueue)); } catch (e) {}
+            updateOfflineUI();
+        }
+        let cachedLogoBase64 = null; // Cache logo untuk PDF agar tidak fetch berulang
+
+        function getLogoBase64() {
+            if (cachedLogoBase64) return Promise.resolve(cachedLogoBase64);
+            return fetch("https://lh3.googleusercontent.com/d/1yKvj7wF8BO9X7yOaTZUthyZj5l98UVES")
+                .then(res => res.blob())
+                .then(blob => new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => { cachedLogoBase64 = reader.result; resolve(cachedLogoBase64); };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                }))
+                .catch(() => null); // Jika gagal (CORS/offline), lanjut tanpa logo
+        }
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
             updateClock();
             setInterval(updateClock, 1000);
+            setupCropInteractions();
             setupCameraInput();
+
+            updateOfflineUI();
+            window.addEventListener('online', () => {
+                updateOfflineUI();
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Koneksi kembali. Menyinkronkan data...', showConfirmButton: false, timer: 1800 });
+                syncPendingQueue();
+            });
+            window.addEventListener('offline', () => {
+                updateOfflineUI();
+                Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Koneksi terputus. Absen akan disimpan sementara.', showConfirmButton: false, timer: 2200 });
+            });
+
+            // Coba sync antrian setiap 30 detik jika ada data tertunda dan sedang online
+            setInterval(() => {
+                if (navigator.onLine && pendingQueue.length > 0 && !isSyncingQueue) {
+                    syncPendingQueue();
+                }
+            }, 30000);
 
             if (currentUser) {
                 initApp();
@@ -561,12 +699,26 @@
             // Logika Halaman Admin Rekap
             if (screenName === 'admin-rekap') {
                 if (currentUser.role !== 'admin') return navigate('home');
-                populateBulanDropdown(); 
-                applyAdminFilters();
+                populateBulanDropdown();
+
+                if (allUsersData.length === 0) {
+                    showLoading(true, "Memuat Data Pengajar...");
+                    fetchAllUsers().then(() => {
+                        showLoading(false);
+                        applyAdminFilters();
+                    }).catch(() => {
+                        showLoading(false);
+                        applyAdminFilters();
+                    });
+                } else {
+                    applyAdminFilters();
+                    fetchAllUsers().then(() => applyAdminFilters()); // refresh senyap di background
+                }
             }
 
             // Logika Halaman Riwayat Absen (Rekap)
             if (screenName === 'rekap') {
+                populateBulanDropdownRekap();
                 loadRekap();
                 
                 // UX FIX: Tampilkan loading jika memori kosong agar user tidak bingung
@@ -649,19 +801,20 @@
 
             document.getElementById('user-greeting-name').innerText = currentUser.name;
             document.getElementById('profile-name').innerText = currentUser.name;
+            renderProfilePhoto();
             document.getElementById('profile-role').innerText =
                 currentUser.role === 'admin' ? 'Administrator' : 'Pengajar';
             document.getElementById('profile-kategori').innerText =
                 currentUser.kategori;
 
-            const adminMenu = document.getElementById('menu-admin-laporan');
+            const adminNavBtn = document.getElementById('nav-admin-rekap');
 
             if (currentUser.role === 'admin') {
-                adminMenu.classList.remove('hidden');
-                adminMenu.classList.add('flex');
+                adminNavBtn.classList.remove('hidden');
+                adminNavBtn.classList.add('flex');
             } else {
-                adminMenu.classList.add('hidden');
-                adminMenu.classList.remove('flex');
+                adminNavBtn.classList.add('hidden');
+                adminNavBtn.classList.remove('flex');
             }
 
             // Masuk ke Home
@@ -693,16 +846,26 @@
                 const badge = document.getElementById(`badge-${sesi}`);
                 if(!card || !badge) return;
 
-                if(sesiList && sesiList.includes(sesi)) {
-                    card.onclick = null; 
+                const sudahHadir = sesiList && sesiList.includes(sesi);
+                const statusWaktu = getStatusWaktuSesi(sesi);
+
+                if (sudahHadir) {
+                    card.onclick = null;
                     card.classList.remove("cursor-pointer", "hover:shadow-md");
                     card.classList.add("opacity-70");
                     badge.className = "text-xs font-semibold px-3 py-1 rounded-full bg-green-50 text-green-600 border border-green-200";
                     badge.innerText = "Hadir";
+                } else if (statusWaktu === 'TERLEWAT' && currentUser.role !== 'admin') {
+                    // Sesi sudah lewat dan belum absen -> tandai Terlewat, nonaktifkan klik
+                    card.onclick = null;
+                    card.classList.remove("cursor-pointer", "hover:shadow-md");
+                    card.classList.add("opacity-60");
+                    badge.className = "text-xs font-semibold px-3 py-1 rounded-full bg-red-50 text-red-500 border border-red-200";
+                    badge.innerHTML = '<i class="fa-solid fa-circle-xmark mr-1"></i>Terlewat';
                 } else {
                     card.onclick = () => pilihSesi(sesi);
                     card.classList.add("cursor-pointer", "hover:shadow-md");
-                    card.classList.remove("opacity-70");
+                    card.classList.remove("opacity-70", "opacity-60");
                     badge.className = "text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200";
                     badge.innerText = "Belum Absen";
                 }
@@ -721,6 +884,14 @@
             return str;
         }
 
+        function fetchAllUsers() {
+            return fetchAPI('getAllUsers', {})
+                .then(function(data) {
+                    allUsersData = data || [];
+                    try { safeStorage.setItem('lem_all_users', JSON.stringify(allUsersData)); } catch(e){}
+                })
+                .catch(function(err) { console.error("Gagal mengambil daftar pengajar", err); });
+        }
         function fetchRiwayat() {
             if (!currentUser) return;
 
@@ -732,7 +903,10 @@
                     });
                     safeStorage.setItem('lem_absensi', JSON.stringify(absensiData));
                     updateHomeStats();
-                    if (document.getElementById('screen-rekap').classList.contains('active')) loadRekap();
+                    if (document.getElementById('screen-rekap').classList.contains('active')) {
+                        populateBulanDropdownRekap();
+                        loadRekap();
+                    }
                     if (document.getElementById('screen-admin-rekap').classList.contains('active')) applyAdminFilters();
                 })
                 .catch(function(err){ console.error("Gagal mengambil riwayat", err); });
@@ -756,37 +930,327 @@
         function setupCameraInput() {
             const input = document.getElementById('camera-input');
             if (input) input.addEventListener('change', handlePhotoSelected);
+
+            const profileInput = document.getElementById('profile-photo-input');
+            if (profileInput) profileInput.addEventListener('change', handleProfilePhotoSelected);
         }
 
+        function triggerProfilePhoto() {
+            document.getElementById('profile-photo-input').value = '';
+            document.getElementById('profile-photo-input').click();
+        }
+
+        function handleProfilePhotoSelected(e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                openCropModal(ev.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- CROPPER STATE ---
+        let cropImg = null;
+        let cropScale = 1;
+        let cropBaseScale = 1;
+        let cropOffsetX = 0;
+        let cropOffsetY = 0;
+        let cropDragging = false;
+        let cropDragStartX = 0;
+        let cropDragStartY = 0;
+
+        function openCropModal(dataUrl) {
+            const modal = document.getElementById('cropModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            const img = new Image();
+            img.onload = () => {
+                cropImg = img;
+                const canvasSize = 240;
+                // Skala dasar agar gambar menutupi seluruh kanvas (seperti object-fit: cover)
+                cropBaseScale = Math.max(canvasSize / img.width, canvasSize / img.height);
+                cropScale = 1;
+                cropOffsetX = 0;
+                cropOffsetY = 0;
+                document.getElementById('crop-zoom').value = 100;
+                drawCropCanvas();
+            };
+            img.src = dataUrl;
+        }
+
+        function closeCropModal() {
+            const modal = document.getElementById('cropModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            cropImg = null;
+        }
+
+        function drawCropCanvas() {
+            if (!cropImg) return;
+            const canvas = document.getElementById('crop-canvas');
+            const ctx = canvas.getContext('2d');
+            const size = 240;
+
+            ctx.clearRect(0, 0, size, size);
+
+            const scale = cropBaseScale * cropScale;
+            const drawW = cropImg.width * scale;
+            const drawH = cropImg.height * scale;
+
+            // Posisi gambar (dipusatkan + offset geser dari drag)
+            const x = (size - drawW) / 2 + cropOffsetX;
+            const y = (size - drawH) / 2 + cropOffsetY;
+
+            ctx.drawImage(cropImg, x, y, drawW, drawH);
+        }
+
+        function clampCropOffsets() {
+            if (!cropImg) return;
+            const size = 240;
+            const scale = cropBaseScale * cropScale;
+            const drawW = cropImg.width * scale;
+            const drawH = cropImg.height * scale;
+
+            const maxOffsetX = Math.max(0, (drawW - size) / 2);
+            const maxOffsetY = Math.max(0, (drawH - size) / 2);
+
+            cropOffsetX = Math.min(maxOffsetX, Math.max(-maxOffsetX, cropOffsetX));
+            cropOffsetY = Math.min(maxOffsetY, Math.max(-maxOffsetY, cropOffsetY));
+        }
+
+        function setupCropInteractions() {
+            const wrap = document.getElementById('crop-canvas-wrap');
+            const zoomSlider = document.getElementById('crop-zoom');
+
+            function startDrag(clientX, clientY) {
+                cropDragging = true;
+                cropDragStartX = clientX - cropOffsetX;
+                cropDragStartY = clientY - cropOffsetY;
+                wrap.style.cursor = 'grabbing';
+            }
+            function moveDrag(clientX, clientY) {
+                if (!cropDragging) return;
+                cropOffsetX = clientX - cropDragStartX;
+                cropOffsetY = clientY - cropDragStartY;
+                clampCropOffsets();
+                drawCropCanvas();
+            }
+            function endDrag() {
+                cropDragging = false;
+                wrap.style.cursor = 'grab';
+            }
+
+            // Mouse
+            wrap.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
+            window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
+            window.addEventListener('mouseup', endDrag);
+
+            // Touch (HP)
+            wrap.addEventListener('touchstart', (e) => {
+                const t = e.touches[0];
+                startDrag(t.clientX, t.clientY);
+            }, { passive: true });
+            wrap.addEventListener('touchmove', (e) => {
+                const t = e.touches[0];
+                moveDrag(t.clientX, t.clientY);
+            }, { passive: true });
+            wrap.addEventListener('touchend', endDrag);
+
+            // Zoom slider
+            zoomSlider.addEventListener('input', (e) => {
+                cropScale = e.target.value / 100;
+                clampCropOffsets();
+                drawCropCanvas();
+            });
+        }
+
+        function confirmCrop() {
+            if (!cropImg) return;
+
+            // Render ulang ke kanvas terpisah ukuran final (300x300) untuk kualitas upload
+            const finalSize = 300;
+            const finalCanvas = document.createElement('canvas');
+            finalCanvas.width = finalSize;
+            finalCanvas.height = finalSize;
+            const ctx = finalCanvas.getContext('2d');
+
+            const previewSize = 240;
+            const ratio = finalSize / previewSize;
+
+            const scale = cropBaseScale * cropScale;
+            const drawW = cropImg.width * scale * ratio;
+            const drawH = cropImg.height * scale * ratio;
+            const x = (finalSize - drawW) / 2 + cropOffsetX * ratio;
+            const y = (finalSize - drawH) / 2 + cropOffsetY * ratio;
+
+            ctx.drawImage(cropImg, x, y, drawW, drawH);
+
+            const croppedBase64 = finalCanvas.toDataURL('image/jpeg', 0.85);
+            closeCropModal();
+            uploadProfilePhoto(croppedBase64);
+        }
+
+        function uploadProfilePhoto(base64Image) {
+            showLoading(true, "Mengunggah Foto Profil...");
+            fetchAPI('updateProfilePhoto', { username: currentUser.username, foto: base64Image })
+                .then(function(res) {
+                    showLoading(false);
+                    if (res.status === 'success') {
+                        currentUser.foto = res.fotoUrl || base64Image;
+                        safeStorage.setItem('lem_user', JSON.stringify(currentUser));
+                        renderProfilePhoto();
+                        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Foto profil diperbarui', showConfirmButton: false, timer: 1800 });
+                    } else {
+                        Swal.fire({ icon: 'error', text: res.message || 'Gagal menyimpan foto.', confirmButtonColor: '#B8860B' });
+                    }
+                })
+                .catch(function() {
+                    showLoading(false);
+                    Swal.fire({ icon: 'error', text: 'Gagal menghubungi server.', confirmButtonColor: '#B8860B' });
+                });
+        }
+
+        function renderProfilePhoto() {
+            const hasFoto = currentUser && currentUser.foto;
+
+            const profileImg = document.getElementById('profile-photo-img');
+            const profilePlaceholder = document.getElementById('profile-photo-placeholder');
+            const homeImg = document.getElementById('home-avatar-img');
+            const homePlaceholder = document.getElementById('home-avatar-placeholder');
+
+            if (hasFoto) {
+                profileImg.src = currentUser.foto;
+                profileImg.classList.remove('hidden');
+                profilePlaceholder.classList.add('hidden');
+
+                homeImg.src = currentUser.foto;
+                homeImg.classList.remove('hidden');
+                homePlaceholder.classList.add('hidden');
+            } else {
+                profileImg.classList.add('hidden');
+                profilePlaceholder.classList.remove('hidden');
+
+                homeImg.classList.add('hidden');
+                homePlaceholder.classList.remove('hidden');
+            }
+        }
+
+        let liveCameraStream = null;
+
         function triggerCamera() {
+            openLiveCamera();
+        }
+
+        function openLiveCamera() {
+            const modal = document.getElementById('liveCameraModal');
+            const video = document.getElementById('live-camera-video');
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                // Browser tidak mendukung getUserMedia -> fallback ke input file
+                fallbackToFileInput();
+                return;
+            }
+
+            navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "user" }, // Paksa kamera depan
+                audio: false
+            })
+            .then(function(stream) {
+                liveCameraStream = stream;
+                video.srcObject = stream;
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            })
+            .catch(function(err) {
+                console.error("Gagal mengakses kamera depan:", err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kamera Tidak Tersedia',
+                    text: 'Tidak dapat mengakses kamera depan. Pastikan izin kamera sudah diberikan pada browser.',
+                    confirmButtonColor: '#B8860B'
+                });
+            });
+        }
+
+        function closeLiveCamera() {
+            const modal = document.getElementById('liveCameraModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+
+            if (liveCameraStream) {
+                liveCameraStream.getTracks().forEach(track => track.stop());
+                liveCameraStream = null;
+            }
+        }
+
+        function captureLiveCamera() {
+            const video = document.getElementById('live-camera-video');
+            const canvas = document.getElementById('live-camera-canvas');
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+
+            // Balik horizontal saat digambar ke canvas agar hasil foto sesuai orientasi natural
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            closeLiveCamera();
+
+            // Live camera hanya dipakai untuk absen sesi
+            processCapturedPhotoForAbsen(dataUrl);
+        }
+
+        // Fallback jika getUserMedia tidak didukung (browser lama)
+        function fallbackToFileInput() {
             const input = document.getElementById('camera-input');
             input.value = '';
             input.click();
         }
 
-        function pilihSesi(sesi) {
-            const now = new Date();
-            const currentTimeInMinutes = (now.getHours() * 60) + now.getMinutes();
-            let isInTimeRange = false;
-            let pesanWaktu = "";
+        // Rentang waktu tiap sesi (dalam menit sejak 00:00)
+        const SESI_RANGE = {
+            PAGI:  { mulai: 270,  selesai: 345,  label: "04.30 - 05.45" },
+            SORE:  { mulai: 945,  selesai: 1005, label: "15.45 - 16.45" },
+            MALAM: { mulai: 1170, selesai: 1230, label: "19.30 - 20.30" }
+        };
 
-            if (sesi === "PAGI") {
-                if (currentTimeInMinutes >= 270 && currentTimeInMinutes <= 345) isInTimeRange = true;
-                else pesanWaktu = "Sesi Pagi hanya aktif jam 04.30 - 05.45.";
-            } else if (sesi === "SORE") {
-                if (currentTimeInMinutes >= 945 && currentTimeInMinutes <= 1005) isInTimeRange = true;
-                else pesanWaktu = "Sesi Sore hanya aktif jam 15.45 - 16.45.";
-            } else if (sesi === "MALAM") {
-                if (currentTimeInMinutes >= 1170 && currentTimeInMinutes <= 1230) isInTimeRange = true;
-                else pesanWaktu = "Sesi Malam hanya aktif jam 19.30 - 20.30.";
-            }
+        // Mengembalikan status waktu sesi: 'BELUM_MULAI' | 'AKTIF' | 'TERLEWAT'
+        function getStatusWaktuSesi(sesi) {
+            const now = new Date();
+            const menitSekarang = (now.getHours() * 60) + now.getMinutes();
+            const range = SESI_RANGE[sesi];
+            if (!range) return 'AKTIF';
+
+            if (menitSekarang < range.mulai) return 'BELUM_MULAI';
+            if (menitSekarang > range.selesai) return 'TERLEWAT';
+            return 'AKTIF';
+        }
+
+        function pilihSesi(sesi) {
+            const status = getStatusWaktuSesi(sesi);
+            const range = SESI_RANGE[sesi];
 
             if (currentUser.role !== "admin") {
-                if (!isInTimeRange) {
+                if (status === 'BELUM_MULAI') {
                     Swal.fire({
-                        icon: 'error',
-                        title: 'Di Luar Jam',
-                        text: pesanWaktu,
+                        icon: 'info',
+                        title: 'Belum Waktunya',
+                        text: `Sesi ini baru aktif jam ${range.label}.`,
+                        confirmButtonColor: '#B8860B'
+                    });
+                    return;
+                }
+                if (status === 'TERLEWAT') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Waktu Absen Terlewat',
+                        text: `Jam absen sesi ini (${range.label}) sudah berakhir. Silakan hubungi admin jika ini kekeliruan.`,
                         confirmButtonColor: '#B8860B'
                     });
                     return;
@@ -801,23 +1265,49 @@
             const file = e.target.files && e.target.files[0];
             if (!file) return;
 
-            showLoading(true, "Memproses Foto...");
             const reader = new FileReader();
-            reader.onload = async (ev) => {
-                try {
-                    capturedPhotoBase64 = await compressImage(ev.target.result, 360, 0.45);
-                    showLoading(false);
+            reader.onload = (ev) => {
+                processCapturedPhotoForAbsen(ev.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Fungsi bersama: dipakai baik dari live camera maupun fallback file input
+        async function processCapturedPhotoForAbsen(dataUrl) {
+            showLoading(true, "Memproses Foto...");
+            try {
+                capturedPhotoBase64 = await compressImage(dataUrl, 360, 0.45);
+                showLoading(false);
                     
                     Swal.fire({
-                        title: `Kirim Absen Sesi ${activeSesi}?`,
+                        // Desain Judul yang lebih rapi dan ringkas
+                        title: `<span class="font-heading font-bold text-xl text-zamrud-900">Absen Sesi ${activeSesi}</span>`,
+                        
+                        // Konfigurasi Gambar agar kecil & estetik
                         imageUrl: capturedPhotoBase64,
+                        imageHeight: 180, // Membatasi tinggi gambar (kunci agar tidak kepanjangan)
                         imageAlt: 'Foto Absen',
+                        
+                        // Konfigurasi Tombol
                         showCancelButton: true,
                         confirmButtonText: '<i class="fa-solid fa-paper-plane mr-1"></i> Ya, Kirim',
                         cancelButtonText: '<i class="fa-solid fa-rotate-right mr-1"></i> Ulangi',
                         confirmButtonColor: '#1D6E4C',
                         cancelButtonColor: '#9ca3af',
-                        customClass: { popup: 'rounded-2xl' }
+                        
+                        // Konfigurasi Layout & Ukuran
+                        padding: '1.5em 1em 1em', // Mengurangi ruang kosong (padding)
+                        width: '22em', // Lebar pop-up yang pas untuk layar HP
+                        
+                        // Kustomisasi CSS untuk mempercantik elemen
+                        customClass: { 
+                            popup: 'rounded-[24px] shadow-2xl border border-emas-100', 
+                            title: 'm-0 p-0 mb-1',
+                            image: 'rounded-xl object-cover w-[90%] mx-auto mt-2 mb-3 shadow-sm', // Gambar punya sudut melengkung
+                            actions: 'mt-0', // Mengurangi jarak antara gambar dan tombol
+                            confirmButton: 'rounded-xl text-sm px-5 py-2.5 font-semibold',
+                            cancelButton: 'rounded-xl text-sm px-5 py-2.5 font-semibold'
+                        }
                     }).then((result) => {
                         if (result.isConfirmed) {
                             prosesKirimAbsen();
@@ -827,11 +1317,9 @@
                     });
 
                 } catch (err) {
-                    showLoading(false);
-                    Swal.fire({ icon: 'error', text: 'Foto gagal diproses.', confirmButtonColor: '#B8860B' });
-                }
-            };
-            reader.readAsDataURL(file);
+                showLoading(false);
+                Swal.fire({ icon: 'error', text: 'Foto gagal diproses.', confirmButtonColor: '#B8860B' });
+            }
         }
 
         function compressImage(dataUrl, maxWidth, quality) {
@@ -865,7 +1353,13 @@
                 sesi: activeSesi,
                 foto: capturedPhotoBase64
             };
-            
+
+            // Jika sudah terdeteksi offline, langsung antrikan tanpa mencoba fetch dulu
+            if (!navigator.onLine) {
+                queueAbsenOffline(dataAbsen);
+                return;
+            }
+
             fetchAPI('saveAbsen', dataAbsen)
                 .then(function(response) {
                     showLoading(false);
@@ -898,9 +1392,67 @@
                     }
                 })
                 .catch(function(error) {
-                    showLoading(false);
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.', confirmButtonColor: '#B8860B' });
+                    // Gagal karena masalah jaringan (bukan error logika dari server) -> antrikan
+                    queueAbsenOffline(dataAbsen);
                 });
+        }
+
+        function queueAbsenOffline(dataAbsen) {
+            pendingQueue.push(dataAbsen);
+            savePendingQueue();
+
+            // Tampilkan juga di rekap lokal secara optimis, ditandai "Menunggu Sinkronisasi"
+            absensiData.unshift({ ...dataAbsen, _pending: true });
+            try { safeStorage.setItem('lem_absensi', JSON.stringify(absensiData)); } catch(e){}
+
+            updateSessionUI(activeSesi);
+            loadRekap();
+            updateHomeStats();
+            showLoading(false);
+
+            Swal.fire({
+                icon: 'info',
+                title: 'Tersimpan Sementara',
+                text: `Absen ${activeSesi} disimpan di perangkat dan akan otomatis dikirim saat koneksi tersedia.`,
+                confirmButtonColor: '#B8860B'
+            });
+        }
+
+        function syncPendingQueue() {
+            if (isSyncingQueue || pendingQueue.length === 0 || !navigator.onLine) return;
+            isSyncingQueue = true;
+
+            const queueCopy = [...pendingQueue];
+            let successCount = 0;
+
+            function processNext(index) {
+                if (index >= queueCopy.length) {
+                    isSyncingQueue = false;
+                    if (successCount > 0) {
+                        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: `${successCount} absen berhasil disinkronkan`, showConfirmButton: false, timer: 2000 });
+                        fetchRiwayat();
+                    }
+                    return;
+                }
+
+                const item = queueCopy[index];
+                fetchAPI('saveAbsen', item)
+                    .then(function(response) {
+                        if (response.status === 'success' || (response.message && response.message.indexOf('sudah melakukan absensi') !== -1)) {
+                            // Sukses, atau ternyata sudah pernah tersimpan (hindari duplikat) -> hapus dari antrian
+                            pendingQueue = pendingQueue.filter(q => q.id_absen !== item.id_absen);
+                            successCount++;
+                            savePendingQueue();
+                        }
+                        processNext(index + 1);
+                    })
+                    .catch(function() {
+                        // Masih gagal (kemungkinan masih offline), hentikan proses, coba lagi nanti
+                        isSyncingQueue = false;
+                    });
+            }
+
+            processNext(0);
         }
 
         // --- REKAP & UI LOGIC ---
@@ -912,6 +1464,13 @@
             // Jika bukan admin, filter datanya hanya milik user yang login
             if (currentUser.role !== 'admin') {
                 myData = absensiData.filter(item => item.username === currentUser.username);
+            }
+
+            // Filter berdasarkan bulan yang dipilih di dropdown
+            const filterDropdown = document.getElementById('filter-bulan-rekap');
+            const selectedBulan = filterDropdown ? filterDropdown.value : 'ALL';
+            if (selectedBulan && selectedBulan !== 'ALL') {
+                myData = myData.filter(item => item.tanggal && item.tanggal.startsWith(selectedBulan));
             }
 
             // Hapus elemen riwayat yang lama sebelum memuat ulang
@@ -940,7 +1499,9 @@
                 // Simpan data sesi ke dalam user tersebut
                 groupedData[item.tanggal][item.username].sesi[item.sesi] = {
                     waktu: item.waktu,
-                    foto: item.foto
+                    foto: item.foto,
+                    id_absen: item.id_absen,
+                    _pending: item._pending || false
                 };
             });
 
@@ -976,15 +1537,15 @@
 
                     // Buat Tombol/Indikator P S M
                     const badgePagi = dataPagi 
-                        ? `<button onclick="viewDetailSesi('${dataPagi.foto}', '${dataPagi.waktu}', 'Pagi')" class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 font-bold text-xs flex items-center justify-center border border-amber-200 shadow-sm hover:bg-amber-200 transition">P</button>`
+                        ? `<button onclick="viewDetailSesi('${dataPagi.foto}', '${dataPagi.waktu}', 'Pagi', '${dataPagi.id_absen}')" class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 font-bold text-xs flex items-center justify-center border border-amber-200 shadow-sm hover:bg-amber-200 transition">P</button>`
                         : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">P</div>`;
                     
                     const badgeSore = dataSore 
-                        ? `<button onclick="viewDetailSesi('${dataSore.foto}', '${dataSore.waktu}', 'Sore')" class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 font-bold text-xs flex items-center justify-center border border-blue-200 shadow-sm hover:bg-blue-200 transition">S</button>`
+                        ? `<button onclick="viewDetailSesi('${dataSore.foto}', '${dataSore.waktu}', 'Sore', '${dataSore.id_absen}')" class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 font-bold text-xs flex items-center justify-center border border-blue-200 shadow-sm hover:bg-blue-200 transition">S</button>`
                         : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">S</div>`;
                     
                     const badgeMalam = dataMalam 
-                        ? `<button onclick="viewDetailSesi('${dataMalam.foto}', '${dataMalam.waktu}', 'Malam')" class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 font-bold text-xs flex items-center justify-center border border-indigo-200 shadow-sm hover:bg-indigo-200 transition">M</button>`
+                        ? `<button onclick="viewDetailSesi('${dataMalam.foto}', '${dataMalam.waktu}', 'Malam', '${dataMalam.id_absen}')" class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 font-bold text-xs flex items-center justify-center border border-indigo-200 shadow-sm hover:bg-indigo-200 transition">M</button>`
                         : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">M</div>`;
 
                     // Card Pengajar
@@ -995,10 +1556,12 @@
                     const namaTampil = currentUser.role === 'admin' ? escapeHtml(user.nama) : "Absensi Anda";
                     const kategoriTampil = currentUser.role === 'admin' ? escapeHtml(user.kategori || '-') : escapeHtml(currentUser.role);
 
+                    const adaPending = Object.values(user.sesi).some(s => s._pending);
                     userCard.innerHTML = `
                         <div class="flex-1 min-w-0 pr-3">
                             <h4 class="font-semibold text-zamrud-900 text-sm truncate">${namaTampil}</h4>
                             <p class="text-[10px] text-zamrud-400 mt-0.5">${kategoriTampil}</p>
+                            ${adaPending ? '<p class="text-[9px] text-amber-600 mt-0.5"><i class="fa-solid fa-clock-rotate-left mr-1"></i>Menunggu sinkronisasi</p>' : ''}
                         </div>
                         <div class="flex gap-1.5 shrink-0">
                             ${badgePagi}
@@ -1022,18 +1585,93 @@
             return `${parseInt(parts[2], 10)} ${bulanArr[parseInt(parts[1], 10)-1]} ${parts[0]}`;
         }
 
-        // Fungsi Pop-Up saat tombol P/S/M diklik
-        function viewDetailSesi(fotoUrl, waktu, namaSesi) {
+        // Fungsi Pop-Up saat tombol P/S/M diklik (desain modern, tanpa perlu scroll)
+        function viewDetailSesi(fotoUrl, waktu, namaSesi, idAbsen) {
+            const iconSesi = {
+                'Pagi': 'fa-sun',
+                'Sore': 'fa-clock',
+                'Malam': 'fa-moon'
+            }[namaSesi] || 'fa-clock';
+
+            const isAdmin = currentUser && currentUser.role === 'admin';
+
             Swal.fire({
-                title: `Sesi ${namaSesi}`,
-                html: `<p class="text-sm font-medium text-zamrud-600 mb-3"><i class="fa-regular fa-clock mr-1"></i> Waktu Absen: ${formatJam(waktu)}</p>`,
-                imageUrl: fotoUrl,
-                imageAlt: 'Foto Absen',
+                html: `
+                    <div class="relative -mx-6 -mt-6">
+                        <img src="${fotoUrl}" alt="Foto Absen" class="w-full h-72 object-cover" style="border-radius: 20px 20px 0 0;">
+                        <div class="absolute inset-0" style="background: linear-gradient(to top, rgba(11,61,46,0.85) 0%, rgba(11,61,46,0.15) 45%, transparent 70%); border-radius: 20px 20px 0 0;"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-9 h-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-emas-300 border border-white/30">
+                                    <i class="fa-solid ${iconSesi}"></i>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-white font-bold text-base leading-tight">Sesi ${namaSesi}</p>
+                                    <p class="text-emas-100 text-xs leading-tight"><i class="fa-regular fa-clock mr-1"></i>${formatJam(waktu)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
                 showConfirmButton: true,
-                confirmButtonText: 'Tutup',
+                confirmButtonText: '<i class="fa-solid fa-xmark mr-1"></i> Tutup',
                 confirmButtonColor: '#0B3D2E',
-                customClass: { popup: 'rounded-2xl' }
+                showDenyButton: isAdmin,
+                denyButtonText: '<i class="fa-solid fa-trash mr-1"></i> Hapus',
+                denyButtonColor: '#DC2626',
+                width: '22em',
+                padding: '0 0 1.2em',
+                customClass: {
+                    popup: 'rounded-[20px] overflow-hidden shadow-2xl',
+                    confirmButton: 'rounded-xl text-sm px-6 py-2.5 font-semibold mt-2',
+                    denyButton: 'rounded-xl text-sm px-6 py-2.5 font-semibold mt-2'
+                }
+            }).then((result) => {
+                if (result.isDenied) {
+                    konfirmasiHapusAbsen(idAbsen, namaSesi);
+                }
             });
+        }
+
+        function konfirmasiHapusAbsen(idAbsen, namaSesi) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Hapus Absen Ini?',
+                text: `Absen sesi ${namaSesi} akan dihapus permanen dan tidak bisa dikembalikan.`,
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#DC2626',
+                cancelButtonColor: '#9ca3af'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    hapusAbsen(idAbsen);
+                }
+            });
+        }
+
+        function hapusAbsen(idAbsen) {
+            showLoading(true, "Menghapus Absen...");
+            fetchAPI('deleteAbsen', { id_absen: idAbsen, requesterUsername: currentUser.username, requesterRole: currentUser.role })
+                .then(function(res) {
+                    showLoading(false);
+                    if (res.status === 'success') {
+                        // Hapus dari data lokal juga
+                        absensiData = absensiData.filter(item => item.id_absen !== idAbsen);
+                        try { safeStorage.setItem('lem_absensi', JSON.stringify(absensiData)); } catch(e){}
+
+                        loadRekap();
+                        if (document.getElementById('screen-admin-rekap').classList.contains('active')) applyAdminFilters();
+
+                        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Absen berhasil dihapus', showConfirmButton: false, timer: 1800 });
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Gagal', text: res.message, confirmButtonColor: '#B8860B' });
+                    }
+                })
+                .catch(function() {
+                    showLoading(false);
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.', confirmButtonColor: '#B8860B' });
+                });
         }
 
         // --- REKAP KESELURUHAN LOGIC (ADMIN) ---
@@ -1047,19 +1685,14 @@
             const dropdownBulan = document.getElementById('filter-bulan');
             document.getElementById('label-periode-tabel').innerText = dropdownBulan.options[dropdownBulan.selectedIndex] ? dropdownBulan.options[dropdownBulan.selectedIndex].text : '';
 
-            // 1. Ekstrak daftar User secara unik dari riwayat absen
-            const userMap = new Map();
-            absensiData.forEach(item => {
-                if (!userMap.has(item.username)) {
-                    userMap.set(item.username, {
-                        username: item.username,
-                        nama: item.nama,
-                        kategori: item.kategori || '-'
-                    });
-                }
-            });
-
-            let userList = Array.from(userMap.values());
+            // 1. Ambil daftar SEMUA pengajar dari data Users (bukan hanya yang punya riwayat absen)
+            let userList = allUsersData
+                .filter(u => u.role !== 'admin') // Opsional: sembunyikan akun admin dari rekap pengajar. Hapus baris ini jika admin tetap ingin ditampilkan.
+                .map(u => ({
+                    username: u.username,
+                    nama: u.name,
+                    kategori: u.kategori || '-'
+                }));
 
             // 2. Filter Kategori
             if (filterKategori !== 'ALL') {
@@ -1072,22 +1705,28 @@
                 filteredAbsen = filteredAbsen.filter(item => item.tanggal.startsWith(filterBulan));
             }
 
-            // 4. Kalkulasi dan Render ke Tabel
+            // 4. Kalkulasi Statistik per User (sebelum diurutkan)
             const tableBody = document.getElementById('admin-rekap-table');
             tableBody.innerHTML = '';
 
             let totalSesiGlobal = 0;
-            let totalHariGlobal = new Set(); 
+            let totalHariGlobal = new Set();
+
+            userList = userList.map(user => {
+                const userAbsen = filteredAbsen.filter(a => a.username === user.username);
+                const totalSesi = userAbsen.length;
+                const totalHari = new Set(userAbsen.map(a => a.tanggal)).size;
+                return { ...user, totalSesi, totalHari, userAbsen };
+            });
+
+            // Urutkan dari yang paling banyak (Total Sesi + Total Hari Hadir)
+            userList.sort((a, b) => (b.totalSesi + b.totalHari) - (a.totalSesi + a.totalHari));
 
             if (userList.length === 0) {
                 tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-400">Tidak ada data pengajar</td></tr>`;
             } else {
                 userList.forEach((user, index) => {
-                    const userAbsen = filteredAbsen.filter(a => a.username === user.username);
-                    const totalSesi = userAbsen.length;
-                    
-                    const hariHadirSet = new Set(userAbsen.map(a => a.tanggal));
-                    const totalHari = hariHadirSet.size;
+                    const { totalSesi, totalHari, userAbsen } = user;
 
                     totalSesiGlobal += totalSesi;
                     userAbsen.forEach(a => totalHariGlobal.add(a.tanggal + '_' + a.username));
@@ -1122,12 +1761,16 @@
                         <!-- Bagian Tengah Kartu: Angka Statistik -->
                         <div class="flex items-center justify-between bg-slate-50 rounded-lg p-2 mt-1">
                             <div class="text-center flex-1 border-r border-gray-200">
-                                <p class="text-[9px] text-gray-500 uppercase tracking-wide">Total Sesi</p>
+                                <p class="text-[9px] text-gray-500 uppercase tracking-wide">Sesi Hadir</p>
                                 <p class="font-bold text-blue-600 text-sm">${totalSesi}</p>
                             </div>
                             <div class="text-center flex-1 border-r border-gray-200">
                                 <p class="text-[9px] text-gray-500 uppercase tracking-wide">Hari Hadir</p>
                                 <p class="font-bold text-zamrud-600 text-sm">${totalHari}</p>
+                            </div>
+                            <div class="text-center flex-1 border-r border-gray-200">
+                                <p class="text-[9px] text-gray-500 uppercase tracking-wide">Total Hadir</p>
+                                <p class="font-bold text-emas-600 text-sm">${totalSesi + totalHari}</p>
                             </div>
                             <div class="text-center flex-1">
                                 <p class="text-[9px] text-gray-500 uppercase tracking-wide">Persentase</p>
@@ -1146,62 +1789,7 @@
 
             document.getElementById('stat-total-sesi').innerText = totalSesiGlobal;
             document.getElementById('stat-total-hari').innerText = totalHariGlobal.size;
-        }
-
-        // Fungsi Export CSV yang disesuaikan
-        function exportRekapCSV() {
-            if (!currentUser || currentUser.role !== 'admin') return;
-            const filterBulan = document.getElementById('filter-bulan').value || 'Semua Waktu';
-            const filterKategori = document.getElementById('filter-kategori').value;
-
-            let filteredAbsen = absensiData;
-            if (filterBulan) filteredAbsen = filteredAbsen.filter(item => item.tanggal.startsWith(filterBulan));
-            if (filterKategori !== 'ALL') filteredAbsen = filteredAbsen.filter(item => item.kategori === filterKategori);
-
-            if (filteredAbsen.length === 0) {
-                Swal.fire({ icon: 'info', text: 'Tidak ada data untuk diekspor pada filter saat ini.', confirmButtonColor: '#B8860B' }); return;
-            }
-
-            const header = ['Nama', 'Username', 'Kategori', 'Tanggal', 'Waktu', 'Sesi'];
-            const rows = filteredAbsen.map(item => [item.nama, item.username, item.kategori, item.tanggal, item.waktu, item.sesi]);
-            const csvContent = [header, ...rows].map(row => row.map(csvEscape).join(',')).join('\r\n');
-
-            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `Rekap_Detail_LEMTATIQHI_${filterBulan}.csv`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        }
-
-        function exportRekapCSV() {
-            const filtered = getFilteredAdminData();
-            if (filtered.length === 0) {
-                Swal.fire({ icon: 'info', text: 'Tidak ada data untuk diekspor pada filter saat ini.', confirmButtonColor: '#B8860B' }); return;
-            }
-
-            const header = ['Nama', 'Username', 'Kategori', 'Tanggal', 'Waktu', 'Sesi'];
-            const rows = filtered.map(item => [item.nama, item.username, item.kategori, item.tanggal, item.waktu, item.sesi]);
-            const csvContent = [header, ...rows].map(row => row.map(csvEscape).join(',')).join('\r\n');
-
-            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `Rekap_LEMTATIQHI_${getFormattedDateISO()}.csv`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        }
-
-        function csvEscape(value) {
-            const str = String(value === undefined || value === null ? '' : value);
-            if (/[",\r\n]/.test(str)) return '"' + str.replace(/"/g, '""') + '"';
-            return str;
+            document.getElementById('stat-total-hadir').innerText = totalSesiGlobal + totalHariGlobal.size;
         }
 
         function escapeHtml(str) {
@@ -1353,6 +1941,39 @@
             );
 
         } 
+        function populateBulanDropdownRekap() {
+            const dropdown = document.getElementById('filter-bulan-rekap');
+            if (!dropdown) return;
+
+            const namaBulanList = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+            let myData = absensiData;
+            if (currentUser.role !== 'admin') {
+                myData = absensiData.filter(item => item.username === currentUser.username);
+            }
+
+            const bulanSet = new Set();
+            myData.forEach(item => {
+                if (item.tanggal) bulanSet.add(item.tanggal.substring(0, 7));
+            });
+
+            const sortedBulan = Array.from(bulanSet).sort().reverse();
+            const currentValue = dropdown.value || 'ALL';
+
+            dropdown.innerHTML = '<option value="ALL">Semua Periode</option>';
+            sortedBulan.forEach(ym => {
+                const [year, month] = ym.split('-');
+                const option = document.createElement('option');
+                option.value = ym;
+                option.text = `${namaBulanList[parseInt(month, 10) - 1]} ${year}`;
+                dropdown.appendChild(option);
+            });
+
+            // Pertahankan pilihan sebelumnya jika masih ada di daftar opsi baru
+            const stillExists = Array.from(dropdown.options).some(o => o.value === currentValue);
+            dropdown.value = stillExists ? currentValue : 'ALL';
+        }
+
         function populateBulanDropdown() {
             const dropdown = document.getElementById('filter-bulan');
             if (!dropdown) return;
@@ -1421,11 +2042,240 @@
             // Tembak nilainya ke HTML
             const statSesiEl = document.getElementById('home-stat-sesi');
             const statHariEl = document.getElementById('home-stat-hari');
+            const statTotalEl = document.getElementById('home-stat-total');
             const statPersenEl = document.getElementById('home-stat-persen');
+            const totalHadir = totalSesi + totalHari;
 
             if(statSesiEl) statSesiEl.innerText = totalSesi;
             if(statHariEl) statHariEl.innerText = totalHari;
+            if(statTotalEl) statTotalEl.innerText = totalHadir;
             if(statPersenEl) statPersenEl.innerText = `${persentase}%`;
+        }
+        // --- FUNGSI EXPORT PDF ---
+        async function exportRekapPDF() {
+            if (!currentUser || currentUser.role !== 'admin') return;
+            
+            showLoading(true, "Menyiapkan PDF...");
+            const logoData = await getLogoBase64();
+
+            setTimeout(() => {
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+
+                    // Ambil nilai filter saat ini
+                    const filterBulanVal = document.getElementById('filter-bulan').value;
+                    const dropdownBulan = document.getElementById('filter-bulan');
+                    const teksBulan = dropdownBulan.options[dropdownBulan.selectedIndex] ? dropdownBulan.options[dropdownBulan.selectedIndex].text : 'Semua Waktu';
+                    const filterKategori = document.getElementById('filter-kategori').value;
+
+                    // 1. Ambil SEMUA pengajar dari data Users (bukan hanya yang punya riwayat absen)
+                    let userList = allUsersData
+                        .filter(u => u.role !== 'admin')
+                        .map(u => ({ username: u.username, nama: u.name, kategori: u.kategori || '-' }));
+                    if (filterKategori !== 'ALL') userList = userList.filter(u => u.kategori === filterKategori);
+
+                    // 2. Filter Absensi
+                    let filteredAbsen = absensiData;
+                    if (filterBulanVal) filteredAbsen = filteredAbsen.filter(item => item.tanggal.startsWith(filterBulanVal));
+
+                    // 3. Hitung statistik per user, lalu urutkan (Total Sesi + Total Hari Hadir terbanyak)
+                    userList = userList.map(user => {
+                        const userAbsen = filteredAbsen.filter(a => a.username === user.username);
+                        const totalSesi = userAbsen.length;
+                        const totalHari = new Set(userAbsen.map(a => a.tanggal)).size;
+                        return { ...user, totalSesi, totalHari };
+                    });
+
+                    userList.sort((a, b) => (b.totalSesi + b.totalHari) - (a.totalSesi + a.totalHari));
+
+                    // 4. Siapkan baris (rows) untuk tabel PDF
+                    const tableRows = [];
+                    userList.forEach((user, index) => {
+                        const { totalSesi, totalHari } = user;
+                        const persentase = totalSesi > 0 ? Math.min(100, Math.round((totalSesi / 60) * 100)) : 0;
+
+                        tableRows.push([
+                            index + 1,
+                            user.nama,
+                            user.kategori,
+                            totalSesi,
+                            totalHari,
+                            totalSesi + totalHari,
+                            `${persentase}%`
+                        ]);
+                    });
+
+                    if (tableRows.length === 0) {
+                        showLoading(false);
+                        Swal.fire({ icon: 'info', text: 'Tidak ada data untuk dicetak.', confirmButtonColor: '#B8860B' });
+                        return;
+                    }
+
+                    // Kop Surat / Header PDF
+                    doc.setFillColor(11, 61, 46); // Warna Hijau Zamrud
+                    doc.rect(0, 0, 210, 32, 'F');
+
+                    // Logo (jika berhasil dimuat) - beri alas putih bulat agar logo tidak tenggelam di background hijau
+                    if (logoData) {
+                        try {
+                            doc.setFillColor(255, 255, 255);
+                            doc.circle(24, 16, 11, 'F'); // Alas putih (pusat x=24, y=16, radius 11mm)
+                            doc.setDrawColor(212, 175, 55);
+                            doc.setLineWidth(0.4);
+                            doc.circle(24, 16, 11, 'S'); // Cincin tipis emas mengelilingi alas putih
+                            doc.addImage(logoData, 'PNG', 14, 6, 20, 20);
+                        } catch(e) {}
+                    }
+
+                    const titleX = logoData ? 105 + 8 : 105;
+                    doc.setTextColor(245, 230, 184); // Emas Gading
+                    doc.setFontSize(17);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("LEMTATIQHI AL-ITTIFAQIAH", titleX, 15, { align: "center" });
+
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(10);
+                    doc.setFont("helvetica", "normal");
+                    doc.text("Laporan Statistik Kehadiran Pengajar Tahfidz & Ta'lim Al-Qur'an", titleX, 22, { align: "center" });
+
+                    // Garis aksen emas di bawah header
+                    doc.setDrawColor(212, 175, 55);
+                    doc.setLineWidth(1);
+                    doc.line(0, 32, 210, 32);
+
+                    // Info Box (kotak periode/kategori/cetak)
+                    doc.setDrawColor(212, 175, 55);
+                    doc.setFillColor(250, 247, 240); // Gading
+                    doc.setLineWidth(0.3);
+                    doc.roundedRect(14, 38, 182, 20, 2, 2, 'FD');
+
+                    const labelColL = 18, valueColL = 42;   // kolom kiri
+                    const labelColR = 105, valueColR = 138; // kolom kanan
+
+                    doc.setTextColor(11, 61, 46);
+                    doc.setFontSize(9);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("Periode:", labelColL, 45);
+                    doc.text("Kategori:", labelColL, 51);
+                    doc.text("Dicetak:", labelColR, 45);
+                    doc.text("Total Pengajar:", labelColR, 51);
+
+                    doc.setFont("helvetica", "normal");
+                    doc.setTextColor(50, 50, 50);
+                    doc.text(`${teksBulan}`, valueColL, 45);
+                    doc.text(`${filterKategori === 'ALL' ? 'Semua Kategori' : filterKategori}`, valueColL, 51);
+                    doc.text(`${new Date().toLocaleDateString('id-ID')} ${getFormattedTime()}`, valueColR, 45);
+                    doc.text(`${userList.length} orang`, valueColR, 51);
+
+                    // Generate Tabel (Menggunakan AutoTable)
+                    doc.autoTable({
+                        startY: 64,
+                        head: [['No', 'Nama Pengajar', 'Kategori', 'Sesi Hadir', 'Hari Hadir', 'Total Hadir', 'Persentase']],
+                        body: tableRows,
+                        theme: 'grid',
+                        headStyles: {
+                            fillColor: [11, 61, 46], // Hijau Zamrud Lemtatiqhi
+                            textColor: [245, 230, 184], // Emas Gading
+                            halign: 'center',
+                            valign: 'middle',
+                            fontSize: 9.5,
+                            fontStyle: 'bold',
+                            cellPadding: { top: 4, bottom: 4 },
+                            lineColor: [212, 175, 55],
+                            lineWidth: 0.3
+                        },
+                        bodyStyles: {
+                            fontSize: 9,
+                            textColor: [40, 40, 40],
+                            cellPadding: { top: 3.5, bottom: 3.5, left: 4, right: 4 },
+                            lineColor: [225, 220, 205],
+                            lineWidth: 0.15,
+                            valign: 'middle'
+                        },
+                        columnStyles: {
+                            0: { halign: 'center', cellWidth: 12, textColor: [150, 150, 150] },
+                            1: { fontStyle: 'bold', textColor: [11, 61, 46] },
+                            2: { halign: 'center' },
+                            3: { halign: 'center' },
+                            4: { halign: 'center' },
+                            5: { halign: 'center', fontStyle: 'bold', textColor: [184, 134, 11] },
+                            6: { halign: 'center', fontStyle: 'bold', textColor: [20, 83, 45] }
+                        },
+                        alternateRowStyles: { fillColor: [250, 247, 240] }, // Gading lembut, senada tema
+                        margin: { left: 14, right: 14 },
+                        didDrawPage: function () {
+                            // Judul kecil di atas tabel jika tabel lanjut ke halaman berikutnya
+                        }
+                    });
+
+                    // 5. Ringkasan Total Global
+                    // Cek sisa ruang halaman: jika kotak ringkasan (16mm) + margin bawah tidak muat, pindah ke halaman baru
+                    let finalY = doc.lastAutoTable.finalY + 10;
+                    const ruangDibutuhkan = 16 + 15; // tinggi kotak + jarak aman ke footer
+                    if (finalY + ruangDibutuhkan > 280) {
+                        doc.addPage();
+                        finalY = 20;
+                    }
+
+                    doc.setDrawColor(212, 175, 55);
+                    doc.setLineWidth(0.4);
+                    doc.setFillColor(20, 83, 45); // Zamrud
+                    doc.roundedRect(14, finalY, 182, 16, 2, 2, 'FD');
+
+                    const totalSesiSum = tableRows.reduce((s, r) => s + r[3], 0);
+                    const totalHariSum = tableRows.reduce((s, r) => s + r[4], 0);
+                    const totalHadirSum = totalSesiSum + totalHariSum;
+
+                    doc.setTextColor(180, 220, 195);
+                    doc.setFontSize(7);
+                    doc.setFont("helvetica", "normal");
+                    doc.text("SESI HADIR", 20, finalY + 6);
+                    doc.text("HARI HADIR", 80, finalY + 6);
+                    doc.text("TOTAL HADIR", 140, finalY + 6);
+
+                    doc.setTextColor(245, 230, 184);
+                    doc.setFontSize(13);
+                    doc.setFont("helvetica", "bold");
+                    doc.text(`${totalSesiSum}`, 20, finalY + 13);
+                    doc.text(`${totalHariSum}`, 80, finalY + 13);
+                    doc.text(`${totalHadirSum}`, 140, finalY + 13);
+
+                    // Footer di setiap halaman
+                    const totalPages = doc.internal.getNumberOfPages();
+                    doc.setPage(totalPages);
+                    const signY = finalY + 30;
+                    doc.setFontSize(9);
+                    doc.setTextColor(50, 50, 50);
+                    doc.setFont("helvetica", "normal");
+                    doc.text("Mengetahui,", 150, signY, { align: "center" });
+                    doc.text("Kepala LEMTATIQHI Putra", 150, signY + 5, { align: "center" });
+                    doc.setFont("helvetica", "bold");
+                    doc.text("( Mustafa Kamal, Lc., M.Pd. Al-Hafidz )", 150, signY + 28, { align: "center" });
+
+                    // Footer di setiap halaman
+                    for (let i = 1; i <= totalPages; i++) {
+                        doc.setPage(i);
+                        doc.setDrawColor(212, 175, 55);
+                        doc.setLineWidth(0.2);
+                        doc.line(14, 283, 196, 283);
+                        doc.setFontSize(7.5);
+                        doc.setFont("helvetica", "italic");
+                        doc.setTextColor(140, 140, 140);
+                        doc.text("Dokumen dihasilkan otomatis oleh sistem LEMTATIQHI", 14, 288);
+                        doc.text(`Halaman ${i} dari ${totalPages}`, 196, 288, { align: "right" });
+                    }
+
+                    // 6. Simpan dan Unduh PDF
+                    doc.save(`Statistik_Absensi_${filterBulanVal || 'Semua'}.pdf`);
+                    showLoading(false);
+
+                } catch (err) {
+                    showLoading(false);
+                    Swal.fire({ icon: 'error', text: 'Gagal membuat PDF. Pastikan koneksi internet stabil.', confirmButtonColor: '#B8860B' });
+                    console.error(err);
+                }
+            }, 500); // Jeda sedikit agar loading screen sempat muncul
         }                
     </script>
 </body>
