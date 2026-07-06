@@ -452,10 +452,15 @@
         </div>
 
         <div id="hafidz-save-bar" class="hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[414px] bg-white border-t border-emas-200 px-5 py-3 z-40 shadow-[0_-8px_20px_-8px_rgba(11,61,46,0.15)]" style="margin-bottom: 68px;">
-            <button type="button" onclick="simpanSemuaHafalan()" class="btn-gold w-full font-heading font-semibold py-3 rounded-xl flex items-center justify-center gap-2">
-                <i class="fa-solid fa-floppy-disk"></i>
-                <span id="hafidz-save-count">Simpan Perubahan</span>
-            </button>
+            <div class="flex flex-col gap-2">
+                <button type="button" onclick="simpanSemuaHafalan()" class="btn-gold w-full font-heading font-semibold py-3 rounded-xl flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span id="hafidz-save-count">Simpan Perubahan</span>
+                </button>
+                <button type="button" onclick="batalkanSemuaHafalan()" class="w-full font-semibold py-2.5 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 active:scale-95 transition text-sm">
+                    Batalkan
+                </button>
+            </div>
         </div>
 
         <div id="screen-rekap" class="app-screen hide-scroll bg-gading">
@@ -1152,8 +1157,17 @@
                 confirmButtonColor: '#B8860B', cancelButtonColor: '#9ca3af', confirmButtonText: 'Ya, Keluar'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // 1. Hapus memori user
                     safeStorage.removeItem('lem_user');
                     currentUser = null;
+                    
+                    // 2. Reset data Hafidz & Sembunyikan Bar Simpan
+                    pendingHafalan = {};
+                    santriData = [];
+                    const saveBar = document.getElementById('hafidz-save-bar');
+                    if (saveBar) saveBar.classList.add('hidden');
+
+                    // 3. Reset form dan kembali ke halaman login
                     document.getElementById('login-form').reset();
                     showScreen('login');
                 }
@@ -2059,6 +2073,15 @@
 
             totalHalaman += delta;
 
+            // --- BATASAN ZIYADAH ---
+            // Ziyadah tidak bisa dikurangi lebih rendah dari data asli di server
+            if (type === 'ziyadah') {
+                const nilaiAsli = (santri.juz - 1) * HAL_PER_JUZ + santri.halaman;
+                if (totalHalaman < nilaiAsli) {
+                    totalHalaman = nilaiAsli;
+                }
+            }
+
             if (totalHalaman < 1) totalHalaman = 1;
             if (totalHalaman > maxTotal) totalHalaman = maxTotal;
 
@@ -2066,7 +2089,20 @@
             const newHalaman = ((totalHalaman - 1) % HAL_PER_JUZ) + 1;
 
             if (!pendingHafalan[idSantri]) pendingHafalan[idSantri] = {};
-            pendingHafalan[idSantri][type] = { juz: newJuz, halaman: newHalaman };
+
+            // Jika nilai di-minus kembali ke angka aslinya, hapus status "belum disimpan"
+            const isOriginal = (type === 'ziyadah') 
+                ? (newJuz === santri.juz && newHalaman === santri.halaman)
+                : (newJuz === (santri.juz_takrir || 1) && newHalaman === (santri.halaman_takrir || 1));
+
+            if (isOriginal) {
+                if (pendingHafalan[idSantri][type]) delete pendingHafalan[idSantri][type];
+                // Bersihkan ID santri dari antrean jika sudah tidak ada perubahan sama sekali
+                if (Object.keys(pendingHafalan[idSantri]).length === 0) delete pendingHafalan[idSantri];
+            } else {
+                pendingHafalan[idSantri][type] = { juz: newJuz, halaman: newHalaman };
+            }
+
             renderHafidzList();
         }
 
@@ -2206,47 +2242,40 @@
 
                     <!-- Blok Ziyadah -->
                     <div class="bg-zamrud-50/60 rounded-xl p-2.5 mb-2">
-                        <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center justify-between mb-2">
                             <p class="text-xs font-bold text-zamrud-700"><i class="fa-solid fa-star mr-1 text-emas-500"></i>Ziyadah</p>
                             <p class="text-xs font-semibold ${hasChangeZiyadah ? 'text-emas-600' : 'text-zamrud-600'}">
                                 Juz ${currentZiyadah.juz} • Hal. ${currentZiyadah.halaman}
                                 ${hasChangeZiyadah ? '<span class="text-[9px] text-emas-500 ml-1">(belum disimpan)</span>' : ''}
                             </p>
                         </div>
-                        <div class="flex items-center gap-1.5">
-                            <button type="button" onclick="ubahHafalan('${santri.id_santri}', 'ziyadah', -1)" class="w-7 h-7 rounded-full bg-red-50 text-red-500 border border-red-200 flex items-center justify-center active:scale-95 transition shrink-0">
-                                <i class="fa-solid fa-minus text-[10px]"></i>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="ubahHafalan('${santri.id_santri}', 'ziyadah', -1)" class="flex-1 py-1.5 rounded-lg bg-red-50 text-red-500 border border-red-200 flex items-center justify-center active:scale-95 transition">
+                                <i class="fa-solid fa-minus text-sm"></i>
                             </button>
-                            <button type="button" onclick="ubahHafalan('${santri.id_santri}', 'ziyadah', 1)" class="w-7 h-7 rounded-full bg-zamrud-100 text-zamrud-700 border border-zamrud-200 flex items-center justify-center active:scale-95 transition shrink-0">
-                                <i class="fa-solid fa-plus text-[10px]"></i>
-                            </button>
-                            <input type="number" id="${inputZiyadahId}" placeholder="Jml hal." class="w-16 border border-zamrud-200 rounded-lg px-2 py-1 text-xs outline-none">
-                            <button type="button" onclick="lompatHafalan('${santri.id_santri}', 'ziyadah', '${inputZiyadahId}')" class="flex-1 text-[11px] font-semibold bg-zamrud-700 text-white rounded-lg py-1.5 active:scale-95 transition">
-                                Tambah
+                            <button type="button" onclick="ubahHafalan('${santri.id_santri}', 'ziyadah', 1)" class="flex-1 py-1.5 rounded-lg bg-zamrud-100 text-zamrud-700 border border-zamrud-200 flex items-center justify-center active:scale-95 transition">
+                                <i class="fa-solid fa-plus text-sm"></i>
                             </button>
                         </div>
                     </div>
 
                     <!-- Blok Takriran -->
                     <div class="bg-emas-50/60 rounded-xl p-2.5">
-                        <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center justify-between mb-2">
                             <p class="text-xs font-bold text-emas-700"><i class="fa-solid fa-rotate mr-1 text-emas-500"></i>Takriran</p>
                             <p class="text-xs font-semibold ${hasChangeTakrir ? 'text-emas-600' : 'text-zamrud-600'}">
                                 Juz ${currentTakrir.juz} • Hal. ${currentTakrir.halaman}
                                 ${hasChangeTakrir ? '<span class="text-[9px] text-emas-500 ml-1">(belum disimpan)</span>' : ''}
                             </p>
                         </div>
-                        <div class="flex items-center gap-1.5">
-                            <button type="button" onclick="ubahHafalan('${santri.id_santri}', 'takrir', -1)" class="w-7 h-7 rounded-full bg-red-50 text-red-500 border border-red-200 flex items-center justify-center active:scale-95 transition shrink-0">
-                                <i class="fa-solid fa-minus text-[10px]"></i>
-                            </button>
-                            <button type="button" onclick="ubahHafalan('${santri.id_santri}', 'takrir', 1)" class="w-7 h-7 rounded-full bg-emas-100 text-emas-700 border border-emas-200 flex items-center justify-center active:scale-95 transition shrink-0">
-                                <i class="fa-solid fa-plus text-[10px]"></i>
-                            </button>
-                            <input type="number" id="${inputTakrirId}" placeholder="Jml hal." class="w-16 border border-emas-200 rounded-lg px-2 py-1 text-xs outline-none">
-                            <button type="button" onclick="lompatHafalan('${santri.id_santri}', 'takrir', '${inputTakrirId}')" class="flex-1 text-[11px] font-semibold bg-emas-600 text-white rounded-lg py-1.5 active:scale-95 transition">
-                                Tambah
-                            </button>
+                        
+                        <!-- Deretan Tombol Cepat (Quick Jump) -->
+                        <div class="grid grid-cols-5 gap-1.5">
+                            <button type="button" onclick="ubahHafalan('${santri.id_santri}', 'takrir', -1)" class="py-1.5 rounded-lg bg-red-50 text-red-500 border border-red-200 text-xs font-bold active:scale-95 transition">-1</button>
+                            <button type="button" onclick="ubahHafalan('${santri.id_santri}', 'takrir', 1)" class="py-1.5 rounded-lg bg-emas-100 text-emas-700 border border-emas-200 text-xs font-bold active:scale-95 transition">+1</button>
+                            <button type="button" onclick="ubahHafalan('${santri.id_santri}', 'takrir', 5)" class="py-1.5 rounded-lg bg-emas-100 text-emas-700 border border-emas-200 text-xs font-bold active:scale-95 transition">+5</button>
+                            <button type="button" onclick="ubahHafalan('${santri.id_santri}', 'takrir', 10)" class="py-1.5 rounded-lg bg-emas-100 text-emas-700 border border-emas-200 text-xs font-bold active:scale-95 transition">+10</button>
+                            <button type="button" onclick="ubahHafalan('${santri.id_santri}', 'takrir', 20)" class="py-1.5 rounded-lg bg-zamrud-700 text-white border border-zamrud-800 text-xs font-bold active:scale-95 transition">+20</button>
                         </div>
                     </div>
                 `;
@@ -2489,6 +2518,12 @@
                     showLoading(false);
                     Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.', confirmButtonColor: '#B8860B' });
                 });
+        }
+        function batalkanSemuaHafalan() {
+            // Kosongkan semua data yang belum tersimpan
+            pendingHafalan = {}; 
+            // Render ulang tampilan kembali ke angka semula dan menghilangkan pop-up bawah
+            renderHafidzList(); 
         }
 
         // --- REKAP KESELURUHAN LOGIC (ADMIN) ---
