@@ -423,7 +423,12 @@
 
         <div id="screen-hafidz" class="app-screen hide-scroll bg-gading">
             <div class="bg-white pt-8 pb-4 px-5 shadow-sm sticky top-0 z-20 border-b border-emas-100">
-                <h2 class="text-xl font-heading font-bold text-zamrud-900">Progres Hafalan</h2>
+                <div class="flex items-center justify-between mb-1">
+                    <h2 class="text-xl font-heading font-bold text-zamrud-900">Progres Hafalan</h2>
+                    <button type="button" id="btn-tambah-santri" onclick="openAddSantriModal()" class="hidden w-9 h-9 rounded-full bg-zamrud-900 text-emas-300 flex items-center justify-center active:scale-95 transition">
+                        <i class="fa-solid fa-plus text-sm"></i>
+                    </button>
+                </div>
                 <p class="text-xs text-zamrud-300 mt-1 mb-3" id="hafidz-subtitle">Santri bimbingan Anda</p>
 
                 <input type="text" id="hafidz-search" oninput="renderHafidzList()" placeholder="Cari nama santri..." class="hidden w-full border border-zamrud-100 rounded-lg px-3 py-2 text-sm outline-none mb-2">
@@ -697,6 +702,44 @@
             <div class="flex gap-2">
                 <button type="button" onclick="closeEditPengajarModal()" class="flex-1 py-3 rounded-xl bg-gray-200 font-semibold text-sm">Batal</button>
                 <button type="button" onclick="simpanEditPengajar()" class="flex-1 py-3 rounded-xl btn-gold font-semibold text-sm">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addSantriModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-5 w-[90%] max-w-md max-h-[85vh] flex flex-col">
+            <h3 class="text-lg font-heading font-bold text-zamrud-900 mb-4">Tambah Santri Baru</h3>
+
+            <div class="flex-1 overflow-y-auto pr-1">
+                <div class="mb-3">
+                    <label class="block text-xs font-semibold text-zamrud-600 mb-1">Nama Santri</label>
+                    <input type="text" id="new-santri-nama" class="w-full border border-zamrud-100 rounded-xl px-3 py-2.5 text-sm outline-none" placeholder="Masukkan nama santri">
+                </div>
+                <div class="mb-3">
+                    <label class="block text-xs font-semibold text-zamrud-600 mb-1">Kelas</label>
+                    <input type="text" id="new-santri-kelas" class="w-full border border-zamrud-100 rounded-xl px-3 py-2.5 text-sm outline-none" placeholder="Contoh: Kelas 2A">
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-zamrud-600 mb-1">Juz Awal</label>
+                        <input type="number" id="new-santri-juz" min="1" max="30" value="1" class="w-full border border-zamrud-100 rounded-xl px-3 py-2.5 text-sm outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-zamrud-600 mb-1">Halaman Awal</label>
+                        <input type="number" id="new-santri-halaman" min="1" max="20" value="1" class="w-full border border-zamrud-100 rounded-xl px-3 py-2.5 text-sm outline-none">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="block text-xs font-semibold text-zamrud-600 mb-1">Pengajar (opsional, bisa lebih dari satu)</label>
+                    <div id="new-santri-pengajar-list" class="flex flex-col gap-2 max-h-40 overflow-y-auto border border-zamrud-100 rounded-xl p-2">
+                        <!-- Checkbox pengajar diinjeksi via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-2 mt-4">
+                <button type="button" onclick="closeAddSantriModal()" class="flex-1 py-3 rounded-xl bg-gray-200 font-semibold text-sm">Batal</button>
+                <button type="button" onclick="simpanSantriBaru()" class="flex-1 py-3 rounded-xl btn-gold font-semibold text-sm">Simpan</button>
             </div>
         </div>
     </div>
@@ -1995,21 +2038,26 @@
             });
         }
 
-        function getCurrentHafalan(santri) {
-            // Mengembalikan posisi terkini: dari pending jika ada perubahan, atau dari data asli
-            if (pendingHafalan[santri.id_santri]) return pendingHafalan[santri.id_santri];
+        // type: 'ziyadah' atau 'takrir'
+        function getCurrentHafalan(santri, type) {
+            const pending = pendingHafalan[santri.id_santri];
+            if (pending && pending[type]) return pending[type];
+
+            if (type === 'takrir') {
+                return { juz: santri.juz_takrir || 1, halaman: santri.halaman_takrir || 1 };
+            }
             return { juz: santri.juz, halaman: santri.halaman };
         }
 
-        function ubahHafalan(idSantri, arah) {
+        function ubahHafalan(idSantri, type, delta) {
             const santri = santriData.find(s => s.id_santri === idSantri);
             if (!santri) return;
 
-            let current = getCurrentHafalan(santri);
+            let current = getCurrentHafalan(santri, type);
             let totalHalaman = (current.juz - 1) * HAL_PER_JUZ + current.halaman;
             const maxTotal = MAX_JUZ * HAL_PER_JUZ;
 
-            totalHalaman += arah; // arah: +1 atau -1
+            totalHalaman += delta;
 
             if (totalHalaman < 1) totalHalaman = 1;
             if (totalHalaman > maxTotal) totalHalaman = maxTotal;
@@ -2017,8 +2065,23 @@
             const newJuz = Math.floor((totalHalaman - 1) / HAL_PER_JUZ) + 1;
             const newHalaman = ((totalHalaman - 1) % HAL_PER_JUZ) + 1;
 
-            pendingHafalan[idSantri] = { juz: newJuz, halaman: newHalaman };
+            if (!pendingHafalan[idSantri]) pendingHafalan[idSantri] = {};
+            pendingHafalan[idSantri][type] = { juz: newJuz, halaman: newHalaman };
             renderHafidzList();
+        }
+
+        // Lompat sejumlah halaman manual (bisa dipakai untuk setoran 3/5/10/20 halaman)
+        function lompatHafalan(idSantri, type, inputId) {
+            const input = document.getElementById(inputId);
+            const jumlah = parseInt(input.value, 10);
+
+            if (!jumlah || jumlah === 0) {
+                Swal.fire({ icon: 'warning', text: 'Masukkan jumlah halaman terlebih dahulu.', confirmButtonColor: '#B8860B' });
+                return;
+            }
+
+            ubahHafalan(idSantri, type, jumlah);
+            input.value = '';
         }
 
         function renderHafidzList() {
@@ -2034,16 +2097,20 @@
             const kelasDropdown = document.getElementById('hafidz-filter-kelas');
             const pengajarDropdown = document.getElementById('hafidz-filter-pengajar');
 
+            const btnTambah = document.getElementById('btn-tambah-santri');
+
             // Tampilkan kotak pencarian & filter, ubah subjudul khusus admin
             if (isAdmin) {
                 searchInput.classList.remove('hidden');
                 filterRow.classList.remove('hidden');
                 filterRow.classList.add('grid');
+                btnTambah.classList.remove('hidden');
                 subtitle.innerText = `Seluruh santri (${santriData.length} orang)`;
             } else {
                 searchInput.classList.add('hidden');
                 filterRow.classList.add('hidden');
                 filterRow.classList.remove('grid');
+                btnTambah.classList.add('hidden');
                 subtitle.innerText = 'Santri bimbingan Anda';
             }
 
@@ -2089,7 +2156,7 @@
                 const hasChange = !!pendingHafalan[santri.id_santri];
 
                 const card = document.createElement('div');
-                card.className = 'santri-card bg-white p-4 rounded-2xl shadow-sm border border-emas-100 mb-3 flex items-center justify-between';
+                card.className = 'santri-card bg-white p-4 rounded-2xl shadow-sm border border-emas-100 mb-3';
                 const isAdminView = currentUser.role === 'admin';
                 const pengajarInfo = (isAdminView && santri.pengajar)
                     ? `<p class="text-[10px] text-zamrud-300 mt-0.5"><i class="fa-solid fa-chalkboard-user mr-1"></i>${escapeHtml(santri.pengajar.split(',').join(', '))}</p>`
@@ -2101,29 +2168,89 @@
                        </button>`
                     : '';
 
+                const deleteBtn = isAdminView
+                    ? `<button type="button" onclick="konfirmasiHapusSantri('${santri.id_santri}', '${escapeHtml(santri.nama).replace(/'/g, "\\'")}')" class="w-9 h-9 rounded-full bg-red-50 text-red-500 border border-red-200 flex items-center justify-center active:scale-95 transition">
+                           <i class="fa-solid fa-trash text-xs"></i>
+                       </button>`
+                    : '';
+
+                const lastEditInfo = santri.updated_at
+                    ? `<p class="text-[9px] text-zamrud-300 mt-1"><i class="fa-regular fa-clock mr-1"></i>Diubah ${formatWaktuEdit(santri.updated_at)} oleh ${escapeHtml(santri.updated_by || '-')}</p>`
+                    : '';
+
+                const currentZiyadah = getCurrentHafalan(santri, 'ziyadah');
+                const currentTakrir = getCurrentHafalan(santri, 'takrir');
+                const pending = pendingHafalan[santri.id_santri] || {};
+                const hasChangeZiyadah = !!pending.ziyadah;
+                const hasChangeTakrir = !!pending.takrir;
+
+                const inputZiyadahId = `input-ziyadah-${santri.id_santri}`;
+                const inputTakrirId = `input-takrir-${santri.id_santri}`;
+
                 card.innerHTML = `
-                    <div class="flex-1 min-w-0 pr-3">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold text-zamrud-300">#${index + 1}</span>
-                            <h4 class="font-heading font-bold text-zamrud-900 text-sm truncate">${escapeHtml(santri.nama)}</h4>
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex-1 min-w-0 pr-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-zamrud-300">#${index + 1}</span>
+                                <h4 class="font-heading font-bold text-zamrud-900 text-sm truncate">${escapeHtml(santri.nama)}</h4>
+                            </div>
+                            <p class="text-[11px] text-zamrud-400 mt-0.5">${escapeHtml(santri.kelas || '-')}</p>
+                            ${pengajarInfo}
+                            ${lastEditInfo}
                         </div>
-                        <p class="text-[11px] text-zamrud-400 mt-0.5">${escapeHtml(santri.kelas || '-')}</p>
-                        ${pengajarInfo}
-                        <p class="text-xs font-semibold mt-1.5 ${hasChange ? 'text-emas-600' : 'text-zamrud-600'}">
-                            <i class="fa-solid fa-bookmark mr-1"></i>Juz ${current.juz} • Hal. ${current.halaman}
-                            ${hasChange ? '<span class="text-[10px] text-emas-500 ml-1">(belum disimpan)</span>' : ''}
-                        </p>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            ${editBtn}
+                            ${deleteBtn}
+                        </div>
                     </div>
-                    <div class="flex items-center gap-2 shrink-0">
-                        ${editBtn}
-                        <button type="button" onclick="ubahHafalan('${santri.id_santri}', -1)" class="w-9 h-9 rounded-full bg-red-50 text-red-500 border border-red-200 flex items-center justify-center active:scale-95 transition">
-                            <i class="fa-solid fa-minus text-xs"></i>
-                        </button>
-                        <button type="button" onclick="ubahHafalan('${santri.id_santri}', 1)" class="w-9 h-9 rounded-full bg-zamrud-50 text-zamrud-700 border border-zamrud-200 flex items-center justify-center active:scale-95 transition">
-                            <i class="fa-solid fa-plus text-xs"></i>
-                        </button>
+
+                    <!-- Blok Ziyadah -->
+                    <div class="bg-zamrud-50/60 rounded-xl p-2.5 mb-2">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <p class="text-xs font-bold text-zamrud-700"><i class="fa-solid fa-star mr-1 text-emas-500"></i>Ziyadah</p>
+                            <p class="text-xs font-semibold ${hasChangeZiyadah ? 'text-emas-600' : 'text-zamrud-600'}">
+                                Juz ${currentZiyadah.juz} • Hal. ${currentZiyadah.halaman}
+                                ${hasChangeZiyadah ? '<span class="text-[9px] text-emas-500 ml-1">(belum disimpan)</span>' : ''}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" onclick="ubahHafalan('${santri.id_santri}', 'ziyadah', -1)" class="w-7 h-7 rounded-full bg-red-50 text-red-500 border border-red-200 flex items-center justify-center active:scale-95 transition shrink-0">
+                                <i class="fa-solid fa-minus text-[10px]"></i>
+                            </button>
+                            <button type="button" onclick="ubahHafalan('${santri.id_santri}', 'ziyadah', 1)" class="w-7 h-7 rounded-full bg-zamrud-100 text-zamrud-700 border border-zamrud-200 flex items-center justify-center active:scale-95 transition shrink-0">
+                                <i class="fa-solid fa-plus text-[10px]"></i>
+                            </button>
+                            <input type="number" id="${inputZiyadahId}" placeholder="Jml hal." class="w-16 border border-zamrud-200 rounded-lg px-2 py-1 text-xs outline-none">
+                            <button type="button" onclick="lompatHafalan('${santri.id_santri}', 'ziyadah', '${inputZiyadahId}')" class="flex-1 text-[11px] font-semibold bg-zamrud-700 text-white rounded-lg py-1.5 active:scale-95 transition">
+                                Tambah
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Blok Takriran -->
+                    <div class="bg-emas-50/60 rounded-xl p-2.5">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <p class="text-xs font-bold text-emas-700"><i class="fa-solid fa-rotate mr-1 text-emas-500"></i>Takriran</p>
+                            <p class="text-xs font-semibold ${hasChangeTakrir ? 'text-emas-600' : 'text-zamrud-600'}">
+                                Juz ${currentTakrir.juz} • Hal. ${currentTakrir.halaman}
+                                ${hasChangeTakrir ? '<span class="text-[9px] text-emas-500 ml-1">(belum disimpan)</span>' : ''}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" onclick="ubahHafalan('${santri.id_santri}', 'takrir', -1)" class="w-7 h-7 rounded-full bg-red-50 text-red-500 border border-red-200 flex items-center justify-center active:scale-95 transition shrink-0">
+                                <i class="fa-solid fa-minus text-[10px]"></i>
+                            </button>
+                            <button type="button" onclick="ubahHafalan('${santri.id_santri}', 'takrir', 1)" class="w-7 h-7 rounded-full bg-emas-100 text-emas-700 border border-emas-200 flex items-center justify-center active:scale-95 transition shrink-0">
+                                <i class="fa-solid fa-plus text-[10px]"></i>
+                            </button>
+                            <input type="number" id="${inputTakrirId}" placeholder="Jml hal." class="w-16 border border-emas-200 rounded-lg px-2 py-1 text-xs outline-none">
+                            <button type="button" onclick="lompatHafalan('${santri.id_santri}', 'takrir', '${inputTakrirId}')" class="flex-1 text-[11px] font-semibold bg-emas-600 text-white rounded-lg py-1.5 active:scale-95 transition">
+                                Tambah
+                            </button>
+                        </div>
                     </div>
                 `;
+
                 container.appendChild(card);
             });
 
@@ -2209,12 +2336,128 @@
                 });
         }
 
+        function openAddSantriModal() {
+            document.getElementById('new-santri-nama').value = '';
+            document.getElementById('new-santri-kelas').value = '';
+            document.getElementById('new-santri-juz').value = 1;
+            document.getElementById('new-santri-halaman').value = 1;
+
+            const listContainer = document.getElementById('new-santri-pengajar-list');
+            const daftarPengajar = allUsersData.filter(u => u.role !== 'admin');
+
+            if (daftarPengajar.length === 0) {
+                listContainer.innerHTML = `<p class="text-xs text-zamrud-300 text-center py-2">Belum ada data pengajar dimuat.</p>`;
+            } else {
+                listContainer.innerHTML = daftarPengajar.map(p => `
+                    <label class="flex items-center gap-2 text-sm">
+                        <input type="checkbox" value="${p.username}" class="new-santri-pengajar-checkbox accent-emas-500">
+                        <span class="truncate">${escapeHtml(p.name)}</span>
+                    </label>
+                `).join('');
+            }
+
+            const modal = document.getElementById('addSantriModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeAddSantriModal() {
+            const modal = document.getElementById('addSantriModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function simpanSantriBaru() {
+            const nama = document.getElementById('new-santri-nama').value.trim();
+            const kelas = document.getElementById('new-santri-kelas').value.trim();
+            const juz = parseInt(document.getElementById('new-santri-juz').value, 10) || 1;
+            const halaman = parseInt(document.getElementById('new-santri-halaman').value, 10) || 1;
+
+            if (!nama) {
+                Swal.fire({ icon: 'warning', text: 'Nama santri harus diisi.', confirmButtonColor: '#B8860B' });
+                return;
+            }
+
+            const checkedBoxes = document.querySelectorAll('.new-santri-pengajar-checkbox:checked');
+            const pengajarUsernames = Array.from(checkedBoxes).map(cb => cb.value);
+
+            showLoading(true, "Menyimpan Santri Baru...");
+            fetchAPI('addSantri', {
+                nama: nama,
+                kelas: kelas,
+                juz: juz,
+                halaman: halaman,
+                pengajar_usernames: pengajarUsernames
+            })
+            .then(function(res) {
+                showLoading(false);
+                if (res.status === 'success') {
+                    closeAddSantriModal();
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Santri baru berhasil ditambahkan', showConfirmButton: false, timer: 1800 });
+                    loadHafidzData(); // Reload daftar santri
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Gagal', text: res.message, confirmButtonColor: '#B8860B' });
+                }
+            })
+            .catch(function() {
+                showLoading(false);
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.', confirmButtonColor: '#B8860B' });
+            });
+        }
+
+        function konfirmasiHapusSantri(idSantri, namaSantri) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Hapus Santri Ini?',
+                text: `Data santri "${namaSantri}" beserta progres hafalannya akan dihapus permanen dan tidak bisa dikembalikan.`,
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#DC2626',
+                cancelButtonColor: '#9ca3af'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    hapusSantri(idSantri);
+                }
+            });
+        }
+
+        function hapusSantri(idSantri) {
+            showLoading(true, "Menghapus Santri...");
+            fetchAPI('deleteSantri', { id_santri: idSantri })
+                .then(function(res) {
+                    showLoading(false);
+                    if (res.status === 'success') {
+                        santriData = santriData.filter(s => s.id_santri !== idSantri);
+                        renderHafidzList();
+                        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Santri berhasil dihapus', showConfirmButton: false, timer: 1800 });
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Gagal', text: res.message, confirmButtonColor: '#B8860B' });
+                    }
+                })
+                .catch(function() {
+                    showLoading(false);
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.', confirmButtonColor: '#B8860B' });
+                });
+        }
+
         function simpanSemuaHafalan() {
-            const updates = Object.keys(pendingHafalan).map(idSantri => ({
-                id_santri: idSantri,
-                juz: pendingHafalan[idSantri].juz,
-                halaman: pendingHafalan[idSantri].halaman
-            }));
+            const updates = Object.keys(pendingHafalan).map(idSantri => {
+                const santri = santriData.find(s => s.id_santri === idSantri);
+                const pending = pendingHafalan[idSantri];
+
+                // Ambil nilai final: dari pending jika berubah, atau tetap dari data asli
+                const ziyadah = pending.ziyadah || { juz: santri.juz, halaman: santri.halaman };
+                const takrir = pending.takrir || { juz: santri.juz_takrir || 1, halaman: santri.halaman_takrir || 1 };
+
+                return {
+                    id_santri: idSantri,
+                    juz: ziyadah.juz,
+                    halaman: ziyadah.halaman,
+                    juz_takrir: takrir.juz,
+                    halaman_takrir: takrir.halaman
+                };
+            });
 
             if (updates.length === 0) return;
 
@@ -2229,9 +2472,12 @@
                             if (santri) {
                                 santri.juz = u.juz;
                                 santri.halaman = u.halaman;
+                                santri.juz_takrir = u.juz_takrir;
+                                santri.halaman_takrir = u.halaman_takrir;
                             }
                         });
                         pendingHafalan = {};
+                        urutkanSantriByHafalan();
                         renderHafidzList();
 
                         Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: `${res.updated} progres hafalan tersimpan`, showConfirmButton: false, timer: 2000 });
@@ -2361,6 +2607,36 @@
             document.getElementById('stat-total-sesi').innerText = totalSesiGlobal;
             document.getElementById('stat-total-hari').innerText = totalHariGlobal.size;
             document.getElementById('stat-total-hadir').innerText = totalSesiGlobal + totalHariGlobal.size;
+        }
+
+        function formatWaktuEdit(raw) {
+            if (!raw) return '-';
+            const d = new Date(raw);
+            if (isNaN(d.getTime())) return escapeHtml(String(raw));
+
+            const jam = String(d.getHours()).padStart(2, '0');
+            const menit = String(d.getMinutes()).padStart(2, '0');
+            const jamMenit = `${jam}:${menit}`;
+
+            // Hitung selisih hari kalender (bukan 24 jam penuh) antara tanggal edit dan hari ini
+            const now = new Date();
+            const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            const diffMs = startOfDay(now) - startOfDay(d);
+            const diffHari = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+            if (diffHari === 0) {
+                return `Hari ini, ${jamMenit}`;
+            } else if (diffHari === 1) {
+                return `Kemarin, ${jamMenit}`;
+            } else if (diffHari === 2) {
+                return `2 hari yang lalu, ${jamMenit}`;
+            } else {
+                const bulanArr = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+                const tanggal = d.getDate();
+                const bulan = bulanArr[d.getMonth()];
+                const tahun = d.getFullYear();
+                return `${tanggal} ${bulan} ${tahun}, ${jamMenit}`;
+            }
         }
 
         function escapeHtml(str) {
