@@ -157,6 +157,15 @@
             border-color: #D4AF37;
             color: #F5E6B8;
         }
+
+        .tingkat-chip {
+            color: #14532D;
+        }
+        .tingkat-chip.is-active {
+            background: #0B3D2E;
+            color: #F5E6B8;
+            box-shadow: 0 2px 8px -2px rgba(11,61,46,0.4);
+        }
         .rekap-card{
             transition:all .25s ease;
         }
@@ -318,6 +327,16 @@
                     </div>
                 </div>
 
+                <div class="flex items-center justify-center gap-2 mb-2 relative z-10">
+                    <button type="button" id="btn-stat-prev" onclick="gantiBulanStat(-1)" class="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center active:scale-90 transition disabled:opacity-30 disabled:cursor-not-allowed" style="color: #F5E6B8;">
+                        <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                    </button>
+                    <p class="text-[11px] font-semibold tracking-wide" id="home-stat-bulan-label" style="color: #F5E6B8;">Juli 2026</p>
+                    <button type="button" id="btn-stat-next" onclick="gantiBulanStat(1)" class="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center active:scale-90 transition disabled:opacity-30 disabled:cursor-not-allowed" style="color: #F5E6B8;">
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                </div>
+
                 <div class="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/20 relative z-10 shadow-inner">
                     <div class="text-center flex-1 border-r border-white/20">
                         <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Sesi Hadir</p>
@@ -433,6 +452,12 @@
 
                 <input type="text" id="hafidz-search" oninput="renderHafidzList()" placeholder="Cari nama santri..." class="hidden w-full border border-zamrud-100 rounded-lg px-3 py-2 text-sm outline-none mb-2">
 
+                <div id="hafidz-filter-tingkat" class="hidden mb-2 bg-zamrud-50 p-1 rounded-full flex gap-1">
+                    <button type="button" data-tingkat="ALL" onclick="setTingkatFilter(this)" class="tingkat-chip is-active flex-1 text-xs font-semibold py-1.5 rounded-full transition">Semua</button>
+                    <button type="button" data-tingkat="MTs" onclick="setTingkatFilter(this)" class="tingkat-chip flex-1 text-xs font-semibold py-1.5 rounded-full transition">MTs</button>
+                    <button type="button" data-tingkat="MA" onclick="setTingkatFilter(this)" class="tingkat-chip flex-1 text-xs font-semibold py-1.5 rounded-full transition">MA</button>
+                </div>
+
                 <div id="hafidz-filter-row" class="hidden grid grid-cols-2 gap-2">
                     <select id="hafidz-filter-kelas" onchange="renderHafidzList()" class="w-full border border-zamrud-100 rounded-lg px-2 py-2 text-xs outline-none text-slate-700 cursor-pointer bg-white">
                         <option value="ALL">Semua Kelas</option>
@@ -510,6 +535,47 @@
                     <p class="text-sm font-medium mb-1" style="color:#B8860B;" id="profile-role">Role</p>
                     <span class="inline-block bg-zamrud-50 text-zamrud-600 text-xs px-3 py-1 rounded-full" id="profile-kategori">Kategori</span>
                 </div>
+
+                <div class="rounded-2xl shadow-[0_16px_32px_-12px_rgba(11,61,46,0.5)] p-5 mb-6 relative overflow-hidden" style="background: linear-gradient(135deg, #0B3D2E 0%, #14532D 45%, #1D6E4C 100%);">
+                    <div class="absolute inset-0" style="background-image: var(--star-pattern); opacity: 0.15;"></div>
+
+                    <!-- Dekorasi emas batangan tersusun di pojok kanan (SVG custom) -->
+                    <div class="absolute -right-3 -bottom-3 opacity-25 rotate-[-8deg]">
+                        <svg width="120" height="90" viewBox="0 0 120 90">
+                            <g>
+                                <polygon points="10,60 30,50 100,50 90,70 20,70" fill="#D4AF37"/>
+                                <polygon points="10,60 20,70 20,80 10,70" fill="#93690A"/>
+                                <polygon points="90,70 20,70 20,80 90,80" fill="#B8860B"/>
+                                <polygon points="90,70 100,50 100,60 90,80" fill="#E2C158"/>
+                            </g>
+                            <g transform="translate(0,-16)">
+                                <polygon points="10,60 30,50 100,50 90,70 20,70" fill="#E2C158"/>
+                                <polygon points="10,60 20,70 20,80 10,70" fill="#B8860B"/>
+                                <polygon points="90,70 20,70 20,80 90,80" fill="#D4AF37"/>
+                                <polygon points="90,70 100,50 100,60 90,80" fill="#F5E6B8"/>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="relative z-10 flex items-center justify-between">
+                        <div class="text-left">
+                            <p class="text-[10px] font-semibold text-emas-300 tracking-[0.15em] uppercase mb-1">
+                                Emas Anda <span id="profile-reward-month">• Bulan Ini</span>
+                            </p>
+                            <h3 class="text-3xl font-heading font-bold text-white drop-shadow-md tracking-wide" id="profile-reward-nominal">0</h3>
+                            <p class="text-[10px] text-emas-100/70 mt-1">Estimasi berdasarkan total kehadiran</p>
+                        </div>
+
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0" style="background: rgba(212,175,55,0.18); border: 1px solid rgba(212,175,55,0.5);">
+                            <svg width="30" height="24" viewBox="0 0 30 24">
+                                <polygon points="2,16 8,10 28,10 22,20 4,20" fill="#F5E6B8" stroke="#B8860B" stroke-width="0.8"/>
+                                <polygon points="2,16 4,20 4,22 2,18" fill="#D4AF37"/>
+                                <polygon points="22,20 4,20 4,22 22,22" fill="#E2C158"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
 
                 <div class="bg-white rounded-2xl shadow-md border border-emas-100 overflow-hidden">
                     <button type="button" class="w-full flex items-center justify-between p-4 border-b border-gray-50 hover:bg-zamrud-50 transition" onclick="openChangePasswordModal()">
@@ -630,7 +696,7 @@
                 <i class="fa-solid fa-house text-xl mb-1 nav-icon"></i>
                 <span class="text-[10px] font-medium">Beranda</span>
             </button>
-            <button type="button" onclick="navigate('hafidz')" class="nav-btn flex-1 flex flex-col items-center py-2 gap-1 text-zamrud-300 transition" data-target="hafidz">
+            <button type="button" id="nav-hafidz" onclick="navigate('hafidz')" class="nav-btn flex-1 flex flex-col items-center py-2 gap-1 text-zamrud-300 transition" data-target="hafidz">
                 <i class="fa-solid fa-book-quran text-xl mb-1 nav-icon"></i>
                 <span class="text-[10px] font-medium">Hafidz</span>
             </button>
@@ -812,8 +878,24 @@
         let absensiData = safeParse('lem_absensi', []);
         let allUsersData = safeParse('lem_all_users', []);
         let selectedKategoriRekap = 'Tahfidz';
+        let statBulanOffset = 0; // 0 = bulan berjalan, -1 = 1 bulan lalu, dst. Tidak bisa lebih dari 0 (masa depan).
         let santriData = []; // Data asli dari server
         let pendingHafalan = {}; // { id_santri: { juz, halaman } } - perubahan yang belum disimpan
+        let selectedTingkatHafidz = 'ALL';
+
+        function setTingkatFilter(btn) {
+            selectedTingkatHafidz = btn.dataset.tingkat;
+
+            document.querySelectorAll('#hafidz-filter-tingkat .tingkat-chip').forEach(el => el.classList.remove('is-active'));
+            btn.classList.add('is-active');
+
+            // Reset dropdown Kelas ke "Semua Kelas" setiap kali tingkat berganti, karena daftar kelas ikut berubah
+            const kelasDropdown = document.getElementById('hafidz-filter-kelas');
+            if (kelasDropdown) kelasDropdown.value = 'ALL';
+
+            populateHafidzFilterDropdowns(); // Refresh opsi Kelas sesuai tingkat terpilih
+            renderHafidzList();
+        }
 
         function setKategoriRekapFilter(btn) {
             selectedKategoriRekap = btn.dataset.kategori;
@@ -937,8 +1019,17 @@
                 }
             }
             
+            // Reset tampilan statistik ke bulan berjalan setiap kali kembali ke Beranda
+            if (screenName === 'home') {
+                statBulanOffset = 0;
+                updateHomeStats();
+            }
+
             // Logika Halaman Hafidz
             if (screenName === 'hafidz') {
+                const bolehAksesHafidz = (currentUser.role === 'admin' || currentUser.kategori === 'Tahfidz');
+                if (!bolehAksesHafidz) return navigate('home');
+
                 loadHafidzData();
                 // Pastikan daftar pengajar tersedia untuk modal edit & filter (khusus admin)
                 if (currentUser.role === 'admin' && allUsersData.length === 0) {
@@ -1051,6 +1142,18 @@
                 adminNavBtn.classList.remove('flex');
             }
 
+            // Menu Hafidz hanya untuk Admin atau pengajar kategori Tahfidz
+            const hafidzNavBtn = document.getElementById('nav-hafidz');
+            const bolehAksesHafidz = (currentUser.role === 'admin' || currentUser.kategori === 'Tahfidz');
+
+            if (bolehAksesHafidz) {
+                hafidzNavBtn.classList.remove('hidden');
+                hafidzNavBtn.classList.add('flex');
+            } else {
+                hafidzNavBtn.classList.add('hidden');
+                hafidzNavBtn.classList.remove('flex');
+            }
+
             // Masuk ke Home, tampilkan skeleton terlebih dahulu sampai data terbaru siap
             navigate("home");
             showHomeSkeleton(true);
@@ -1087,6 +1190,15 @@
 
                 const sudahHadir = sesiList && sesiList.includes(sesi);
                 const statusWaktu = getStatusWaktuSesi(sesi);
+                const tersediaUntukKategori = isSesiTersediaUntukKategori(sesi);
+
+                // Kategori Ta'lim Khusus: sembunyikan total sesi yang tidak berlaku (bukan hanya nonaktifkan)
+                if (currentUser.role !== 'admin' && currentUser.kategori === "Ta'lim Khusus" && !tersediaUntukKategori && !sudahHadir) {
+                    card.classList.add('hidden');
+                    return;
+                } else {
+                    card.classList.remove('hidden');
+                }
 
                 if (sudahHadir) {
                     card.onclick = null;
@@ -1468,6 +1580,20 @@
             MALAM: { mulai: 1170, selesai: 1230, label: "19.30 - 20.30" }
         };
 
+        // Cek apakah sesi tertentu tersedia untuk kategori pengajar saat ini
+        // Ta'lim Khusus: hanya sesi MALAM, hanya hari Senin/Selasa/Rabu
+        function isSesiTersediaUntukKategori(sesi) {
+            if (currentUser.kategori !== "Ta'lim Khusus") return true; // Kategori lain tidak dibatasi
+
+            const hariIni = new Date().getDay(); // 0=Minggu, 1=Senin, 2=Selasa, 3=Rabu, ...
+            const hariDiizinkan = [1, 2, 3]; // Senin, Selasa, Rabu
+
+            if (sesi !== 'MALAM') return false;
+            if (!hariDiizinkan.includes(hariIni)) return false;
+
+            return true;
+        }
+
         // Mengembalikan status waktu sesi: 'BELUM_MULAI' | 'AKTIF' | 'TERLEWAT'
         function getStatusWaktuSesi(sesi) {
             const now = new Date();
@@ -1485,6 +1611,19 @@
             const range = SESI_RANGE[sesi];
 
             if (currentUser.role !== "admin") {
+                // Cek pembatasan khusus kategori Ta'lim Khusus lebih dulu
+                if (!isSesiTersediaUntukKategori(sesi)) {
+                    if (currentUser.kategori === "Ta'lim Khusus") {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Sesi Tidak Tersedia',
+                            text: `Pengajar Ta'lim Khusus hanya dapat absen pada Sesi Malam, khusus hari Senin, Selasa, dan Rabu.`,
+                            confirmButtonColor: '#B8860B'
+                        });
+                    }
+                    return;
+                }
+
                 if (status === 'BELUM_MULAI') {
                     Swal.fire({
                         icon: 'info',
@@ -2013,9 +2152,13 @@
             const kelasDropdown = document.getElementById('hafidz-filter-kelas');
             const pengajarDropdown = document.getElementById('hafidz-filter-pengajar');
 
-            // --- Isi dropdown Kelas (unik dari data santri) ---
+            // --- Isi dropdown Kelas (unik dari data santri, difilter oleh tingkat yang sedang dipilih) ---
+            const santriUntukKelas = selectedTingkatHafidz === 'ALL'
+                ? santriData
+                : santriData.filter(s => (s.tingkat || '').trim() === selectedTingkatHafidz);
+
             const kelasSet = new Set();
-            santriData.forEach(s => { if (s.kelas) kelasSet.add(s.kelas.trim()); });
+            santriUntukKelas.forEach(s => { if (s.kelas) kelasSet.add(s.kelas.trim()); });
             const sortedKelas = Array.from(kelasSet).sort();
 
             const currentKelasValue = kelasDropdown.value || 'ALL';
@@ -2134,18 +2277,23 @@
             const pengajarDropdown = document.getElementById('hafidz-filter-pengajar');
 
             const btnTambah = document.getElementById('btn-tambah-santri');
+            const filterTingkatRow = document.getElementById('hafidz-filter-tingkat');
 
             // Tampilkan kotak pencarian & filter, ubah subjudul khusus admin
             if (isAdmin) {
                 searchInput.classList.remove('hidden');
                 filterRow.classList.remove('hidden');
                 filterRow.classList.add('grid');
+                filterTingkatRow.classList.remove('hidden');
+                filterTingkatRow.classList.add('flex');
                 btnTambah.classList.remove('hidden');
                 subtitle.innerText = `Seluruh santri (${santriData.length} orang)`;
             } else {
                 searchInput.classList.add('hidden');
                 filterRow.classList.add('hidden');
                 filterRow.classList.remove('grid');
+                filterTingkatRow.classList.add('hidden');
+                filterTingkatRow.classList.remove('flex');
                 btnTambah.classList.add('hidden');
                 subtitle.innerText = 'Santri bimbingan Anda';
             }
@@ -2158,15 +2306,19 @@
                 return;
             }
 
-            // Filter berdasarkan pencarian nama, kelas, dan pengajar (khusus admin)
+            // Filter berdasarkan pencarian nama, tingkat, kelas, dan pengajar (khusus admin)
             const keyword = isAdmin ? (searchInput.value || '').toLowerCase().trim() : '';
             const selectedKelas = isAdmin ? kelasDropdown.value : 'ALL';
             const selectedPengajar = isAdmin ? pengajarDropdown.value : 'ALL';
+            const selectedTingkat = isAdmin ? selectedTingkatHafidz : 'ALL';
 
             let filteredSantri = santriData;
 
             if (keyword) {
                 filteredSantri = filteredSantri.filter(s => s.nama.toLowerCase().includes(keyword));
+            }
+            if (selectedTingkat !== 'ALL') {
+                filteredSantri = filteredSantri.filter(s => (s.tingkat || '').trim() === selectedTingkat);
             }
             if (selectedKelas !== 'ALL') {
                 filteredSantri = filteredSantri.filter(s => (s.kelas || '').trim() === selectedKelas);
@@ -2195,7 +2347,7 @@
                 card.className = 'santri-card bg-white p-4 rounded-2xl shadow-sm border border-emas-100 mb-3';
                 const isAdminView = currentUser.role === 'admin';
                 const pengajarInfo = (isAdminView && santri.pengajar)
-                    ? `<p class="text-[10px] text-zamrud-300 mt-0.5"><i class="fa-solid fa-chalkboard-user mr-1"></i>${escapeHtml(santri.pengajar.split(',').join(', '))}</p>`
+                    ? `<p class="text-[10px] text-zamrud-300 mt-0.5"><i class="fa-solid fa-chalkboard-user mr-1"></i>${escapeHtml(mapUsernamesPengajarKeNama(santri.pengajar))}</p>`
                     : '';
 
                 const editBtn = isAdminView
@@ -2230,7 +2382,7 @@
                                 <span class="text-xs font-bold text-zamrud-300">#${index + 1}</span>
                                 <h4 class="font-heading font-bold text-zamrud-900 text-sm truncate">${escapeHtml(santri.nama)}</h4>
                             </div>
-                            <p class="text-[11px] text-zamrud-400 mt-0.5">${escapeHtml(santri.kelas || '-')}</p>
+                            <p class="text-[11px] text-zamrud-400 mt-0.5"><i class="fa-solid fa-school mr-1"></i>${escapeHtml(santri.kelas || '-')}</p>
                             ${pengajarInfo}
                             ${lastEditInfo}
                         </div>
@@ -2674,6 +2826,16 @@
             }
         }
 
+        // Mengubah string username (dipisah koma) menjadi nama lengkap pengajar (dipisah koma)
+        function mapUsernamesPengajarKeNama(usernameStr) {
+            const usernames = String(usernameStr || '').split(',').map(u => u.trim()).filter(Boolean);
+            const namaList = usernames.map(username => {
+                const pengajar = allUsersData.find(u => u.username === username);
+                return pengajar ? pengajar.name : username; // Fallback ke username jika tidak ditemukan
+            });
+            return namaList.join(', ');
+        }
+
         function escapeHtml(str) {
             const div = document.createElement('div');
             div.innerText = str === undefined || str === null ? '' : str;
@@ -2918,18 +3080,36 @@
 
             dropdown.value = currentValue;
         } 
+        
         // --- UPDATE STATISTIK BERANDA (PERSONAL) ---
+        function gantiBulanStat(arah) {
+            // Hanya izinkan 2 posisi: 0 (bulan berjalan) atau -1 (1 bulan sebelumnya). Tidak lebih.
+            const targetOffset = statBulanOffset + arah;
+            if (targetOffset > 0 || targetOffset < -1) return;
+
+            if (targetOffset === -1) {
+                const now = new Date();
+                const target = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                const targetBulan = `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, '0')}`;
+                const adaData = absensiData.some(item => item.username === currentUser.username && item.tanggal.startsWith(targetBulan));
+                if (!adaData) return; // Tidak ada data bulan lalu, batal pindah
+            }
+
+            statBulanOffset = targetOffset;
+            updateHomeStats();
+        }
+
         function updateHomeStats() {
             if (!currentUser) return;
-            
-            // Dapatkan bulan saat ini dengan format YYYY-MM
+
             const now = new Date();
-            const currentBulan = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-            
-            // Ambil hanya absensi milik user ini DAN khusus di bulan ini
+            const targetDate = new Date(now.getFullYear(), now.getMonth() + statBulanOffset, 1);
+            const targetBulan = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}`;
+
+            // Ambil hanya absensi milik user ini DAN khusus di bulan yang sedang dilihat
             const myAbsenBulanIni = absensiData.filter(item => 
                 item.username === currentUser.username && 
-                item.tanggal.startsWith(currentBulan)
+                item.tanggal.startsWith(targetBulan)
             );
 
             // Kalkulasi
@@ -2948,12 +3128,75 @@
             const statHariEl = document.getElementById('home-stat-hari');
             const statTotalEl = document.getElementById('home-stat-total');
             const statPersenEl = document.getElementById('home-stat-persen');
+            const statBulanLabelEl = document.getElementById('home-stat-bulan-label');
+            const btnNext = document.getElementById('btn-stat-next');
+            const btnPrev = document.getElementById('btn-stat-prev');
             const totalHadir = totalSesi + totalHari;
 
             if(statSesiEl) statSesiEl.innerText = totalSesi;
             if(statHariEl) statHariEl.innerText = totalHari;
             if(statTotalEl) statTotalEl.innerText = totalHadir;
             if(statPersenEl) statPersenEl.innerText = `${persentase}%`;
+
+            // Label bulan yang sedang ditampilkan
+            const bulanArr = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            if (statBulanLabelEl) {
+                statBulanLabelEl.innerText = `${bulanArr[targetDate.getMonth()]} ${targetDate.getFullYear()}`;
+            }
+
+            if (btnNext) btnNext.disabled = (statBulanOffset >= 0);
+            
+            // - sudah di posisi -1 (paling mundur yang diizinkan), ATAU
+            // - bulan sebelumnya tidak ada datanya sama sekali
+            if (btnPrev) {
+                if (statBulanOffset <= -1) {
+                    btnPrev.disabled = true;
+                } else {
+                    const prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                    const prevBulan = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}`;
+                    const adaDataSebelumnya = absensiData.some(item => item.username === currentUser.username && item.tanggal.startsWith(prevBulan));
+                    btnPrev.disabled = !adaDataSebelumnya;
+                }
+            }
+
+            // --- UPDATE KARTU REWARD DI PROFIL ---
+            const rewardNominalEl = document.getElementById('profile-reward-nominal');
+            const rewardMonthEl = document.getElementById('profile-reward-month');
+
+            if (rewardNominalEl && rewardMonthEl) {
+                // Tentukan bulan efektif untuk label & perhitungan:
+                // Tanggal 1 -> masih tampilkan/hitung bulan SEBELUMNYA (memberi jeda 1 hari untuk penyesuaian data akhir bulan)
+                // Tanggal 2 dst -> pindah ke bulan BERJALAN
+                let displayDate = new Date(now);
+                if (now.getDate() === 1) {
+                    displayDate.setMonth(displayDate.getMonth() - 1);
+                }
+
+                const displayBulan = `${displayDate.getFullYear()}-${String(displayDate.getMonth() + 1).padStart(2, '0')}`;
+
+                // Hitung ulang total hadir KHUSUS untuk bulan efektif ini (bukan selalu bulan kalender berjalan)
+                const absenBulanEfektif = absensiData.filter(item =>
+                    item.username === currentUser.username &&
+                    item.tanggal.startsWith(displayBulan)
+                );
+                const totalSesiEfektif = absenBulanEfektif.length;
+                const totalHariEfektif = new Set(absenBulanEfektif.map(a => a.tanggal)).size;
+                const totalHadirEfektif = totalSesiEfektif + totalHariEfektif;
+
+                // Kalkulasi Total Hadir x Rp 10.000
+                const totalHonor = totalHadirEfektif * 10000;
+
+                const formattedHonor = new Intl.NumberFormat('id-ID', {
+                    style: 'decimal',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(totalHonor);
+
+                rewardNominalEl.innerText = formattedHonor;
+
+                const bulanArr = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                rewardMonthEl.innerText = `• ${bulanArr[displayDate.getMonth()]} ${displayDate.getFullYear()}`;
+            }
         }
         // --- FUNGSI EXPORT PDF ---
         async function exportRekapPDF() {
