@@ -594,6 +594,16 @@
 
 
                 <div class="bg-white rounded-2xl shadow-md border border-emas-100 overflow-hidden">
+                    <button type="button" id="menu-manajemen-pengguna" class="hidden w-full items-center justify-between p-4 border-b border-gray-50 hover:bg-zamrud-50 transition" onclick="navigate('kelola-user')">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-zamrud-50 text-zamrud-600 flex items-center justify-center">
+                                <i class="fa-solid fa-users-gear"></i>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Manajemen Pengguna</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-emas-500 text-sm"></i>
+                    </button>
+
                     <button type="button" class="w-full flex items-center justify-between p-4 border-b border-gray-50 hover:bg-zamrud-50 transition" onclick="openChangePasswordModal()">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-full bg-zamrud-50 text-zamrud-600 flex items-center justify-center">
@@ -612,6 +622,33 @@
                             <span class="text-sm font-medium text-red-600">Keluar</span>
                         </div>
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== SCREEN: KELOLA USER ==================== -->
+        <div id="screen-kelola-user" class="app-screen hide-scroll bg-gading">
+            <div class="bg-white pt-8 pb-4 px-5 shadow-sm sticky top-0 z-20 border-b border-emas-100 flex items-center gap-3">
+                <button type="button" onclick="navigate('profile')" class="w-9 h-9 rounded-full bg-zamrud-50 text-zamrud-700 flex items-center justify-center hover:bg-zamrud-100 transition">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <div class="flex-1">
+                    <h2 class="text-xl font-heading font-bold text-zamrud-900">Manajemen Pengguna</h2>
+                    <p class="text-xs text-zamrud-300 mt-1">Kelola akun pengajar & admin</p>
+                </div>
+                <button type="button" onclick="openAddUserModal()" class="w-9 h-9 rounded-full bg-zamrud-900 text-emas-300 flex items-center justify-center active:scale-95 transition">
+                    <i class="fa-solid fa-plus text-sm"></i>
+                </button>
+            </div>
+
+            <div class="p-5">
+                <input type="text" id="user-search" oninput="renderKelolaUserList()" placeholder="Cari nama atau username..." class="w-full border border-zamrud-100 rounded-lg px-3 py-2 text-sm outline-none mb-4">
+
+                <div id="kelola-user-list">
+                    <div class="text-center text-zamrud-300 py-10" id="kelola-user-empty">
+                        <i class="fa-solid fa-users text-4xl mb-3" style="color:#D4AF37;"></i>
+                        <p class="text-sm">Belum ada data pengguna</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -831,6 +868,69 @@
         </div>
     </div>
 
+    <div id="userFormModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-5 w-[90%] max-w-md max-h-[85vh] flex flex-col">
+            <h3 class="text-lg font-heading font-bold text-zamrud-900 mb-4" id="userFormTitle">Tambah Pengguna</h3>
+
+            <div class="flex-1 overflow-y-auto pr-1">
+                <div class="mb-3">
+                    <label class="block text-xs font-semibold text-zamrud-600 mb-1">Username</label>
+                    <input type="text" id="user-form-username" class="w-full border border-zamrud-100 rounded-xl px-3 py-2.5 text-sm outline-none" placeholder="Username unik">
+                </div>
+                <div class="mb-3">
+                    <label class="block text-xs font-semibold text-zamrud-600 mb-1">Password <span id="user-form-password-hint" class="font-normal text-zamrud-300"></span></label>
+                    <input type="password" id="user-form-password" class="w-full border border-zamrud-100 rounded-xl px-3 py-2.5 text-sm outline-none" placeholder="Password">
+                </div>
+                <div class="mb-3">
+                    <label class="block text-xs font-semibold text-zamrud-600 mb-1">Nama Lengkap</label>
+                    <input type="text" id="user-form-name" class="w-full border border-zamrud-100 rounded-xl px-3 py-2.5 text-sm outline-none" placeholder="Nama lengkap">
+                </div>
+                <div class="mb-3">
+                    <label class="block text-xs font-semibold text-zamrud-600 mb-1">Role</label>
+                    <select id="user-form-role" class="w-full border border-zamrud-100 rounded-xl px-3 py-2.5 text-sm outline-none">
+                        <option value="pengajar">Pengajar</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="block text-xs font-semibold text-zamrud-600 mb-1">Kategori</label>
+                    <select id="user-form-kategori" onchange="toggleJadwalTalimUmum()" class="w-full border border-zamrud-100 rounded-xl px-3 py-2.5 text-sm outline-none">
+                        <option value="">- Pilih Kategori -</option>
+                        <option value="Tahfidz">Tahfidz</option>
+                        <option value="Ta'lim Umum">Ta'lim Umum</option>
+                        <option value="Ta'lim Khusus">Ta'lim Khusus</option>
+                    </select>
+                </div>
+                <div class="mb-3" id="user-form-materi-wrap">
+                    <label class="block text-xs font-semibold text-zamrud-600 mb-1">Materi</label>
+                    <select id="user-form-materi" class="w-full border border-zamrud-100 rounded-xl px-3 py-2.5 text-sm outline-none">
+                        <option value="">- Pilih Materi -</option>
+                        <option value="Tilawah">Tilawah</option>
+                        <option value="Tajwid">Tajwid</option>
+                        <option value="Barzanji">Barzanji</option>
+                        <option value="Kitab At-Tibyan">Kitab At-Tibyan</option>
+                        <option value="Tartil">Tartil</option>
+                    </select>
+                </div>                
+
+                <div id="user-form-jadwal-wrap" class="hidden mb-2 p-3 bg-zamrud-50 rounded-xl">
+                    <p class="text-xs font-semibold text-zamrud-700 mb-2">Jadwal Sesi (khusus Ta'lim Umum)</p>
+
+                    <p class="text-[11px] font-medium text-zamrud-500 mb-1">Sesi Maghrib (18:30-19:30)</p>
+                    <div id="user-form-jadwal-maghrib" class="flex flex-wrap gap-1.5 mb-3"></div>
+
+                    <p class="text-[11px] font-medium text-zamrud-500 mb-1">Sesi Malam (19:30-20:30)</p>
+                    <div id="user-form-jadwal-malam" class="flex flex-wrap gap-1.5"></div>
+                </div>
+            </div>
+
+            <div class="flex gap-2 mt-4">
+                <button type="button" onclick="closeUserFormModal()" class="flex-1 py-3 rounded-xl bg-gray-200 font-semibold text-sm">Batal</button>
+                <button type="button" onclick="simpanUserForm()" class="flex-1 py-3 rounded-xl btn-gold font-semibold text-sm">Simpan</button>
+            </div>
+        </div>
+    </div>
+
     <div id="passwordModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
         <div class="bg-white rounded-2xl p-6 w-[90%] max-w-md">
             <h3 class="text-xl font-bold mb-5 text-center">Ganti Password</h3>
@@ -1041,6 +1141,12 @@
                 updateHomeStats();
             }
 
+            // Logika Halaman Kelola User
+            if (screenName === 'kelola-user') {
+                if (currentUser.role !== 'admin') return navigate('home');
+                loadKelolaUserData();
+            }
+
             // Logika Halaman Hafidz
             if (screenName === 'hafidz') {
                 const bolehAksesHafidz = (currentUser.role === 'admin' || currentUser.kategori === 'Tahfidz');
@@ -1168,6 +1274,16 @@
                 }
             }
 
+            // Menu Manajemen Pengguna khusus admin
+            const menuKelolaUser = document.getElementById('menu-manajemen-pengguna');
+            if (currentUser.role === 'admin') {
+                menuKelolaUser.classList.remove('hidden');
+                menuKelolaUser.classList.add('flex');
+            } else {
+                menuKelolaUser.classList.add('hidden');
+                menuKelolaUser.classList.remove('flex');
+            }
+
             // Menu Hafidz hanya untuk Admin atau pengajar kategori Tahfidz
             const hafidzNavBtn = document.getElementById('nav-hafidz');
             const bolehAksesHafidz = (currentUser.role === 'admin' || currentUser.kategori === 'Tahfidz');
@@ -1213,13 +1329,32 @@
                 const card = document.getElementById(`card-${sesi}`);
                 const badge = document.getElementById(`badge-${sesi}`);
                 if(!card || !badge) return;
+                let containerMateri = card.querySelector('.materi-container');
+                if (currentUser.kategori === "Ta'lim Umum") {
+                    if (!containerMateri) {
+                        containerMateri = document.createElement('div');
+                        containerMateri.className = 'materi-container text-[10px] text-zamrud-500 font-medium mt-2 pt-2 border-t border-gray-100 flex items-center gap-1';
+                        card.appendChild(containerMateri);
+                    }
+                    containerMateri.innerHTML = `<i class="fa-solid fa-book-open text-emas-500"></i> Materi: <span class="font-semibold text-zamrud-700">${currentUser.materi || '-'}</span>`;
+                } else if (containerMateri) {
+                    containerMateri.remove();
+                }              
 
                 const sudahHadir = sesiList && sesiList.includes(sesi);
                 const statusWaktu = getStatusWaktuSesi(sesi);
                 const tersediaUntukKategori = isSesiTersediaUntukKategori(sesi);
 
-                // Sembunyikan kartu yang memang tidak berlaku untuk kategori/jadwal pengajar ini (bukan hanya nonaktifkan)
-                // Kecuali kalau kebetulan sudah pernah tercatat hadir (data lama tetap ditampilkan sebagai riwayat)
+                // --- LOGIKA LIBUR KHUSUS TAHFIDZ ---
+                let isLiburTahfidz = false;
+                if (currentUser.kategori === 'Tahfidz') {
+                    const hariIni = getNamaHariIni();
+                    if (hariIni === 'Kamis' && sesi === 'MALAM') isLiburTahfidz = true;
+                    if (hariIni === 'Jumat' && sesi === 'PAGI') isLiburTahfidz = true;
+                }
+
+                // Sembunyikan kartu yang memang tidak berlaku untuk kategori/jadwal pengajar ini
+                // Kecuali kalau sudah pernah tercatat hadir (data lama tetap ditampilkan sebagai riwayat)
                 if (currentUser.role !== 'admin' && !tersediaUntukKategori && !sudahHadir) {
                     card.classList.add('hidden');
                     return;
@@ -1232,7 +1367,14 @@
                     card.classList.remove("cursor-pointer", "hover:shadow-md");
                     card.classList.add("opacity-70");
                     badge.className = "text-xs font-semibold px-3 py-1 rounded-full bg-green-50 text-green-600 border border-green-200";
-                    badge.innerText = "Hadir";
+                    badge.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Hadir';
+                } else if (isLiburTahfidz && currentUser.role !== 'admin') {
+                    // --- TAMPILAN LIBUR TAHFIDZ ---
+                    card.onclick = null;
+                    card.classList.remove("cursor-pointer", "hover:shadow-md");
+                    card.classList.add("opacity-60");
+                    badge.className = "text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-500 border border-slate-200";
+                    badge.innerHTML = '<i class="fa-solid fa-mug-hot mr-1"></i>Libur';
                 } else if (statusWaktu === 'TERLEWAT' && currentUser.role !== 'admin') {
                     // Sesi sudah lewat dan belum absen -> tandai Terlewat, nonaktifkan klik
                     card.onclick = null;
@@ -2167,6 +2309,237 @@
 
                     } else {
                         showLoading(false);
+                        Swal.fire({ icon: 'error', title: 'Gagal', text: res.message, confirmButtonColor: '#B8860B' });
+                    }
+                })
+                .catch(function() {
+                    showLoading(false);
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.', confirmButtonColor: '#B8860B' });
+                });
+        }
+
+        // --- MANAJEMEN PENGGUNA LOGIC ---
+        const HARI_LIST = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
+        let editingUsername = null;
+
+        function loadKelolaUserData() {
+            showLoading(true, "Memuat Data Pengguna...");
+            fetchAllUsers().then(() => {
+                showLoading(false);
+                renderKelolaUserList();
+            }).catch(() => {
+                showLoading(false);
+                Swal.fire({ icon: 'error', text: 'Gagal memuat data pengguna.', confirmButtonColor: '#B8860B' });
+            });
+        }
+
+        function renderKelolaUserList() {
+            const container = document.getElementById('kelola-user-list');
+            const emptyState = document.getElementById('kelola-user-empty');
+            const keyword = (document.getElementById('user-search').value || '').toLowerCase().trim();
+
+            document.querySelectorAll('#kelola-user-list .user-card').forEach(el => el.remove());
+
+            let filtered = allUsersData;
+            if (keyword) {
+                filtered = filtered.filter(u => u.name.toLowerCase().includes(keyword) || u.username.toLowerCase().includes(keyword));
+            }
+
+            if (filtered.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+            emptyState.style.display = 'none';
+
+            filtered.forEach(user => {
+                const card = document.createElement('div');
+                card.className = 'user-card bg-white p-4 rounded-2xl shadow-sm border border-emas-100 mb-3 flex items-center justify-between';
+
+                const roleBadge = user.role === 'admin'
+                    ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emas-100 text-emas-700">Admin</span>`
+                    : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zamrud-50 text-zamrud-600">Pengajar</span>`;
+
+                card.innerHTML = `
+                    <div class="flex-1 min-w-0 pr-3">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h4 class="font-heading font-bold text-zamrud-900 text-sm truncate">${escapeHtml(user.name)}</h4>
+                            ${roleBadge}
+                        </div>
+                        <p class="text-[11px] text-zamrud-400">@${escapeHtml(user.username)}</p>
+                        ${user.kategori ? `<p class="text-[11px] text-zamrud-500 mt-0.5"><i class="fa-solid fa-tag mr-1"></i>${escapeHtml(user.kategori)}</p>` : ''}
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button type="button" onclick="openEditUserModal('${user.username}')" class="w-9 h-9 rounded-full bg-zamrud-50 text-zamrud-600 border border-zamrud-200 flex items-center justify-center active:scale-95 transition">
+                            <i class="fa-solid fa-pen text-xs"></i>
+                        </button>
+                        <button type="button" onclick="konfirmasiHapusUser('${user.username}', '${escapeHtml(user.name).replace(/'/g, "\\'")}')" class="w-9 h-9 rounded-full bg-red-50 text-red-500 border border-red-200 flex items-center justify-center active:scale-95 transition">
+                            <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleJadwalTalimUmum() {
+            const kategori = document.getElementById('user-form-kategori').value;
+            const wrap = document.getElementById('user-form-jadwal-wrap');
+            if (kategori === "Ta'lim Umum") {
+                wrap.classList.remove('hidden');
+            } else {
+                wrap.classList.add('hidden');
+            }
+        }
+
+        function renderJadwalChips(containerId, jadwalTerpilih) {
+            const container = document.getElementById(containerId);
+            const daftarTerpilih = String(jadwalTerpilih || '').split(',').map(h => h.trim()).filter(Boolean);
+
+            container.innerHTML = HARI_LIST.map(hari => {
+                const aktif = daftarTerpilih.includes(hari);
+                return `<button type="button" data-hari="${hari}" onclick="toggleJadwalChip(this)" class="jadwal-chip text-[10px] font-semibold px-2.5 py-1 rounded-full border transition ${aktif ? 'bg-zamrud-900 text-emas-200 border-zamrud-900' : 'bg-white text-zamrud-500 border-zamrud-200'}">${hari.substring(0,3)}</button>`;
+            }).join('');
+        }
+
+        function toggleJadwalChip(btn) {
+            const aktif = btn.classList.contains('bg-zamrud-900');
+            if (aktif) {
+                btn.classList.remove('bg-zamrud-900', 'text-emas-200', 'border-zamrud-900');
+                btn.classList.add('bg-white', 'text-zamrud-500', 'border-zamrud-200');
+            } else {
+                btn.classList.add('bg-zamrud-900', 'text-emas-200', 'border-zamrud-900');
+                btn.classList.remove('bg-white', 'text-zamrud-500', 'border-zamrud-200');
+            }
+        }
+
+        function getJadwalTerpilih(containerId) {
+            const chips = document.querySelectorAll(`#${containerId} .jadwal-chip.bg-zamrud-900`);
+            return Array.from(chips).map(c => c.dataset.hari).join(',');
+        }
+
+        function openAddUserModal() {
+            editingUsername = null;
+            document.getElementById('userFormTitle').innerText = 'Tambah Pengguna';
+            document.getElementById('user-form-username').value = '';
+            document.getElementById('user-form-username').disabled = false;
+            document.getElementById('user-form-password').value = '';
+            document.getElementById('user-form-password-hint').innerText = '';
+            document.getElementById('user-form-name').value = '';
+            document.getElementById('user-form-role').value = 'pengajar';
+            document.getElementById('user-form-kategori').value = '';
+            renderJadwalChips('user-form-jadwal-maghrib', '');
+            renderJadwalChips('user-form-jadwal-malam', '');
+            toggleJadwalTalimUmum();
+
+            const modal = document.getElementById('userFormModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function openEditUserModal(username) {
+            const user = allUsersData.find(u => u.username === username);
+            if (!user) return;
+
+            editingUsername = username;
+            document.getElementById('userFormTitle').innerText = `Edit Pengguna - ${user.name}`;
+            document.getElementById('user-form-username').value = user.username;
+            document.getElementById('user-form-username').disabled = true; // Username tidak bisa diubah
+            document.getElementById('user-form-password').value = '';
+            document.getElementById('user-form-password-hint').innerText = '(kosongkan jika tidak diubah)';
+            document.getElementById('user-form-name').value = user.name;
+            document.getElementById('user-form-role').value = user.role;
+            document.getElementById('user-form-kategori').value = user.kategori || '';
+            renderJadwalChips('user-form-jadwal-maghrib', user.jadwal_maghrib);
+            renderJadwalChips('user-form-jadwal-malam', user.jadwal_malam);
+            toggleJadwalTalimUmum();
+
+            const modal = document.getElementById('userFormModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeUserFormModal() {
+            const modal = document.getElementById('userFormModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            editingUsername = null;
+        }
+
+        function simpanUserForm() {
+            const username = document.getElementById('user-form-username').value.trim();
+            const password = document.getElementById('user-form-password').value;
+            const name = document.getElementById('user-form-name').value.trim();
+            const role = document.getElementById('user-form-role').value;
+            const kategori = document.getElementById('user-form-kategori').value;
+            const jadwalMaghrib = getJadwalTerpilih('user-form-jadwal-maghrib');
+            const jadwalMalam = getJadwalTerpilih('user-form-jadwal-malam');
+
+            if (!username || !name) {
+                Swal.fire({ icon: 'warning', text: 'Username dan nama harus diisi.', confirmButtonColor: '#B8860B' });
+                return;
+            }
+
+            const isEdit = !!editingUsername;
+            if (!isEdit && !password) {
+                Swal.fire({ icon: 'warning', text: 'Password harus diisi untuk pengguna baru.', confirmButtonColor: '#B8860B' });
+                return;
+            }
+
+            const payload = {
+                username: username,
+                password: password,
+                name: name,
+                role: role,
+                kategori: kategori,
+                jadwal_maghrib: jadwalMaghrib,
+                jadwal_malam: jadwalMalam
+            };
+
+            showLoading(true, isEdit ? "Menyimpan Perubahan..." : "Menambahkan Pengguna...");
+            fetchAPI(isEdit ? 'updateUser' : 'addUser', payload)
+                .then(function(res) {
+                    showLoading(false);
+                    if (res.status === 'success') {
+                        closeUserFormModal();
+                        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: isEdit ? 'Pengguna diperbarui' : 'Pengguna ditambahkan', showConfirmButton: false, timer: 1800 });
+                        loadKelolaUserData();
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Gagal', text: res.message, confirmButtonColor: '#B8860B' });
+                    }
+                })
+                .catch(function() {
+                    showLoading(false);
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.', confirmButtonColor: '#B8860B' });
+                });
+        }
+
+        function konfirmasiHapusUser(username, nama) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Hapus Pengguna Ini?',
+                text: `Akun "${nama}" akan dihapus permanen. Riwayat absensi & data terkait tidak akan ikut terhapus.`,
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#DC2626',
+                cancelButtonColor: '#9ca3af'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    hapusUser(username);
+                }
+            });
+        }
+
+        function hapusUser(username) {
+            showLoading(true, "Menghapus Pengguna...");
+            fetchAPI('deleteUser', { username: username, requesterUsername: currentUser.username })
+                .then(function(res) {
+                    showLoading(false);
+                    if (res.status === 'success') {
+                        allUsersData = allUsersData.filter(u => u.username !== username);
+                        renderKelolaUserList();
+                        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Pengguna berhasil dihapus', showConfirmButton: false, timer: 1800 });
+                    } else {
                         Swal.fire({ icon: 'error', title: 'Gagal', text: res.message, confirmButtonColor: '#B8860B' });
                     }
                 })
