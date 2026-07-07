@@ -348,7 +348,7 @@
                     </div>
                     <div class="text-center flex-1 border-r border-white/20">
                         <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Total Hadir</p>
-                        <p class="text-xl font-bold text-emas-200 font-heading leading-none" id="home-stat-total">0</p>
+                        <p class="text-xl font-bold text-white font-heading leading-none" id="home-stat-total">0</p>
                     </div>
                     <div class="text-center flex-1">
                         <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Persentase</p>
@@ -401,7 +401,7 @@
                                 </div>
                                 <div>
                                     <h4 class="font-bold text-zamrud-900 text-base">Pagi</h4>
-                                    <p class="text-xs text-zamrud-300 mt-0.5">04:30 - 05:45</p>
+                                    <p class="text-xs text-zamrud-300 mt-0.5">04:45 - 06:00</p>
                                 </div>
                             </div>
                             <div id="badge-PAGI" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
@@ -420,6 +420,19 @@
                             <div id="badge-SORE" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
                         </div>
 
+                        <div id="card-MAGHRIB" onclick="pilihSesi('MAGHRIB')" class="hidden flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-purple-500 text-xl">
+                                    <i class="fa-solid fa-mosque"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-zamrud-900 text-base">Maghrib</h4>
+                                    <p class="text-xs text-zamrud-300 mt-0.5">18:30 - 19:30</p>
+                                </div>
+                            </div>
+                            <div id="badge-MAGHRIB" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
+                        </div>
+
                         <div id="card-MALAM" onclick="pilihSesi('MALAM')" class="flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 text-xl">
@@ -428,6 +441,9 @@
                                 <div>
                                     <h4 class="font-bold text-zamrud-900 text-base">Malam</h4>
                                     <p class="text-xs text-zamrud-300 mt-0.5">19:30 - 20:30</p>
+                                    <p id="malam-hari-keterangan" class="hidden text-[10px] text-emas-600 font-medium mt-0.5">
+                                        <i class="fa-solid fa-calendar-day mr-1"></i>Senin, Selasa, Rabu
+                                    </p>
                                 </div>
                             </div>
                             <div id="badge-MALAM" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
@@ -1142,6 +1158,16 @@
                 adminNavBtn.classList.remove('flex');
             }
 
+            // Tampilkan keterangan hari khusus Ta'lim Khusus di kartu sesi Malam
+            const malamHariKeterangan = document.getElementById('malam-hari-keterangan');
+            if (malamHariKeterangan) {
+                if (currentUser.kategori === "Ta'lim Khusus") {
+                    malamHariKeterangan.classList.remove('hidden');
+                } else {
+                    malamHariKeterangan.classList.add('hidden');
+                }
+            }
+
             // Menu Hafidz hanya untuk Admin atau pengajar kategori Tahfidz
             const hafidzNavBtn = document.getElementById('nav-hafidz');
             const bolehAksesHafidz = (currentUser.role === 'admin' || currentUser.kategori === 'Tahfidz');
@@ -1182,7 +1208,7 @@
         }
 
         function lockSession(sesiList) {
-            const sesiAll = ['PAGI', 'SORE', 'MALAM'];
+            const sesiAll = ['PAGI', 'SORE', 'MAGHRIB', 'MALAM'];
             sesiAll.forEach(sesi => {
                 const card = document.getElementById(`card-${sesi}`);
                 const badge = document.getElementById(`badge-${sesi}`);
@@ -1192,8 +1218,9 @@
                 const statusWaktu = getStatusWaktuSesi(sesi);
                 const tersediaUntukKategori = isSesiTersediaUntukKategori(sesi);
 
-                // Kategori Ta'lim Khusus: sembunyikan total sesi yang tidak berlaku (bukan hanya nonaktifkan)
-                if (currentUser.role !== 'admin' && currentUser.kategori === "Ta'lim Khusus" && !tersediaUntukKategori && !sudahHadir) {
+                // Sembunyikan kartu yang memang tidak berlaku untuk kategori/jadwal pengajar ini (bukan hanya nonaktifkan)
+                // Kecuali kalau kebetulan sudah pernah tercatat hadir (data lama tetap ditampilkan sebagai riwayat)
+                if (currentUser.role !== 'admin' && !tersediaUntukKategori && !sudahHadir) {
                     card.classList.add('hidden');
                     return;
                 } else {
@@ -1573,24 +1600,46 @@
             input.click();
         }
 
-        // Rentang waktu tiap sesi (dalam menit sejak 00:00)
         const SESI_RANGE = {
-            PAGI:  { mulai: 270,  selesai: 345,  label: "04.30 - 05.45" },
-            SORE:  { mulai: 945,  selesai: 1005, label: "15.45 - 16.45" },
-            MALAM: { mulai: 1170, selesai: 1230, label: "19.30 - 20.30" }
+            PAGI:    { mulai: 285,  selesai: 360,  label: "04.45 - 06.00" },
+            SORE:    { mulai: 945,  selesai: 1005, label: "15.45 - 16.45" },
+            MAGHRIB: { mulai: 1110, selesai: 1170, label: "18.30 - 19.30" },
+            MALAM:   { mulai: 1170, selesai: 1230, label: "19.30 - 20.30" }
         };
 
-        // Cek apakah sesi tertentu tersedia untuk kategori pengajar saat ini
-        // Ta'lim Khusus: hanya sesi MALAM, hanya hari Senin/Selasa/Rabu
+        const NAMA_HARI = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+
+        function getNamaHariIni() {
+            return NAMA_HARI[new Date().getDay()];
+        }
+
+        // Cek apakah string jadwal (dipisah koma) mengandung hari ini
+        function cekJadwalHariIni(jadwalStr) {
+            if (!jadwalStr) return false;
+            const daftarHari = String(jadwalStr).split(',').map(h => h.trim());
+            return daftarHari.includes(getNamaHariIni());
+        }
+
+        // Cek apakah sesi tertentu tersedia untuk kategori & jadwal pengajar saat ini
         function isSesiTersediaUntukKategori(sesi) {
-            if (currentUser.kategori !== "Ta'lim Khusus") return true; // Kategori lain tidak dibatasi
+            const kategori = currentUser.kategori;
 
-            const hariIni = new Date().getDay(); // 0=Minggu, 1=Senin, 2=Selasa, 3=Rabu, ...
-            const hariDiizinkan = [1, 2, 3]; // Senin, Selasa, Rabu
+            // --- Ta'lim Khusus: hanya sesi MALAM, hanya hari Senin/Selasa/Rabu (berlaku sama untuk semua pengajar kategori ini) ---
+            if (kategori === "Ta'lim Khusus") {
+                const hariDiizinkan = ["Senin", "Selasa", "Rabu"];
+                if (sesi !== 'MALAM') return false;
+                return hariDiizinkan.includes(getNamaHariIni());
+            }
 
-            if (sesi !== 'MALAM') return false;
-            if (!hariDiizinkan.includes(hariIni)) return false;
+            // --- Ta'lim Umum: hanya sesi MAGHRIB & MALAM, jadwal berbeda per pengajar (dari Sheets) ---
+            if (kategori === "Ta'lim Umum") {
+                if (sesi === 'MAGHRIB') return cekJadwalHariIni(currentUser.jadwal_maghrib);
+                if (sesi === 'MALAM') return cekJadwalHariIni(currentUser.jadwal_malam);
+                return false; // Pagi & Sore tidak berlaku untuk Ta'lim Umum
+            }
 
+            // --- Tahfidz & kategori lain: semua sesi normal (kecuali MAGHRIB yang memang khusus Ta'lim Umum) ---
+            if (sesi === 'MAGHRIB') return false;
             return true;
         }
 
@@ -1611,16 +1660,20 @@
             const range = SESI_RANGE[sesi];
 
             if (currentUser.role !== "admin") {
-                // Cek pembatasan khusus kategori Ta'lim Khusus lebih dulu
+                // Cek pembatasan khusus kategori & jadwal pengajar lebih dulu
                 if (!isSesiTersediaUntukKategori(sesi)) {
+                    let pesan = 'Sesi ini tidak tersedia untuk kategori Anda.';
                     if (currentUser.kategori === "Ta'lim Khusus") {
-                        Swal.fire({
-                            icon: 'info',
-                            title: 'Sesi Tidak Tersedia',
-                            text: `Pengajar Ta'lim Khusus hanya dapat absen pada Sesi Malam, khusus hari Senin, Selasa, dan Rabu.`,
-                            confirmButtonColor: '#B8860B'
-                        });
+                        pesan = `Pengajar Ta'lim Khusus hanya dapat absen pada Sesi Malam, khusus hari Senin, Selasa, dan Rabu.`;
+                    } else if (currentUser.kategori === "Ta'lim Umum") {
+                        pesan = `Anda tidak dijadwalkan mengajar sesi ini pada hari ${getNamaHariIni()}. Silakan hubungi admin jika ini kekeliruan.`;
                     }
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Sesi Tidak Tersedia',
+                        text: pesan,
+                        confirmButtonColor: '#B8860B'
+                    });
                     return;
                 }
 
