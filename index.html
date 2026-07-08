@@ -242,7 +242,7 @@
 
         <div id="screen-home" class="app-screen hide-scroll bg-gading">
 
-            <!-- ===== SKELETON LOADER (tampil sampai data awal selesai dimuat) ===== -->
+            <!-- ===== SKELETON LOADER ===== -->
             <div id="home-skeleton" class="hidden">
                 <div class="pt-8 pb-10 px-6 rounded-b-[32px] relative overflow-hidden" style="background: linear-gradient(135deg, #14532D, #0B3D2E);">
                     <div class="flex justify-between items-center mb-5">
@@ -293,167 +293,168 @@
                                 </div>
                                 <div class="skeleton w-20 h-6 rounded-full"></div>
                             </div>
-                            <div class="flex items-center justify-between p-4 border border-emas-50 rounded-2xl">
-                                <div class="flex items-center gap-4">
-                                    <div class="skeleton w-12 h-12 rounded-full"></div>
-                                    <div>
-                                        <div class="skeleton h-4 w-16 rounded mb-2"></div>
-                                        <div class="skeleton h-3 w-24 rounded"></div>
-                                    </div>
-                                </div>
-                                <div class="skeleton w-20 h-6 rounded-full"></div>
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- ===== END SKELETON LOADER ===== -->
 
-            <div id="home-real-content" class="pt-8 pb-10 px-6 rounded-b-[32px] shadow-sm relative overflow-hidden" style="background: linear-gradient(135deg, #14532D, #0B3D2E);">
-                <div class="absolute inset-0" style="background-image: var(--star-pattern); opacity: 0.25;"></div>
+            <!-- ===== REAL CONTENT ===== -->
+            <div id="home-real-content">
                 
-                <div class="flex justify-between items-center mb-5 relative z-10">
-                    <div class="flex-1 min-w-0 pr-3">
-                        <p class="text-xs tracking-[0.15em] uppercase" style="color:#E2C158;">Assalamu'alaikum,</p>
-                        <h2 class="text-white text-xl font-heading font-bold truncate" id="user-greeting-name">Nama Pengajar</h2>
-                        <!-- Tambahkan Badge Kategori di sini -->
-                        <span id="home-kategori-badge" class="inline-block bg-white/20 text-white text-[10px] font-medium px-2 py-0.5 rounded-md mt-1 backdrop-blur-sm border border-white/10">
-                            Kategori
-                        </span>
-                    </div>
-                    <div id="home-avatar-wrap" class="w-20 h-20 rounded-full flex items-center justify-center shrink-0 overflow-hidden shadow-lg border-2 border-white/30" style="background: rgba(212,175,55,0.25);">
-                        <i id="home-avatar-placeholder" class="fa-solid fa-user-circle text-5xl" style="color:#F5E6B8;"></i>
-                        <img id="home-avatar-img" src="" class="hidden w-full h-full object-cover">
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-center gap-2 mb-2 relative z-10">
-                    <button type="button" id="btn-stat-prev" onclick="gantiBulanStat(-1)" class="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center active:scale-90 transition disabled:opacity-30 disabled:cursor-not-allowed" style="color: #F5E6B8;">
-                        <i class="fa-solid fa-chevron-left text-[10px]"></i>
-                    </button>
-                    <p class="text-[11px] font-semibold tracking-wide" id="home-stat-bulan-label" style="color: #F5E6B8;">Juli 2026</p>
-                    <button type="button" id="btn-stat-next" onclick="gantiBulanStat(1)" class="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center active:scale-90 transition disabled:opacity-30 disabled:cursor-not-allowed" style="color: #F5E6B8;">
-                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                    </button>
-                </div>
-
-                <div class="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/20 relative z-10 shadow-inner">
-                    <div class="text-center flex-1 border-r border-white/20">
-                        <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Sesi Hadir</p>
-                        <p class="text-xl font-bold text-white font-heading leading-none" id="home-stat-sesi">0</p>
-                    </div>
-                    <div class="text-center flex-1 border-r border-white/20">
-                        <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Hari Hadir</p>
-                        <p class="text-xl font-bold text-white font-heading leading-none" id="home-stat-hari">0</p>
-                    </div>
-                    <div class="text-center flex-1 border-r border-white/20">
-                        <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Total Hadir</p>
-                        <p class="text-xl font-bold text-white font-heading leading-none" id="home-stat-total">0</p>
-                    </div>
-                    <div class="text-center flex-1">
-                        <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Persentase</p>
-                        <p class="text-xl font-bold text-emas-300 font-heading leading-none" id="home-stat-persen">0%</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="px-5 -mt-9 relative z-10">
-                <div class="bg-white p-4 rounded-2xl shadow-md border border-emas-100 flex items-center justify-between mb-6">
-                    <div>
-                        <p class="text-xs text-zamrud-300 font-medium">Hari ini</p>
-                        <p class="text-zamrud-900 font-heading font-semibold" id="current-date">Senin, 1 Jan 2024</p>
-                    </div>
+                <!-- HEADER HIJAU -->
+                <div class="pt-8 pb-10 px-6 rounded-b-[32px] shadow-sm relative overflow-hidden" style="background: linear-gradient(135deg, #14532D, #0B3D2E);">
+                    <div class="absolute inset-0" style="background-image: var(--star-pattern); opacity: 0.25;"></div>
                     
-                    <!-- Wadah Flex baru untuk Jam dan Tombol Refresh -->
-                    <div class="flex items-center gap-2">
-                        <!-- Tombol Refresh -->
-                        <button type="button" onclick="refreshAllData()" class="w-9 h-9 flex items-center justify-center rounded-lg bg-zamrud-50 text-zamrud-600 border border-zamrud-100 hover:bg-zamrud-100 active:scale-95 transition shadow-sm">
-                            <i class="fa-solid fa-arrows-rotate"></i>
+                    <div class="flex justify-between items-center mb-5 relative z-10">
+                        <div class="flex-1 min-w-0 pr-3">
+                            <p class="text-xs tracking-[0.15em] uppercase" style="color:#E2C158;">Assalamu'alaikum,</p>
+                            <h2 class="text-white text-xl font-heading font-bold truncate" id="user-greeting-name">Nama Pengajar</h2>
+                            <span id="home-kategori-badge" class="inline-block bg-white/20 text-white text-[10px] font-medium px-2 py-0.5 rounded-md mt-1 backdrop-blur-sm border border-white/10">
+                                Kategori
+                            </span>
+                        </div>
+                        <div id="home-avatar-wrap" class="w-20 h-20 rounded-full flex items-center justify-center shrink-0 overflow-hidden shadow-lg border-2 border-white/30" style="background: rgba(212,175,55,0.25);">
+                            <i id="home-avatar-placeholder" class="fa-solid fa-user-circle text-5xl" style="color:#F5E6B8;"></i>
+                            <img id="home-avatar-img" src="" class="hidden w-full h-full object-cover">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-center gap-2 mb-2 relative z-10">
+                        <button type="button" id="btn-stat-prev" onclick="gantiBulanStat(-1)" class="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center active:scale-90 transition disabled:opacity-30 disabled:cursor-not-allowed" style="color: #F5E6B8;">
+                            <i class="fa-solid fa-chevron-left text-[10px]"></i>
                         </button>
+                        <p class="text-[11px] font-semibold tracking-wide" id="home-stat-bulan-label" style="color: #F5E6B8;">Bulan</p>
+                        <button type="button" id="btn-stat-next" onclick="gantiBulanStat(1)" class="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center active:scale-90 transition disabled:opacity-30 disabled:cursor-not-allowed" style="color: #F5E6B8;">
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/20 relative z-10 shadow-inner">
+                        <div class="text-center flex-1 border-r border-white/20" id="box-stat-sesi">
+                            <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Sesi Hadir</p>
+                            <p class="text-xl font-bold text-white font-heading leading-none" id="home-stat-sesi">0</p>
+                        </div>
+                        <div class="text-center flex-1 border-r border-white/20" id="box-stat-hari">
+                            <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Hari Hadir</p>
+                            <p class="text-xl font-bold text-white font-heading leading-none" id="home-stat-hari">0</p>
+                        </div>
+                        <div class="text-center flex-1 border-r border-white/20" id="box-stat-total">
+                            <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium" id="label-stat-total">Total Hadir</p>
+                            <p class="text-xl font-bold text-white font-heading leading-none" id="home-stat-total">0</p>
+                        </div>
+                        <div class="text-center flex-1">
+                            <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Persentase</p>
+                            <p class="text-xl font-bold text-emas-300 font-heading leading-none" id="home-stat-persen">0%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KONTEN KARTU OVERLAP BAWAH -->
+                <div class="px-5 -mt-9 relative z-10">
+                    <div class="bg-white p-4 rounded-2xl shadow-md border border-emas-100 flex items-center justify-between mb-6">
+                        <div>
+                            <p class="text-xs text-zamrud-300 font-medium">Hari ini</p>
+                            <p class="text-zamrud-900 font-heading font-semibold" id="current-date">Senin, 1 Jan 2024</p>
+                        </div>
                         
-                        <!-- Kotak Jam -->
-                        <div class="bg-zamrud-950 text-emas-300 px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2">
-                            <i class="fa-solid fa-clock"></i> <span id="current-time">00:00</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="refreshAllData()" class="w-9 h-9 flex items-center justify-center rounded-lg bg-zamrud-50 text-zamrud-600 border border-zamrud-100 hover:bg-zamrud-100 active:scale-95 transition shadow-sm">
+                                <i class="fa-solid fa-arrows-rotate"></i>
+                            </button>
+                            <div class="bg-zamrud-950 text-emas-300 px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2">
+                                <i class="fa-solid fa-clock"></i> <span id="current-time">00:00</span>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div id="offline-banner" class="hidden mt-3 px-4 py-2.5 rounded-xl bg-red-50 border border-red-200 flex items-center gap-2 text-red-600 text-xs font-medium">
-                    <i class="fa-solid fa-wifi-slash"></i>
-                    <span id="offline-banner-text">Tidak ada koneksi internet. Absen akan disimpan sementara.</span>
-                </div>
-
-                <div id="pending-sync-banner" class="hidden mt-3 px-4 py-2.5 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between text-amber-700 text-xs font-medium">
-                    <span><i class="fa-solid fa-clock-rotate-left mr-1"></i> <span id="pending-sync-count">0</span> absen menunggu sinkronisasi</span>
-                    <button type="button" onclick="syncPendingQueue()" class="underline font-semibold">Coba Lagi</button>
-                </div>
-
-                <div class="bg-white rounded-3xl p-5 shadow-md border border-emas-100 mb-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-heading font-semibold text-zamrud-900">Presensi Kehadiran</h3>
+                    <div id="offline-banner" class="hidden mt-3 px-4 py-2.5 rounded-xl bg-red-50 border border-red-200 flex items-center gap-2 text-red-600 text-xs font-medium">
+                        <i class="fa-solid fa-wifi-slash"></i>
+                        <span id="offline-banner-text">Tidak ada koneksi internet. Absen disimpan sementara.</span>
                     </div>
 
-                    <div class="flex flex-col gap-3 mt-2" id="session-cards">
-                        <div id="card-PAGI" onclick="pilihSesi('PAGI')" class="flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 text-xl">
-                                    <i class="fa-solid fa-sun"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-zamrud-900 text-base">Pagi</h4>
-                                    <p class="text-xs text-zamrud-300 mt-0.5">04:45 - 06:00</p>
-                                </div>
-                            </div>
-                            <div id="badge-PAGI" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
-                        </div>
-
-                        <div id="card-SORE" onclick="pilihSesi('SORE')" class="flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 text-xl">
-                                    <i class="fa-solid fa-clock"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-zamrud-900 text-base">Sore</h4>
-                                    <p class="text-xs text-zamrud-300 mt-0.5">15:45 - 16:45</p>
-                                </div>
-                            </div>
-                            <div id="badge-SORE" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
-                        </div>
-
-                        <div id="card-MAGHRIB" onclick="pilihSesi('MAGHRIB')" class="hidden flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-purple-500 text-xl">
-                                    <i class="fa-solid fa-mosque"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-zamrud-900 text-base">Maghrib</h4>
-                                    <p class="text-xs text-zamrud-300 mt-0.5">18:30 - 19:30</p>
-                                </div>
-                            </div>
-                            <div id="badge-MAGHRIB" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
-                        </div>
-
-                        <div id="card-MALAM" onclick="pilihSesi('MALAM')" class="flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 text-xl">
-                                    <i class="fa-solid fa-moon"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-zamrud-900 text-base">Malam</h4>
-                                    <p class="text-xs text-zamrud-300 mt-0.5">19:30 - 20:30</p>
-                                    <p id="malam-hari-keterangan" class="hidden text-[10px] text-emas-600 font-medium mt-0.5">
-                                        <i class="fa-solid fa-calendar-day mr-1"></i>Senin, Selasa, Rabu
-                                    </p>
-                                </div>
-                            </div>
-                            <div id="badge-MALAM" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
-                        </div>
+                    <div id="pending-sync-banner" class="hidden mt-3 px-4 py-2.5 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between text-amber-700 text-xs font-medium">
+                        <span><i class="fa-solid fa-clock-rotate-left mr-1"></i> <span id="pending-sync-count">0</span> absen menunggu sinkronisasi</span>
+                        <button type="button" onclick="syncPendingQueue()" class="underline font-semibold">Coba Lagi</button>
                     </div>
-                    
-                    <input type="file" id="camera-input" accept="image/*" capture="user" class="hidden">
-                    <canvas id="canvas" class="hidden"></canvas>
+
+                    <div class="bg-white rounded-3xl p-5 shadow-md border border-emas-100 mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-heading font-semibold text-zamrud-900">Presensi Kehadiran</h3>
+                        </div>
+
+                        <div id="no-jadwal-hari-ini" class="hidden text-center py-8 px-4">
+                            <i class="fa-solid fa-calendar-xmark text-4xl mb-3" style="color:#D4AF37;"></i>
+                            <p class="text-sm font-semibold text-zamrud-700 mb-1">Hari ini tidak ada jadwal Anda mengajar</p>
+                            <p class="text-xs text-zamrud-400" id="jadwal-anda-info">Jadwal Anda: -</p>
+                        </div>
+
+                        <div class="flex flex-col gap-3 mt-2" id="session-cards">
+                            
+                            <div id="card-PAGI" onclick="pilihSesi('PAGI')" class="flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 text-xl">
+                                        <i class="fa-solid fa-sun"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-zamrud-900 text-base">Pagi</h4>
+                                        <p class="text-xs text-zamrud-300 mt-0.5">04:45 - 06:00</p>
+                                    </div>
+                                </div>
+                                <div id="badge-PAGI" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
+                            </div>
+
+                            <div id="card-SORE" onclick="pilihSesi('SORE')" class="flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 text-xl">
+                                        <i class="fa-solid fa-clock"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-zamrud-900 text-base">Sore</h4>
+                                        <p class="text-xs text-zamrud-300 mt-0.5">15:45 - 16:45</p>
+                                    </div>
+                                </div>
+                                <div id="badge-SORE" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
+                            </div>
+
+                            <div id="card-MAGHRIB" onclick="pilihSesi('MAGHRIB')" class="hidden flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-purple-500 text-xl">
+                                        <i class="fa-solid fa-mosque"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-zamrud-900 text-base">Maghrib</h4>
+                                        <p class="text-xs text-zamrud-300 mt-0.5">18:30 - 19:30</p>
+                                    </div>
+                                </div>
+                                <div id="badge-MAGHRIB" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
+                            </div>
+
+                            <div id="card-MALAM" onclick="pilihSesi('MALAM')" class="flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 text-xl">
+                                        <i class="fa-solid fa-moon"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-zamrud-900 text-base">Malam</h4>
+                                        <p class="text-xs text-zamrud-300 mt-0.5">19:30 - 20:30</p>
+                                        <p id="malam-hari-keterangan" class="hidden text-[10px] text-emas-600 font-medium mt-0.5">
+                                            <i class="fa-solid fa-calendar-day mr-1"></i>Senin, Selasa, Rabu
+                                        </p>
+                                    </div>
+                                </div>
+                                <div id="badge-MALAM" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
+                            </div>
+                        </div>
+                        
+                        <input type="file" id="camera-input" accept="image/*" capture="user" class="hidden">
+                        <canvas id="canvas" class="hidden"></canvas>
+                    </div>
                 </div>
+                
             </div>
+            <!-- ===== END REAL CONTENT ===== -->
+
         </div>
 
         <div id="screen-hafidz" class="app-screen hide-scroll bg-gading">
@@ -513,9 +514,9 @@
                     <option value="ALL">Semua Periode</option>
                 </select>
 
-                <div class="flex gap-2 overflow-x-auto hide-scroll pb-1">
+                <div id="rekap-filter-kategori-row" class="flex gap-2 overflow-x-auto hide-scroll pb-1">
                     <button type="button" data-kategori="ALL" onclick="setKategoriRekapFilter(this)" class="filter-chip flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border border-zamrud-100 text-zamrud-600 bg-white transition">Semua</button>
-                    <button type="button" data-kategori="Tahfidz" onclick="setKategoriRekapFilter(this)" class="filter-chip is-active flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border border-zamrud-100 text-zamrud-600 bg-white transition">Tahfidz</button>
+                    <button type="button" data-kategori="Tahfidz" onclick="setKategoriRekapFilter(this)" class="filter-chip flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border border-zamrud-100 text-zamrud-600 bg-white transition">Tahfidz</button>
                     <button type="button" data-kategori="Ta'lim Umum" onclick="setKategoriRekapFilter(this)" class="filter-chip flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border border-zamrud-100 text-zamrud-600 bg-white transition">Ta'lim Umum</button>
                     <button type="button" data-kategori="Ta'lim Khusus" onclick="setKategoriRekapFilter(this)" class="filter-chip flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border border-zamrud-100 text-zamrud-600 bg-white transition">Ta'lim Khusus</button>
                 </div>
@@ -695,9 +696,10 @@
                 </div>
 
                 <!-- Summary Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+                <div id="summary-cards-sesi-hari" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
                     <div class="bg-zamrud-600 rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
                         <div class="relative z-10">
+                            <p class="text-sm font-medium mb-1">مجموع الحضور</p>
                             <p class="text-4xl font-bold font-heading mb-1" id="stat-total-sesi">0</p>
                             <p class="text-xs text-zamrud-100">Sesi Hadir</p>
                         </div>
@@ -706,15 +708,28 @@
                     
                     <div class="bg-zamrud-500 rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
                         <div class="relative z-10">
+                            <p class="text-sm font-medium mb-1">مجموع أيام الحضور</p>
                             <p class="text-4xl font-bold font-heading mb-1" id="stat-total-hari">0</p>
-                            <p class="text-xs text-zamrud-100">Hari Hadir</p>
+                            <p class="text-xs text-zamrud-100">Total Hari Hadir</p>
                         </div>
                         <i class="fa-solid fa-calendar-day absolute -right-2 -bottom-4 text-7xl opacity-20"></i>
                     </div>
 
                     <div class="bg-emas-600 rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
                         <div class="relative z-10">
+                            <p class="text-sm font-medium mb-1">مجموع الحضور الكلي</p>
                             <p class="text-4xl font-bold font-heading mb-1" id="stat-total-hadir">0</p>
+                            <p class="text-xs text-emas-50">Total Hadir</p>
+                        </div>
+                        <i class="fa-solid fa-star absolute -right-2 -bottom-4 text-7xl opacity-20"></i>
+                    </div>
+                </div>
+
+                <div id="summary-card-hadir-only" class="hidden grid grid-cols-1 gap-4 mb-5">
+                    <div class="bg-emas-600 rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
+                        <div class="relative z-10">
+                            <p class="text-sm font-medium mb-1">مجموع الحضور</p>
+                            <p class="text-4xl font-bold font-heading mb-1" id="stat-hadir-only">0</p>
                             <p class="text-xs text-emas-50">Total Hadir</p>
                         </div>
                         <i class="fa-solid fa-star absolute -right-2 -bottom-4 text-7xl opacity-20"></i>
@@ -1013,6 +1028,68 @@
             renderHafidzList();
         }
 
+        // Menentukan chip filter kategori mana yang perlu ditampilkan,
+        // berdasarkan kategori-kategori yang benar-benar pernah dicatat di riwayat absen milik pengajar ini.
+        // Admin selalu melihat semua chip karena mereka mengawasi seluruh kategori.
+        function sesuaikanFilterKategoriRekap() {
+            const filterRow = document.getElementById('rekap-filter-kategori-row');
+            if (!filterRow) return;
+
+            if (currentUser.role === 'admin') {
+                filterRow.classList.remove('hidden');
+                filterRow.classList.add('flex');
+                // Pastikan semua chip terlihat untuk admin
+                filterRow.querySelectorAll('.filter-chip').forEach(el => el.classList.remove('hidden'));
+                sinkronkanChipAktifRekap();
+                return;
+            }
+
+            // Kumpulkan kategori unik dari riwayat absen milik pengajar ini
+            const kategoriUnik = new Set(
+                absensiData
+                    .filter(item => item.username === currentUser.username)
+                    .map(item => item.kategori)
+                    .filter(Boolean)
+            );
+
+            // Selalu sertakan kategori profil saat ini juga, meskipun belum pernah absen sama sekali
+            if (currentUser.kategori) kategoriUnik.add(currentUser.kategori);
+
+            if (kategoriUnik.size <= 1) {
+                // Hanya 1 kategori (atau kosong) -> sembunyikan seluruh baris filter
+                filterRow.classList.add('hidden');
+                filterRow.classList.remove('flex');
+                // Pastikan filter tetap mengarah ke satu-satunya kategori yang ada
+                if (kategoriUnik.size === 1) {
+                    selectedKategoriRekap = Array.from(kategoriUnik)[0];
+                }
+            } else {
+                // Lebih dari 1 kategori -> tampilkan baris filter, tapi hanya chip yang relevan + "Semua"
+                filterRow.classList.remove('hidden');
+                filterRow.classList.add('flex');
+
+                filterRow.querySelectorAll('.filter-chip').forEach(el => {
+                    const kat = el.dataset.kategori;
+                    if (kat === 'ALL' || kategoriUnik.has(kat)) {
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
+                });
+            }
+
+            sinkronkanChipAktifRekap();
+        }
+
+        function sinkronkanChipAktifRekap() {
+            document.querySelectorAll('#screen-rekap .filter-chip').forEach(el => {
+                el.classList.remove('is-active');
+                if (el.dataset.kategori === selectedKategoriRekap) {
+                    el.classList.add('is-active');
+                }
+            });
+        }
+
         function setKategoriRekapFilter(btn) {
             selectedKategoriRekap = btn.dataset.kategori;
 
@@ -1161,6 +1238,8 @@
 
             // Logika Halaman Riwayat Absen (Rekap)
             if (screenName === 'rekap') {
+                sesuaikanFilterKategoriRekap();
+
                 populateBulanDropdownRekap();
                 loadRekap();
                 
@@ -1245,6 +1324,12 @@
 
         function initApp() {
 
+            // Set filter kategori Riwayat Absen default sesuai kategori pengajar yang login
+            // (Admin tetap default ke Tahfidz karena mereka melihat semua kategori)
+            if (currentUser.role !== 'admin' && currentUser.kategori) {
+                selectedKategoriRekap = currentUser.kategori;
+            }
+
             document.getElementById('user-greeting-name').innerText = currentUser.name;
             document.getElementById('home-kategori-badge').innerText = currentUser.kategori;
             document.getElementById('profile-name').innerText = currentUser.name;
@@ -1325,18 +1410,24 @@
 
         function lockSession(sesiList) {
             const sesiAll = ['PAGI', 'SORE', 'MAGHRIB', 'MALAM'];
+            let adaKartuTampil = false;
+
             sesiAll.forEach(sesi => {
                 const card = document.getElementById(`card-${sesi}`);
                 const badge = document.getElementById(`badge-${sesi}`);
                 if(!card || !badge) return;
                 let containerMateri = card.querySelector('.materi-container');
                 if (currentUser.kategori === "Ta'lim Umum") {
-                    if (!containerMateri) {
-                        containerMateri = document.createElement('div');
-                        containerMateri.className = 'materi-container text-[10px] text-zamrud-500 font-medium mt-2 pt-2 border-t border-gray-100 flex items-center gap-1';
-                        card.appendChild(containerMateri);
+                    // Cari div info (icon+teks) di dalam card -- itu yang perlu dibungkus jadi kolom vertikal
+                    const infoWrap = card.querySelector('.flex.items-center.gap-4 > div:last-child');
+                    if (infoWrap && !containerMateri) {
+                        containerMateri = document.createElement('p');
+                        containerMateri.className = 'materi-container text-[10px] text-zamrud-500 font-medium mt-1 flex items-center gap-1';
+                        infoWrap.appendChild(containerMateri);
                     }
-                    containerMateri.innerHTML = `<i class="fa-solid fa-book-open text-emas-500"></i> Materi: <span class="font-semibold text-zamrud-700">${currentUser.materi || '-'}</span>`;
+                    if (containerMateri) {
+                        containerMateri.innerHTML = `<i class="fa-solid fa-book-open text-emas-500"></i> Materi: <span class="font-semibold text-zamrud-700">${currentUser.materi || '-'}</span>`;
+                    }
                 } else if (containerMateri) {
                     containerMateri.remove();
                 }              
@@ -1360,6 +1451,7 @@
                     return;
                 } else {
                     card.classList.remove('hidden');
+                    adaKartuTampil = true;
                 }
 
                 if (sudahHadir) {
@@ -1390,6 +1482,38 @@
                     badge.innerText = "Belum Absen";
                 }
             });
+
+            // Tampilkan keterangan kosong jika tidak ada satupun kartu sesi yang tampil hari ini
+            const noJadwalEl = document.getElementById('no-jadwal-hari-ini');
+            const jadwalInfoEl = document.getElementById('jadwal-anda-info');
+            if (noJadwalEl) {
+                if (!adaKartuTampil && currentUser.role !== 'admin') {
+                    noJadwalEl.classList.remove('hidden');
+                    if (jadwalInfoEl) {
+                        jadwalInfoEl.innerText = `Jadwal Anda: ${buatKeteranganJadwal()}`;
+                    }
+                } else {
+                    noJadwalEl.classList.add('hidden');
+                }
+            }
+        }
+
+        // Membuat teks ringkas jadwal pengajar berdasarkan kategori
+        function buatKeteranganJadwal() {
+            const kategori = currentUser.kategori;
+
+            if (kategori === "Ta'lim Khusus") {
+                return "Senin, Selasa, Rabu (Sesi Malam)";
+            }
+
+            if (kategori === "Ta'lim Umum") {
+                const daftar = [];
+                if (currentUser.jadwal_maghrib) daftar.push(`${currentUser.jadwal_maghrib} (Maghrib)`);
+                if (currentUser.jadwal_malam) daftar.push(`${currentUser.jadwal_malam} (Malam)`);
+                return daftar.length > 0 ? daftar.join(' • ') : 'Belum ada jadwal diatur, hubungi admin.';
+            }
+
+            return 'Setiap hari (Pagi, Sore, Malam)';
         }
 
         function normalizeTanggal(raw) {
@@ -1424,6 +1548,7 @@
                     safeStorage.setItem('lem_absensi', JSON.stringify(absensiData));
                     updateHomeStats();
                     if (document.getElementById('screen-rekap').classList.contains('active')) {
+                        sesuaikanFilterKategoriRekap();
                         populateBulanDropdownRekap();
                         loadRekap();
                     }
@@ -2102,20 +2227,29 @@
                 const usersArr = Object.values(usersObj);
 
                 if (currentUser.role !== 'admin') {
-                    // --- TAMPILAN PENGAJAR (1 Baris: Tanggal di Kiri, P S M di Kanan) ---
+                    // --- TAMPILAN PENGAJAR (1 Baris: Tanggal di Kiri, badge sesi di Kanan) ---
                     const user = usersArr[0]; // Karena bukan admin, datanya pasti hanya 1 (dirinya sendiri)
                     const dataPagi = user.sesi['PAGI'];
                     const dataSore = user.sesi['SORE'];
+                    const dataMaghrib = user.sesi['MAGHRIB'];
                     const dataMalam = user.sesi['MALAM'];
+
+                    // Kategori Ta'lim Umum tidak punya sesi Pagi/Sore, jadi cukup tampilkan Maghrib & Malam
+                    const isTalimUmum = currentUser.kategori === "Ta'lim Umum";
 
                     const badgePagi = dataPagi ? buatBadgeSesi(dataPagi, 'Pagi', 'P', 'amber') : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">P</div>`;
                     const badgeSore = dataSore ? buatBadgeSesi(dataSore, 'Sore', 'S', 'blue') : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">S</div>`;
+                    const badgeMaghrib = dataMaghrib ? buatBadgeSesi(dataMaghrib, 'Maghrib', 'G', 'purple') : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">G</div>`;
                     const badgeMalam = dataMalam ? buatBadgeSesi(dataMalam, 'Malam', 'M', 'indigo') : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">M</div>`;
                     const adaPending = Object.values(user.sesi).some(s => s._pending);
 
                     // Buat Kartu Minimalis
                     const card = document.createElement('div');
                     card.className = 'rekap-group bg-white p-3.5 rounded-xl shadow-sm border border-emas-100 flex items-center justify-between mb-3';
+
+                    const badgeHtml = isTalimUmum
+                        ? `${badgeMaghrib}${badgeMalam}`
+                        : `${badgePagi}${badgeSore}${badgeMalam}`;
                     
                     card.innerHTML = `
                         <div class="flex-1 min-w-0 pr-3 border-l-4 border-emas-400 pl-2.5 rounded-l-sm">
@@ -2123,9 +2257,7 @@
                             ${adaPending ? '<p class="text-[9px] text-amber-600 mt-1"><i class="fa-solid fa-clock-rotate-left mr-1"></i>Sinkronisasi...</p>' : ''}
                         </div>
                         <div class="flex gap-2 shrink-0">
-                            ${badgePagi}
-                            ${badgeSore}
-                            ${badgeMalam}
+                            ${badgeHtml}
                         </div>
                     `;
                     container.appendChild(card);
@@ -2149,15 +2281,23 @@
                     usersArr.forEach(user => {
                         const dataPagi = user.sesi['PAGI'];
                         const dataSore = user.sesi['SORE'];
+                        const dataMaghrib = user.sesi['MAGHRIB'];
                         const dataMalam = user.sesi['MALAM'];
+
+                        const isTalimUmum = user.kategori === "Ta'lim Umum";
 
                         const badgePagi = dataPagi ? buatBadgeSesi(dataPagi, 'Pagi', 'P', 'amber') : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">P</div>`;
                         const badgeSore = dataSore ? buatBadgeSesi(dataSore, 'Sore', 'S', 'blue') : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">S</div>`;
+                        const badgeMaghrib = dataMaghrib ? buatBadgeSesi(dataMaghrib, 'Maghrib', 'G', 'purple') : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">G</div>`;
                         const badgeMalam = dataMalam ? buatBadgeSesi(dataMalam, 'Malam', 'M', 'indigo') : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">M</div>`;
 
                         const userCard = document.createElement('div');
                         userCard.className = 'bg-white p-3 rounded-xl shadow-sm border border-emas-100 flex items-center justify-between';
                         const adaPending = Object.values(user.sesi).some(s => s._pending);
+
+                        const badgeHtml = isTalimUmum
+                            ? `${badgeMaghrib}${badgeMalam}`
+                            : `${badgePagi}${badgeSore}${badgeMalam}`;
                         
                         userCard.innerHTML = `
                             <div class="flex-1 min-w-0 pr-3">
@@ -2166,9 +2306,7 @@
                                 ${adaPending ? '<p class="text-[9px] text-amber-600 mt-0.5"><i class="fa-solid fa-clock-rotate-left mr-1"></i>Menunggu sinkronisasi</p>' : ''}
                             </div>
                             <div class="flex gap-1.5 shrink-0">
-                                ${badgePagi}
-                                ${badgeSore}
-                                ${badgeMalam}
+                                ${badgeHtml}
                             </div>
                         `;
                         listContainer.appendChild(userCard);
@@ -2179,13 +2317,22 @@
                 }
             });
         }
-        // Mengubah format "YYYY-MM-DD" menjadi "DD Bulan YYYY" (Contoh: 3 Juli 2026)
+        // Mengubah format "YYYY-MM-DD" menjadi "Hari, DD Bulan YYYY" (Contoh: Selasa, 7 Juli 2026)
         function formatTanggalIndo(tglStr) {
             if(!tglStr) return '-';
             const bulanArr = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            const namaHariArr = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
             const parts = tglStr.split('-');
             if(parts.length !== 3) return tglStr;
-            return `${parseInt(parts[2], 10)} ${bulanArr[parseInt(parts[1], 10)-1]} ${parts[0]}`;
+
+            const tanggal = parseInt(parts[2], 10);
+            const bulanIndex = parseInt(parts[1], 10) - 1;
+            const tahun = parseInt(parts[0], 10);
+
+            const dateObj = new Date(tahun, bulanIndex, tanggal);
+            const namaHari = namaHariArr[dateObj.getDay()];
+
+            return `${namaHari}, ${tanggal} ${bulanArr[bulanIndex]} ${tahun}`;
         }
         // Membuat badge P/S/M, dengan tanda silang jika absen sudah dibatalkan admin
         function buatBadgeSesi(dataSesi, namaSesi, huruf, warna) {
@@ -2211,6 +2358,7 @@
             const iconSesi = {
                 'Pagi': 'fa-sun',
                 'Sore': 'fa-clock',
+                'Maghrib': 'fa-mosque',
                 'Malam': 'fa-moon'
             }[namaSesi] || 'fa-clock';
 
@@ -2384,10 +2532,15 @@
         function toggleJadwalTalimUmum() {
             const kategori = document.getElementById('user-form-kategori').value;
             const wrap = document.getElementById('user-form-jadwal-wrap');
+            const materiWrap = document.getElementById('user-form-materi-wrap');
+
             if (kategori === "Ta'lim Umum") {
                 wrap.classList.remove('hidden');
+                materiWrap.classList.remove('hidden');
             } else {
                 wrap.classList.add('hidden');
+                materiWrap.classList.add('hidden');
+                document.getElementById('user-form-materi').value = ''; // Reset pilihan materi jika kategori diganti
             }
         }
 
@@ -2397,23 +2550,23 @@
 
             container.innerHTML = HARI_LIST.map(hari => {
                 const aktif = daftarTerpilih.includes(hari);
-                return `<button type="button" data-hari="${hari}" onclick="toggleJadwalChip(this)" class="jadwal-chip text-[10px] font-semibold px-2.5 py-1 rounded-full border transition ${aktif ? 'bg-zamrud-900 text-emas-200 border-zamrud-900' : 'bg-white text-zamrud-500 border-zamrud-200'}">${hari.substring(0,3)}</button>`;
+                return `<button type="button" data-hari="${hari}" onclick="toggleJadwalChip(this)" class="jadwal-chip text-[10px] font-semibold px-2.5 py-1 rounded-full border transition ${aktif ? 'bg-emas-500 text-white border-emas-600' : 'bg-white text-zamrud-500 border-zamrud-200'}">${hari.substring(0,3)}</button>`;
             }).join('');
         }
 
         function toggleJadwalChip(btn) {
-            const aktif = btn.classList.contains('bg-zamrud-900');
+            const aktif = btn.classList.contains('bg-emas-500');
             if (aktif) {
-                btn.classList.remove('bg-zamrud-900', 'text-emas-200', 'border-zamrud-900');
+                btn.classList.remove('bg-emas-500', 'text-white', 'border-emas-600');
                 btn.classList.add('bg-white', 'text-zamrud-500', 'border-zamrud-200');
             } else {
-                btn.classList.add('bg-zamrud-900', 'text-emas-200', 'border-zamrud-900');
+                btn.classList.add('bg-emas-500', 'text-white', 'border-emas-600');
                 btn.classList.remove('bg-white', 'text-zamrud-500', 'border-zamrud-200');
             }
         }
 
         function getJadwalTerpilih(containerId) {
-            const chips = document.querySelectorAll(`#${containerId} .jadwal-chip.bg-zamrud-900`);
+            const chips = document.querySelectorAll(`#${containerId} .jadwal-chip.bg-emas-500`);
             return Array.from(chips).map(c => c.dataset.hari).join(',');
         }
 
@@ -2427,6 +2580,7 @@
             document.getElementById('user-form-name').value = '';
             document.getElementById('user-form-role').value = 'pengajar';
             document.getElementById('user-form-kategori').value = '';
+            document.getElementById('user-form-materi').value = '';
             renderJadwalChips('user-form-jadwal-maghrib', '');
             renderJadwalChips('user-form-jadwal-malam', '');
             toggleJadwalTalimUmum();
@@ -2449,6 +2603,7 @@
             document.getElementById('user-form-name').value = user.name;
             document.getElementById('user-form-role').value = user.role;
             document.getElementById('user-form-kategori').value = user.kategori || '';
+            document.getElementById('user-form-materi').value = user.materi || '';
             renderJadwalChips('user-form-jadwal-maghrib', user.jadwal_maghrib);
             renderJadwalChips('user-form-jadwal-malam', user.jadwal_malam);
             toggleJadwalTalimUmum();
@@ -2471,6 +2626,7 @@
             const name = document.getElementById('user-form-name').value.trim();
             const role = document.getElementById('user-form-role').value;
             const kategori = document.getElementById('user-form-kategori').value;
+            const materi = document.getElementById('user-form-materi').value;
             const jadwalMaghrib = getJadwalTerpilih('user-form-jadwal-maghrib');
             const jadwalMalam = getJadwalTerpilih('user-form-jadwal-malam');
 
@@ -2491,6 +2647,7 @@
                 name: name,
                 role: role,
                 kategori: kategori,
+                materi: materi,
                 jadwal_maghrib: jadwalMaghrib,
                 jadwal_malam: jadwalMalam
             };
@@ -3117,11 +3274,13 @@
 
             // 1. Ambil daftar SEMUA pengajar dari data Users (bukan hanya yang punya riwayat absen)
             let userList = allUsersData
-                .filter(u => u.role !== 'admin') // Opsional: sembunyikan akun admin dari rekap pengajar. Hapus baris ini jika admin tetap ingin ditampilkan.
+                .filter(u => u.role !== 'admin')
                 .map(u => ({
                     username: u.username,
                     nama: u.name,
-                    kategori: u.kategori || '-'
+                    kategori: u.kategori || '-',
+                    jadwal_maghrib: u.jadwal_maghrib || '',
+                    jadwal_malam: u.jadwal_malam || ''
                 }));
 
             // 2. Filter Kategori
@@ -3134,6 +3293,11 @@
             if (filterBulan) {
                 filteredAbsen = filteredAbsen.filter(item => item.tanggal.startsWith(filterBulan));
             }
+
+            const now = new Date();
+            const filterBulanDate = filterBulan
+                ? new Date(parseInt(filterBulan.split('-')[0], 10), parseInt(filterBulan.split('-')[1], 10) - 1, 1)
+                : now;
 
             // 4. Kalkulasi Statistik per User (sebelum diurutkan)
             const tableBody = document.getElementById('admin-rekap-table');
@@ -3161,10 +3325,11 @@
                     totalSesiGlobal += totalSesi;
                     userAbsen.forEach(a => totalHariGlobal.add(a.tanggal + '_' + a.username));
 
-                    const MAX_SESI = 60; 
+                    const targetSesi = hitungTargetSesiUntukUser(user, filterBulanDate.getFullYear(), filterBulanDate.getMonth());
+                    const realisasi = hitungRealisasiUntukUser(user, userAbsen);
                     let persentase = 0;
-                    if (totalSesi > 0) {
-                        persentase = Math.min(100, Math.round((totalSesi / MAX_SESI) * 100));
+                    if (realisasi > 0 && targetSesi > 0) {
+                        persentase = Math.min(100, Math.round((realisasi / targetSesi) * 100));
                     }
 
                     let barColor = 'bg-red-500';
@@ -3189,6 +3354,18 @@
                         </div>
                         
                         <!-- Bagian Tengah Kartu: Angka Statistik -->
+                        ${user.kategori === "Ta'lim Umum" || user.kategori === "Ta'lim Khusus" ? `
+                        <div class="flex items-center justify-between bg-slate-50 rounded-lg p-2 mt-1">
+                            <div class="text-center flex-1 border-r border-gray-200">
+                                <p class="text-[9px] text-gray-500 uppercase tracking-wide">Hadir</p>
+                                <p class="font-bold text-emas-600 text-sm">${realisasi}</p>
+                            </div>
+                            <div class="text-center flex-1">
+                                <p class="text-[9px] text-gray-500 uppercase tracking-wide">Persentase</p>
+                                <p class="font-bold ${textColor} text-sm">${persentase}%</p>
+                            </div>
+                        </div>
+                        ` : `
                         <div class="flex items-center justify-between bg-slate-50 rounded-lg p-2 mt-1">
                             <div class="text-center flex-1 border-r border-gray-200">
                                 <p class="text-[9px] text-gray-500 uppercase tracking-wide">Sesi Hadir</p>
@@ -3207,6 +3384,7 @@
                                 <p class="font-bold ${textColor} text-sm">${persentase}%</p>
                             </div>
                         </div>
+                        `}
                         
                         <!-- Bagian Bawah Kartu: Progress Bar -->
                         <div class="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden mt-1">
@@ -3217,9 +3395,35 @@
                 });
             }
 
-            document.getElementById('stat-total-sesi').innerText = totalSesiGlobal;
-            document.getElementById('stat-total-hari').innerText = totalHariGlobal.size;
-            document.getElementById('stat-total-hadir').innerText = totalSesiGlobal + totalHariGlobal.size;
+            // Tentukan apakah filter kategori yang aktif adalah kategori "tanpa sesi" (Ta'lim Umum/Khusus)
+            const kategoriTerpilihTanpaSesi = (filterKategori === "Ta'lim Umum" || filterKategori === "Ta'lim Khusus");
+
+            const boxSesiHari = document.getElementById('summary-cards-sesi-hari');
+            const boxHadirOnly = document.getElementById('summary-card-hadir-only');
+
+            if (kategoriTerpilihTanpaSesi) {
+                // Hitung total hadir sesuai jenis kategori (per sesi utk Ta'lim Umum, per hari utk Ta'lim Khusus)
+                let totalHadirKategori = 0;
+                if (filterKategori === "Ta'lim Umum") {
+                    totalHadirKategori = filteredAbsen.filter(a => a.kategori === filterKategori).length;
+                } else {
+                    totalHadirKategori = new Set(filteredAbsen.filter(a => a.kategori === filterKategori).map(a => a.tanggal + '_' + a.username)).size;
+                }
+                document.getElementById('stat-hadir-only').innerText = totalHadirKategori;
+
+                boxSesiHari.classList.add('hidden');
+                boxHadirOnly.classList.remove('hidden');
+                boxHadirOnly.classList.add('grid');
+            } else {
+                document.getElementById('stat-total-sesi').innerText = totalSesiGlobal;
+                document.getElementById('stat-total-hari').innerText = totalHariGlobal.size;
+                document.getElementById('stat-total-hadir').innerText = totalSesiGlobal + totalHariGlobal.size;
+
+                boxSesiHari.classList.remove('hidden');
+                boxSesiHari.classList.add('grid');
+                boxHadirOnly.classList.add('hidden');
+                boxHadirOnly.classList.remove('grid');
+            }
         }
 
         function formatWaktuEdit(raw) {
@@ -3506,7 +3710,76 @@
 
             dropdown.value = currentValue;
         } 
-        
+        // Menghitung berapa kali hari-hari tertentu (misal "Senin,Rabu") muncul dalam sebulan
+        function hitungJumlahHariDalamBulan(daftarHariStr, tahun, bulanIndex) {
+            const daftarHari = String(daftarHariStr || '').split(',').map(h => h.trim()).filter(Boolean);
+            if (daftarHari.length === 0) return 0;
+
+            const indexHari = daftarHari.map(nama => NAMA_HARI.indexOf(nama)).filter(i => i !== -1);
+            const jumlahHariDalamBulan = new Date(tahun, bulanIndex + 1, 0).getDate();
+
+            let total = 0;
+            for (let tgl = 1; tgl <= jumlahHariDalamBulan; tgl++) {
+                const hariKe = new Date(tahun, bulanIndex, tgl).getDay();
+                if (indexHari.includes(hariKe)) total++;
+            }
+            return total;
+        }
+
+        // Versi generik: menghitung target sesi seharusnya dalam sebulan untuk USER MANAPUN (bukan hanya currentUser)
+        function hitungTargetSesiUntukUser(user, tahun, bulanIndex) {
+            if (user.kategori === "Ta'lim Khusus") {
+                return hitungJumlahHariDalamBulan("Senin,Selasa,Rabu", tahun, bulanIndex);
+            }
+            if (user.kategori === "Ta'lim Umum") {
+                const targetMaghrib = hitungJumlahHariDalamBulan(user.jadwal_maghrib, tahun, bulanIndex);
+                const targetMalam = hitungJumlahHariDalamBulan(user.jadwal_malam, tahun, bulanIndex);
+                return targetMaghrib + targetMalam;
+            }
+
+            // Tahfidz: setiap hari ada 3 sesi (Pagi, Sore, Malam),
+            // KECUALI hari Kamis (Malam libur) dan Jumat (Pagi libur) -> hanya 2 sesi di hari itu
+            const jumlahHariDalamBulan = new Date(tahun, bulanIndex + 1, 0).getDate();
+            let totalTargetSesi = 0;
+            for (let tgl = 1; tgl <= jumlahHariDalamBulan; tgl++) {
+                const hariKe = new Date(tahun, bulanIndex, tgl).getDay(); // 0=Minggu, 4=Kamis, 5=Jumat
+                if (hariKe === 4 || hariKe === 5) {
+                    totalTargetSesi += 2;
+                } else {
+                    totalTargetSesi += 3;
+                }
+            }
+            return totalTargetSesi;
+        }
+
+        // Menghitung realisasi "hadir" (jumlah yang dibandingkan dengan target) untuk USER MANAPUN
+        function hitungRealisasiUntukUser(user, userAbsen) {
+            if (user.kategori === "Ta'lim Khusus") {
+                return new Set(userAbsen.map(a => a.tanggal)).size; // per hari (1 sesi/hari)
+            }
+            if (user.kategori === "Ta'lim Umum") {
+                return userAbsen.length; // per sesi (bisa 2 sesi/hari)
+            }
+            return userAbsen.length; // Tahfidz -> per sesi seperti sebelumnya
+        }
+
+        // Menghitung target jumlah kehadiran seharusnya dalam sebulan, sesuai kategori & jadwal pengajar
+        function hitungTargetHariBulanIni(tahun, bulanIndex) {
+            if (currentUser.kategori === "Ta'lim Khusus") {
+                // Hanya 1 sesi (Malam), jadi target = jumlah hari Senin/Selasa/Rabu dalam bulan itu
+                return hitungJumlahHariDalamBulan("Senin,Selasa,Rabu", tahun, bulanIndex);
+            }
+
+            if (currentUser.kategori === "Ta'lim Umum") {
+                // Jumlahkan (bukan gabungkan) target Maghrib + target Malam,
+                // supaya hari yang punya 2 jadwal sekaligus dihitung 2, bukan 1
+                const targetMaghrib = hitungJumlahHariDalamBulan(currentUser.jadwal_maghrib, tahun, bulanIndex);
+                const targetMalam = hitungJumlahHariDalamBulan(currentUser.jadwal_malam, tahun, bulanIndex);
+                return targetMaghrib + targetMalam;
+            }
+
+            return 0; // Tidak dipakai untuk kategori lain (Tahfidz pakai MAX_SESI seperti biasa)
+        }
         // --- UPDATE STATISTIK BERANDA (PERSONAL) ---
         function gantiBulanStat(arah) {
             // Hanya izinkan 2 posisi: 0 (bulan berjalan) atau -1 (1 bulan sebelumnya). Tidak lebih.
@@ -3538,18 +3811,6 @@
                 item.tanggal.startsWith(targetBulan)
             );
 
-            // Kalkulasi
-            const totalSesi = myAbsenBulanIni.length;
-            const hariHadirSet = new Set(myAbsenBulanIni.map(a => a.tanggal));
-            const totalHari = hariHadirSet.size;
-
-            const MAX_SESI = 60; // Asumsi sebulan full 60 sesi
-            let persentase = 0;
-            if (totalSesi > 0) {
-                persentase = Math.min(100, Math.round((totalSesi / MAX_SESI) * 100));
-            }
-
-            // Tembak nilainya ke HTML
             const statSesiEl = document.getElementById('home-stat-sesi');
             const statHariEl = document.getElementById('home-stat-hari');
             const statTotalEl = document.getElementById('home-stat-total');
@@ -3557,12 +3818,49 @@
             const statBulanLabelEl = document.getElementById('home-stat-bulan-label');
             const btnNext = document.getElementById('btn-stat-next');
             const btnPrev = document.getElementById('btn-stat-prev');
-            const totalHadir = totalSesi + totalHari;
+            const boxSesi = document.getElementById('box-stat-sesi');
+            const boxHari = document.getElementById('box-stat-hari');
+            const labelTotal = document.getElementById('label-stat-total');
 
-            if(statSesiEl) statSesiEl.innerText = totalSesi;
-            if(statHariEl) statHariEl.innerText = totalHari;
-            if(statTotalEl) statTotalEl.innerText = totalHadir;
-            if(statPersenEl) statPersenEl.innerText = `${persentase}%`;
+            const kategoriTanpaSesi = (currentUser.kategori === "Ta'lim Umum" || currentUser.kategori === "Ta'lim Khusus");
+
+            let totalHadir, persentase;
+
+            if (kategoriTanpaSesi) {
+                // Ta'lim Khusus: 1 sesi per hari -> hitung per hari hadir
+                // Ta'lim Umum: bisa 2 sesi (Maghrib+Malam) per hari -> hitung per SESI hadir, bukan per hari
+                if (currentUser.kategori === "Ta'lim Umum") {
+                    totalHadir = myAbsenBulanIni.length; // Jumlah baris absen (per sesi)
+                } else {
+                    const hariHadirSet = new Set(myAbsenBulanIni.map(a => a.tanggal));
+                    totalHadir = hariHadirSet.size;
+                }
+
+                const targetHari = hitungTargetHariBulanIni(targetDate.getFullYear(), targetDate.getMonth());
+                persentase = targetHari > 0 ? Math.min(100, Math.round((totalHadir / targetHari) * 100)) : 0;
+
+                if (boxSesi) boxSesi.classList.add('hidden');
+                if (boxHari) boxHari.classList.add('hidden');
+                if (labelTotal) labelTotal.innerText = 'Hadir';
+            } else {
+                // Tahfidz & kategori lain: logika lama (Sesi + Hari terpisah)
+                const totalSesi = myAbsenBulanIni.length;
+                const hariHadirSet = new Set(myAbsenBulanIni.map(a => a.tanggal));
+                const totalHari = hariHadirSet.size;
+
+                const MAX_SESI = 60;
+                persentase = totalSesi > 0 ? Math.min(100, Math.round((totalSesi / MAX_SESI) * 100)) : 0;
+                totalHadir = totalSesi + totalHari;
+
+                if (statSesiEl) statSesiEl.innerText = totalSesi;
+                if (statHariEl) statHariEl.innerText = totalHari;
+                if (boxSesi) boxSesi.classList.remove('hidden');
+                if (boxHari) boxHari.classList.remove('hidden');
+                if (labelTotal) labelTotal.innerText = 'Total Hadir';
+            }
+
+            if (statTotalEl) statTotalEl.innerText = totalHadir;
+            if (statPersenEl) statPersenEl.innerText = `${persentase}%`;
 
             // Label bulan yang sedang ditampilkan
             const bulanArr = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -3605,9 +3903,21 @@
                     item.username === currentUser.username &&
                     item.tanggal.startsWith(displayBulan)
                 );
-                const totalSesiEfektif = absenBulanEfektif.length;
-                const totalHariEfektif = new Set(absenBulanEfektif.map(a => a.tanggal)).size;
-                const totalHadirEfektif = totalSesiEfektif + totalHariEfektif;
+
+                // Samakan logika dengan kartu statistik Beranda:
+                // Ta'lim Umum -> hitung per SESI (bisa 2x sehari)
+                // Ta'lim Khusus -> hitung per HARI (hanya 1 sesi/hari)
+                // Tahfidz & lainnya -> Sesi + Hari (seperti semula)
+                let totalHadirEfektif;
+                if (currentUser.kategori === "Ta'lim Umum") {
+                    totalHadirEfektif = absenBulanEfektif.length;
+                } else if (currentUser.kategori === "Ta'lim Khusus") {
+                    totalHadirEfektif = new Set(absenBulanEfektif.map(a => a.tanggal)).size;
+                } else {
+                    const totalSesiEfektif = absenBulanEfektif.length;
+                    const totalHariEfektif = new Set(absenBulanEfektif.map(a => a.tanggal)).size;
+                    totalHadirEfektif = totalSesiEfektif + totalHariEfektif;
+                }
 
                 // Kalkulasi Total Hadir x Rp 10.000
                 const totalHonor = totalHadirEfektif * 10000;
@@ -3642,10 +3952,15 @@
                     const teksBulan = dropdownBulan.options[dropdownBulan.selectedIndex] ? dropdownBulan.options[dropdownBulan.selectedIndex].text : 'Semua Waktu';
                     const filterKategori = document.getElementById('filter-kategori').value;
 
-                    // 1. Ambil SEMUA pengajar dari data Users (bukan hanya yang punya riwayat absen)
                     let userList = allUsersData
                         .filter(u => u.role !== 'admin')
-                        .map(u => ({ username: u.username, nama: u.name, kategori: u.kategori || '-' }));
+                        .map(u => ({
+                            username: u.username,
+                            nama: u.name,
+                            kategori: u.kategori || '-',
+                            jadwal_maghrib: u.jadwal_maghrib || '',
+                            jadwal_malam: u.jadwal_malam || ''
+                        }));
                     if (filterKategori !== 'ALL') userList = userList.filter(u => u.kategori === filterKategori);
 
                     // 2. Filter Absensi
@@ -3653,11 +3968,15 @@
                     if (filterBulanVal) filteredAbsen = filteredAbsen.filter(item => item.tanggal.startsWith(filterBulanVal));
 
                     // 3. Hitung statistik per user, lalu urutkan (Total Sesi + Total Hari Hadir terbanyak)
+                    const pdfBulanDate = filterBulanVal
+                        ? new Date(parseInt(filterBulanVal.split('-')[0], 10), parseInt(filterBulanVal.split('-')[1], 10) - 1, 1)
+                        : new Date();
+
                     userList = userList.map(user => {
                         const userAbsen = filteredAbsen.filter(a => a.username === user.username);
                         const totalSesi = userAbsen.length;
                         const totalHari = new Set(userAbsen.map(a => a.tanggal)).size;
-                        return { ...user, totalSesi, totalHari };
+                        return { ...user, totalSesi, totalHari, userAbsen };
                     });
 
                     userList.sort((a, b) => (b.totalSesi + b.totalHari) - (a.totalSesi + a.totalHari));
@@ -3665,16 +3984,20 @@
                     // 4. Siapkan baris (rows) untuk tabel PDF
                     const tableRows = [];
                     userList.forEach((user, index) => {
-                        const { totalSesi, totalHari } = user;
-                        const persentase = totalSesi > 0 ? Math.min(100, Math.round((totalSesi / 60) * 100)) : 0;
+                        const { totalSesi, totalHari, userAbsen } = user;
+                        const kategoriTanpaSesi = (user.kategori === "Ta'lim Umum" || user.kategori === "Ta'lim Khusus");
+
+                        const targetSesi = hitungTargetSesiUntukUser(user, pdfBulanDate.getFullYear(), pdfBulanDate.getMonth());
+                        const realisasi = hitungRealisasiUntukUser(user, userAbsen);
+                        const persentase = (realisasi > 0 && targetSesi > 0) ? Math.min(100, Math.round((realisasi / targetSesi) * 100)) : 0;
 
                         tableRows.push([
                             index + 1,
                             user.nama,
                             user.kategori,
-                            totalSesi,
-                            totalHari,
-                            totalSesi + totalHari,
+                            kategoriTanpaSesi ? '-' : totalSesi,
+                            kategoriTanpaSesi ? '-' : totalHari,
+                            realisasi,
                             `${persentase}%`
                         ]);
                     });
