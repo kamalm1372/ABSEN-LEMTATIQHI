@@ -461,9 +461,14 @@
             <div class="bg-white pt-8 pb-4 px-5 shadow-sm sticky top-0 z-20 border-b border-emas-100">
                 <div class="flex items-center justify-between mb-1">
                     <h2 class="text-xl font-heading font-bold text-zamrud-900">Progres Hafalan</h2>
-                    <button type="button" id="btn-tambah-santri" onclick="openAddSantriModal()" class="hidden w-9 h-9 rounded-full bg-zamrud-900 text-emas-300 flex items-center justify-center active:scale-95 transition">
-                        <i class="fa-solid fa-plus text-sm"></i>
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="openExportHafidzModal()" class="w-9 h-9 rounded-full bg-red-50 text-red-600 border border-red-200 flex items-center justify-center active:scale-95 transition">
+                            <i class="fa-solid fa-file-pdf text-sm"></i>
+                        </button>
+                        <button type="button" id="btn-tambah-santri" onclick="openAddSantriModal()" class="hidden w-9 h-9 rounded-full bg-zamrud-900 text-emas-300 flex items-center justify-center active:scale-95 transition">
+                            <i class="fa-solid fa-plus text-sm"></i>
+                        </button>
+                    </div>
                 </div>
                 <p class="text-xs text-zamrud-300 mt-1 mb-3" id="hafidz-subtitle">Santri bimbingan Anda</p>
 
@@ -825,6 +830,39 @@
             <div class="flex gap-2 mt-5">
                 <button type="button" onclick="closeCropModal()" class="flex-1 py-3 rounded-xl bg-gray-200 font-semibold text-sm">Batal</button>
                 <button type="button" onclick="confirmCrop()" class="flex-1 py-3 rounded-xl btn-gold font-semibold text-sm">Gunakan Foto</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="timelineModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-5 w-[90%] max-w-md max-h-[80vh] flex flex-col">
+            <div class="flex items-center justify-between mb-1">
+                <h3 class="text-lg font-heading font-bold text-zamrud-900" id="timelineSantriName">Riwayat Setoran</h3>
+                <button type="button" onclick="closeTimelineModal()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+            <p class="text-xs text-zamrud-300 mb-4">Riwayat penambahan Ziyadah & Takriran</p>
+
+            <div id="timelineContent" class="flex-1 overflow-y-auto pr-1">
+                <!-- Timeline diinjeksi via JS -->
+            </div>
+        </div>
+    </div>
+
+    <div id="exportHafidzModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-5 w-[90%] max-w-sm">
+            <h3 class="text-lg font-heading font-bold text-zamrud-900 mb-1">Export Laporan Bulanan</h3>
+            <p class="text-xs text-zamrud-300 mb-4">Pilih periode bulan untuk diekspor ke PDF</p>
+
+            <label class="block text-xs font-semibold text-zamrud-600 mb-1">Periode Bulan</label>
+            <select id="export-hafidz-bulan" class="w-full border border-zamrud-100 rounded-xl px-3 py-2.5 text-sm outline-none mb-4"></select>
+
+            <div class="flex gap-2">
+                <button type="button" onclick="closeExportHafidzModal()" class="flex-1 py-3 rounded-xl bg-gray-200 font-semibold text-sm">Batal</button>
+                <button type="button" onclick="exportHafidzPDF()" class="flex-1 py-3 rounded-xl btn-gold font-semibold text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i> Export
+                </button>
             </div>
         </div>
     </div>
@@ -3003,13 +3041,13 @@
                         <div class="flex-1 min-w-0 pr-2">
                             <div class="flex items-center gap-2">
                                 <span class="text-xs font-bold text-zamrud-300">#${index + 1}</span>
-                                <h4 class="font-heading font-bold text-zamrud-900 text-sm truncate">${escapeHtml(santri.nama)}</h4>
+                                <h4 class="font-heading font-bold text-zamrud-900 text-base truncate cursor-pointer hover:text-emas-600 hover:underline transition" onclick="openTimelineModal('${escapeHtml(santri.nama).replace(/'/g, "\\'")}')">${escapeHtml(santri.nama)}</h4>
                             </div>
-                            <p class="text-[11px] text-zamrud-400 mt-0.5"><i class="fa-solid fa-school mr-1"></i>${escapeHtml(santri.kelas || '-')}</p>
                             ${pengajarInfo}
                             ${lastEditInfo}
                         </div>
                         <div class="flex items-center gap-1.5 shrink-0">
+                            <span class="text-xs font-bold text-emas-700 bg-emas-50 border border-emas-200 px-2.5 py-1 rounded-lg">${escapeHtml(santri.kelas || '-')}</span>
                             ${editBtn}
                             ${deleteBtn}
                         </div>
@@ -3066,7 +3104,171 @@
                 saveBar.classList.add('hidden');
             }
         }
+        function openTimelineModal(namaSantri) {
+            document.getElementById('timelineSantriName').innerText = namaSantri;
+            const content = document.getElementById('timelineContent');
+            content.innerHTML = `<div class="flex justify-center py-10"><i class="fa-solid fa-spinner fa-spin text-2xl text-emas-500"></i></div>`;
 
+            const modal = document.getElementById('timelineModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            fetchAPI('getHafalanLogByNama', { nama_santri: namaSantri })
+                .then(function(logs) {
+                    renderTimeline(logs || []);
+                })
+                .catch(function() {
+                    content.innerHTML = `<p class="text-center text-sm text-red-500 py-10">Gagal memuat riwayat.</p>`;
+                });
+        }
+
+        function closeTimelineModal() {
+            const modal = document.getElementById('timelineModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+        // Membersihkan format tanggal/waktu jika masih berupa ISO string mentah dari Sheet lama
+        function bersihkanTanggalLog(raw) {
+            if (!raw) return '';
+            const isoMatch = String(raw).match(/^(\d{4}-\d{2}-\d{2})/);
+            if (isoMatch) return isoMatch[1];
+            return String(raw);
+        }
+
+        function bersihkanWaktuLog(raw) {
+            if (!raw) return '';
+            const str = String(raw);
+            if (str.includes('T')) {
+                const d = new Date(str);
+                if (!isNaN(d.getTime())) {
+                    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+                }
+            }
+            return str;
+        }
+        let timelineFullLogs = [];  // Semua log yang sudah diambil dari server
+        let timelineShownCount = 0; // Berapa banyak yang sudah ditampilkan
+        const TIMELINE_BATCH = 20;  // Jumlah entri per "muat lebih banyak"
+
+        function renderTimeline(logs) {
+            timelineFullLogs = logs;
+            timelineShownCount = TIMELINE_BATCH;
+            renderTimelineBatch();
+        }
+
+        function buatKontenLogSingle(log) {
+            const isZiyadah = log.tipe === 'ziyadah';
+            const dotColor = isZiyadah ? 'bg-zamrud-600' : 'bg-emas-500';
+            const badgeColor = isZiyadah ? 'bg-zamrud-50 text-zamrud-700 border-zamrud-200' : 'bg-emas-50 text-emas-700 border-emas-200';
+            const icon = isZiyadah ? 'fa-star' : 'fa-rotate';
+            const label = isZiyadah ? 'Ziyadah' : 'Takriran';
+            const deltaText = log.delta > 0 ? `+${log.delta}` : `${log.delta}`;
+            const waktuBersih = bersihkanWaktuLog(log.waktu);
+
+            return `
+                <div class="relative mb-4">
+                    <div class="absolute -left-6 top-0.5 w-3.5 h-3.5 rounded-full ${dotColor} border-2 border-white shadow"></div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeColor}"><i class="fa-solid ${icon} mr-1"></i>${label}</span>
+                        <span class="text-[10px] text-zamrud-300">${waktuBersih}</span>
+                    </div>
+                    <p class="text-sm text-zamrud-800">
+                        Juz ${log.juz_sebelum} Hal. ${log.halaman_sebelum} <i class="fa-solid fa-arrow-right text-[10px] text-zamrud-300 mx-1"></i> Juz ${log.juz_sesudah} Hal. ${log.halaman_sesudah}
+                        <span class="font-bold ${isZiyadah ? 'text-zamrud-600' : 'text-emas-600'} ml-1">(${deltaText} hal.)</span>
+                    </p>
+                    <p class="text-[10px] text-zamrud-300 mt-0.5">oleh ${escapeHtml(log.updated_by || '-')}</p>
+                </div>
+            `;
+        }
+
+        function renderTimelineBatch() {
+            const content = document.getElementById('timelineContent');
+
+            if (timelineFullLogs.length === 0) {
+                content.innerHTML = `
+                    <div class="text-center py-10">
+                        <i class="fa-solid fa-inbox text-3xl mb-2" style="color:#D4AF37;"></i>
+                        <p class="text-sm text-zamrud-300">Belum ada riwayat setoran</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const logsToShow = timelineFullLogs.slice(0, timelineShownCount);
+
+            // Kelompokkan berdasarkan tanggal (bersih)
+            const grouped = {};
+            const urutanTanggal = [];
+            logsToShow.forEach(log => {
+                const tglBersih = bersihkanTanggalLog(log.tanggal);
+                if (!grouped[tglBersih]) {
+                    grouped[tglBersih] = [];
+                    urutanTanggal.push(tglBersih);
+                }
+                grouped[tglBersih].push(log);
+            });
+
+            let html = '';
+            urutanTanggal.forEach(tgl => {
+                const entriesHtml = grouped[tgl].map(buatKontenLogSingle).join('');
+                html += `
+                    <div class="mb-5">
+                        <div class="sticky top-0 bg-white z-10 py-1 mb-2">
+                            <span class="text-xs font-bold text-zamrud-700 bg-zamrud-50 px-2.5 py-1 rounded-full border border-zamrud-100">
+                                <i class="fa-regular fa-calendar mr-1"></i>${formatTanggalIndo(tgl)}
+                            </span>
+                        </div>
+                        <div class="relative pl-6">
+                            <div class="absolute left-[7px] top-1 bottom-1 w-0.5 bg-zamrud-100"></div>
+                            ${entriesHtml}
+                        </div>
+                    </div>
+                `;
+            });
+
+            const sisaData = timelineFullLogs.length - timelineShownCount;
+            if (sisaData > 0) {
+                html += `
+                    <button type="button" onclick="muatLebihBanyakTimeline()" class="w-full py-2.5 rounded-xl bg-zamrud-50 text-zamrud-700 text-xs font-semibold hover:bg-zamrud-100 transition mb-2">
+                        <i class="fa-solid fa-chevron-down mr-1"></i> Muat ${Math.min(sisaData, TIMELINE_BATCH)} riwayat lagi (${sisaData} tersisa)
+                    </button>
+                `;
+            } else if (timelineFullLogs.length > TIMELINE_BATCH) {
+                html += `<p class="text-center text-[10px] text-zamrud-300 py-2">— Semua riwayat sudah dimuat (${timelineFullLogs.length} entri) —</p>`;
+            }
+
+            content.innerHTML = html;
+        }
+
+        function muatLebihBanyakTimeline() {
+            timelineShownCount += TIMELINE_BATCH;
+            renderTimelineBatch();
+        }
+        function openExportHafidzModal() {
+            const dropdown = document.getElementById('export-hafidz-bulan');
+            const namaBulanList = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            const now = new Date();
+
+            dropdown.innerHTML = '';
+            for (let i = 0; i < 6; i++) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                const opt = document.createElement('option');
+                opt.value = value;
+                opt.text = `${namaBulanList[d.getMonth()]} ${d.getFullYear()}`;
+                dropdown.appendChild(opt);
+            }
+
+            const modal = document.getElementById('exportHafidzModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeExportHafidzModal() {
+            const modal = document.getElementById('exportHafidzModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
         let editingSantriId = null;
 
         function openEditPengajarModal(idSantri) {
@@ -4003,6 +4205,194 @@
                 const bulanArr = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
                 rewardMonthEl.innerText = `• ${bulanArr[displayDate.getMonth()]} ${displayDate.getFullYear()}`;
             }
+        }
+        async function exportHafidzPDF() {
+            const bulanVal = document.getElementById('export-hafidz-bulan').value;
+            const dropdown = document.getElementById('export-hafidz-bulan');
+            const teksBulan = dropdown.options[dropdown.selectedIndex].text;
+
+            closeExportHafidzModal();
+            showLoading(true, "Menyiapkan Laporan Hafalan...");
+            const logoData = await getLogoBase64();
+
+            fetchAPI('getRekapHafalanBulanan', { bulan: bulanVal, username: currentUser.username, role: currentUser.role })
+                .then(function(res) {
+                    if (res.status !== 'success') {
+                        showLoading(false);
+                        Swal.fire({ icon: 'error', text: res.message || 'Gagal mengambil data.', confirmButtonColor: '#B8860B' });
+                        return;
+                    }
+
+                    const dataSantri = res.data || [];
+                    if (dataSantri.length === 0) {
+                        showLoading(false);
+                        Swal.fire({ icon: 'info', text: 'Tidak ada data santri untuk laporan ini.', confirmButtonColor: '#B8860B' });
+                        return;
+                    }
+
+                    setTimeout(() => {
+                        try {
+                            generateHafidzPDFDocument(dataSantri, teksBulan, logoData);
+                            showLoading(false);
+                        } catch (err) {
+                            showLoading(false);
+                            console.error(err);
+                            Swal.fire({ icon: 'error', text: 'Gagal membuat PDF.', confirmButtonColor: '#B8860B' });
+                        }
+                    }, 300);
+                })
+                .catch(function() {
+                    showLoading(false);
+                    Swal.fire({ icon: 'error', text: 'Gagal menghubungi server.', confirmButtonColor: '#B8860B' });
+                });
+        }
+
+        function generateHafidzPDFDocument(dataSantri, teksBulan, logoData) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const isAdmin = currentUser.role === 'admin';
+
+            // Header
+            doc.setFillColor(11, 61, 46);
+            doc.rect(0, 0, 210, 32, 'F');
+
+            if (logoData) {
+                try {
+                    doc.setFillColor(255, 255, 255);
+                    doc.circle(24, 16, 11, 'F');
+                    doc.setDrawColor(212, 175, 55);
+                    doc.setLineWidth(0.4);
+                    doc.circle(24, 16, 11, 'S');
+                    doc.addImage(logoData, 'PNG', 14, 6, 20, 20);
+                } catch(e) {}
+            }
+
+            const titleX = logoData ? 105 + 8 : 105;
+            doc.setTextColor(245, 230, 184);
+            doc.setFontSize(17);
+            doc.setFont("helvetica", "bold");
+            doc.text("LEMTATIQHI AL-ITTIFAQIAH", titleX, 15, { align: "center" });
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text("Laporan Progres Hafalan Santri", titleX, 22, { align: "center" });
+
+            doc.setDrawColor(212, 175, 55);
+            doc.setLineWidth(1);
+            doc.line(0, 32, 210, 32);
+
+            // Info box
+            doc.setDrawColor(212, 175, 55);
+            doc.setFillColor(250, 247, 240);
+            doc.setLineWidth(0.3);
+            doc.roundedRect(14, 38, 182, 20, 2, 2, 'FD');
+
+            doc.setTextColor(11, 61, 46);
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "bold");
+            doc.text("Periode:", 18, 45);
+            doc.text("Pengajar:", 18, 51);
+            doc.text("Dicetak:", 105, 45);
+            doc.text("Total Santri:", 105, 51);
+
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(50, 50, 50);
+            doc.text(`${teksBulan}`, 42, 45);
+            doc.text(`${isAdmin ? 'Semua Pengajar (Admin)' : currentUser.name}`, 42, 51);
+            doc.text(`${new Date().toLocaleDateString('id-ID')} ${getFormattedTime()}`, 138, 45);
+            doc.text(`${dataSantri.length} orang`, 138, 51);
+
+            // Tabel
+            const tableRows = dataSantri.map((s, i) => [
+                i + 1,
+                s.nama,
+                s.kelas || '-',
+                s.posisi_ziyadah,
+                s.total_ziyadah > 0 ? `+${s.total_ziyadah}` : '0',
+                s.posisi_takrir,
+                s.total_takrir > 0 ? `+${s.total_takrir}` : '0'
+            ]);
+
+            doc.autoTable({
+                startY: 64,
+                head: [['No', 'Nama Santri', 'Kelas', 'Posisi Ziyadah', 'Setoran Ziyadah', 'Posisi Takriran', 'Setoran Takriran']],
+                body: tableRows,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [11, 61, 46],
+                    textColor: [245, 230, 184],
+                    halign: 'center',
+                    valign: 'middle',
+                    fontSize: 8,
+                    fontStyle: 'bold',
+                    cellPadding: { top: 4, bottom: 4 },
+                    lineColor: [212, 175, 55],
+                    lineWidth: 0.3
+                },
+                bodyStyles: {
+                    fontSize: 8,
+                    textColor: [40, 40, 40],
+                    cellPadding: { top: 3, bottom: 3, left: 3, right: 3 },
+                    lineColor: [225, 220, 205],
+                    lineWidth: 0.15,
+                    valign: 'middle'
+                },
+                columnStyles: {
+                    0: { halign: 'center', cellWidth: 10, textColor: [150, 150, 150] },
+                    1: { fontStyle: 'bold', textColor: [11, 61, 46] },
+                    2: { halign: 'center' },
+                    3: { halign: 'center' },
+                    4: { halign: 'center', fontStyle: 'bold', textColor: [20, 83, 45] },
+                    5: { halign: 'center' },
+                    6: { halign: 'center', fontStyle: 'bold', textColor: [184, 134, 11] }
+                },
+                alternateRowStyles: { fillColor: [250, 247, 240] },
+                margin: { left: 14, right: 14 }
+            });
+
+            // Ringkasan
+            let finalY = doc.lastAutoTable.finalY + 10;
+            if (finalY + 30 > 280) { doc.addPage(); finalY = 20; }
+
+            const totalZiyadahSum = dataSantri.reduce((s, r) => s + r.total_ziyadah, 0);
+            const totalTakrirSum = dataSantri.reduce((s, r) => s + r.total_takrir, 0);
+            const santriAktif = dataSantri.filter(s => s.ada_aktivitas).length;
+
+            doc.setDrawColor(212, 175, 55);
+            doc.setLineWidth(0.4);
+            doc.setFillColor(20, 83, 45);
+            doc.roundedRect(14, finalY, 182, 16, 2, 2, 'FD');
+
+            doc.setTextColor(180, 220, 195);
+            doc.setFontSize(7);
+            doc.setFont("helvetica", "normal");
+            doc.text("TOTAL SETORAN ZIYADAH", 20, finalY + 6);
+            doc.text("TOTAL SETORAN TAKRIRAN", 80, finalY + 6);
+            doc.text("SANTRI AKTIF", 150, finalY + 6);
+
+            doc.setTextColor(245, 230, 184);
+            doc.setFontSize(13);
+            doc.setFont("helvetica", "bold");
+            doc.text(`${totalZiyadahSum} hal.`, 20, finalY + 13);
+            doc.text(`${totalTakrirSum} hal.`, 80, finalY + 13);
+            doc.text(`${santriAktif}/${dataSantri.length}`, 150, finalY + 13);
+
+            // Footer
+            const totalPages = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= totalPages; i++) {
+                doc.setPage(i);
+                doc.setDrawColor(212, 175, 55);
+                doc.setLineWidth(0.2);
+                doc.line(14, 283, 196, 283);
+                doc.setFontSize(7.5);
+                doc.setFont("helvetica", "italic");
+                doc.setTextColor(140, 140, 140);
+                doc.text("Dokumen dihasilkan otomatis oleh sistem LEMTATIQHI", 14, 288);
+                doc.text(`Halaman ${i} dari ${totalPages}`, 196, 288, { align: "right" });
+            }
+
+            doc.save(`Laporan_Hafalan_${teksBulan.replace(' ', '_')}.pdf`);
         }
         // --- FUNGSI EXPORT PDF ---
         async function exportRekapPDF() {
