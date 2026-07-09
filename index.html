@@ -1010,7 +1010,7 @@
         let allUsersData = safeParse('lem_all_users', []);
         let selectedKategoriRekap = 'Tahfidz';
         let statBulanOffset = 0; // 0 = bulan berjalan, -1 = 1 bulan lalu, dst. Tidak bisa lebih dari 0 (masa depan).
-        let santriData = []; // Data asli dari server
+        let santriData = safeParse('lem_santri', []); // Data asli dari server (cache lokal untuk tampilan instan)
         let pendingHafalan = {}; // { id_santri: { juz, halaman } } - perubahan yang belum disimpan
         let selectedTingkatHafidz = 'ALL';
 
@@ -1277,7 +1277,6 @@
             }
         }
 
-        // --- AUTH LOGIC ---
         function handleLogin(e) {
             e.preventDefault();
             const user = document.getElementById('login-username').value.trim();
@@ -1287,37 +1286,37 @@
             if (!user || !pass) return;
 
             btn.disabled = true;
-
             btn.dataset.oldText = btn.innerHTML;
-
-            btn.innerHTML = `
-            <i class="fa-solid fa-spinner fa-spin mr-2"></i>
-            Memverifikasi...
-            `;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Memverifikasi...`;
 
             fetchAPI('checkLogin', { username: user, password: pass })
                 .then(function(response) {
-                    btn.disabled = false;
-                    btn.innerHTML = btn.dataset.oldText;
-
                     if (response.status === 'success') {
                         safeStorage.setItem('lem_user', JSON.stringify(response.user));
                         currentUser = response.user;
+
+                        // Langsung masuk ke app begitu login sukses -- jangan tunggu tombol/form reset dulu
                         initApp();
                         fetchRiwayat();
-                        
+
                         Swal.fire({
                             toast: true, position: 'top-end', icon: 'success',
                             title: `Ahlan wa sahlan, ${response.user.name}`,
                             showConfirmButton: false, timer: 2000
                         });
+
+                        // Reset state tombol setelah transisi (tidak terlihat lagi karena sudah pindah layar)
+                        btn.disabled = false;
+                        btn.innerHTML = btn.dataset.oldText;
                     } else {
+                        btn.disabled = false;
+                        btn.innerHTML = btn.dataset.oldText;
                         Swal.fire({ icon: 'error', title: 'Login Gagal', text: response.message, confirmButtonColor: '#B8860B' });
                     }
                 })
                 .catch(function(error) {
-                    showLoading(false);
                     btn.disabled = false;
+                    btn.innerHTML = btn.dataset.oldText;
                     Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.', confirmButtonColor: '#B8860B' });
                 });
         }
@@ -1381,15 +1380,24 @@
                 hafidzNavBtn.classList.remove('flex');
             }
 
-            // Masuk ke Home, tampilkan skeleton terlebih dahulu sampai data terbaru siap
+            // Masuk ke Home
             navigate("home");
-            showHomeSkeleton(true);
 
-            // Tampilkan data lokal dulu (langsung) sebagai fallback isi awal
-            loadRekap();
-            updateHomeStats();
+            const adaCacheAbsensi = absensiData.length > 0;
 
-            // Jalankan sinkronisasi secara paralel
+            if (adaCacheAbsensi) {
+                // Sudah punya data dari sesi sebelumnya -> langsung tampilkan, TANPA skeleton sama sekali
+                loadRekap();
+                updateHomeStats();
+                lockSession([]); // Buka dulu semua kartu sesi sesuai kategori, nanti dikunci ulang begitu status asli didapat
+            } else {
+                // Kunjungan pertama tanpa cache sama sekali -> baru tampilkan skeleton
+                showHomeSkeleton(true);
+                loadRekap();
+                updateHomeStats();
+            }
+
+            // Selalu sinkronisasi ke server di latar belakang (senyap jika sudah ada cache)
             Promise.all([
                 fetchRiwayat(),
                 fetchAPI("getTodayAttendance", {
@@ -1398,12 +1406,12 @@
             ])
             .then(([_, sesiList]) => {
                 lockSession(sesiList);
-                showHomeSkeleton(false);
+                if (!adaCacheAbsensi) showHomeSkeleton(false);
             })
             .catch(err => {
                 console.error(err);
-                // Tetap tampilkan konten (dari data lokal/cache) walau sinkronisasi gagal
-                showHomeSkeleton(false);
+                if (!adaCacheAbsensi) showHomeSkeleton(false);
+                // Jika ada cache, kegagalan sinkronisasi diabaikan senyap -- user tetap bisa lihat data lama
             });
 
         }
@@ -1570,6 +1578,7 @@
                     // 2. Reset data Hafidz & Sembunyikan Bar Simpan
                     pendingHafalan = {};
                     santriData = [];
+                    safeStorage.removeItem('lem_santri');
                     const saveBar = document.getElementById('hafidz-save-bar');
                     if (saveBar) saveBar.classList.add('hidden');
 
@@ -2471,14 +2480,21 @@
         let editingUsername = null;
 
         function loadKelolaUserData() {
-            showLoading(true, "Memuat Data Pengguna...");
-            fetchAllUsers().then(() => {
-                showLoading(false);
-                renderKelolaUserList();
-            }).catch(() => {
-                showLoading(false);
-                Swal.fire({ icon: 'error', text: 'Gagal memuat data pengguna.', confirmButtonColor: '#B8860B' });
-            });
+            const adaCache = allUsersData.length > 0;
+
+            if (adaCache) {
+                renderKelolaUserList(); // Render instan dari cache
+                fetchAllUsers().then(() => renderKelolaUserList()); // Refresh senyap
+            } else {
+                showLoading(true, "Memuat Data Pengguna...");
+                fetchAllUsers().then(() => {
+                    showLoading(false);
+                    renderKelolaUserList();
+                }).catch(() => {
+                    showLoading(false);
+                    Swal.fire({ icon: 'error', text: 'Gagal memuat data pengguna.', confirmButtonColor: '#B8860B' });
+                });
+            }
         }
 
         function renderKelolaUserList() {
@@ -2688,21 +2704,27 @@
         }
 
         function hapusUser(username) {
-            showLoading(true, "Menghapus Pengguna...");
+            const backupUsers = JSON.parse(JSON.stringify(allUsersData));
+            allUsersData = allUsersData.filter(u => u.username !== username);
+            renderKelolaUserList();
+
+            Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Menghapus...', showConfirmButton: false, timer: 1200 });
+
             fetchAPI('deleteUser', { username: username, requesterUsername: currentUser.username })
                 .then(function(res) {
-                    showLoading(false);
                     if (res.status === 'success') {
-                        allUsersData = allUsersData.filter(u => u.username !== username);
-                        renderKelolaUserList();
+                        try { safeStorage.setItem('lem_all_users', JSON.stringify(allUsersData)); } catch(e){}
                         Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Pengguna berhasil dihapus', showConfirmButton: false, timer: 1800 });
                     } else {
+                        allUsersData = backupUsers;
+                        renderKelolaUserList();
                         Swal.fire({ icon: 'error', title: 'Gagal', text: res.message, confirmButtonColor: '#B8860B' });
                     }
                 })
                 .catch(function() {
-                    showLoading(false);
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.', confirmButtonColor: '#B8860B' });
+                    allUsersData = backupUsers;
+                    renderKelolaUserList();
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server. Pengguna dikembalikan.', confirmButtonColor: '#B8860B' });
                 });
         }
 
@@ -2715,19 +2737,37 @@
             const action = isAdmin ? 'getAllSantri' : 'getSantriByPengajar';
             const payload = isAdmin ? {} : { username: currentUser.username };
 
-            showLoading(true, "Memuat Data Santri...");
+            const adaCacheLokal = santriData.length > 0;
+
+            // 1. Jika ada cache -> render INSTAN tanpa loader sama sekali
+            if (adaCacheLokal) {
+                urutkanSantriByHafalan();
+                if (isAdmin) populateHafidzFilterDropdowns();
+                renderHafidzList();
+            } else {
+                // Tidak ada cache (kunjungan pertama) -> baru tampilkan loader
+                showLoading(true, "Memuat Data Santri...");
+            }
+
+            // 2. Selalu refresh dari server di latar belakang (senyap jika ada cache)
             fetchAPI(action, payload)
                 .then(function(data) {
-                    showLoading(false);
+                    if (!adaCacheLokal) showLoading(false);
+
+                    // Jangan timpa perubahan yang sedang diedit user (pendingHafalan tetap dipertahankan)
                     santriData = data || [];
+                    try { safeStorage.setItem('lem_santri', JSON.stringify(santriData)); } catch(e){}
+
                     urutkanSantriByHafalan();
-                    pendingHafalan = {}; // reset perubahan yang belum disimpan setiap kali reload
                     if (isAdmin) populateHafidzFilterDropdowns();
                     renderHafidzList();
                 })
                 .catch(function() {
-                    showLoading(false);
-                    Swal.fire({ icon: 'error', text: 'Gagal memuat data santri.', confirmButtonColor: '#B8860B' });
+                    if (!adaCacheLokal) {
+                        showLoading(false);
+                        Swal.fire({ icon: 'error', text: 'Gagal memuat data santri.', confirmButtonColor: '#B8860B' });
+                    }
+                    // Jika ada cache, gagal fetch cukup diabaikan senyap — user tetap bisa bekerja dengan data lokal
                 });
         }
 
@@ -3078,25 +3118,32 @@
             const checkedBoxes = document.querySelectorAll('#editPengajarList .pengajar-checkbox:checked');
             const selectedUsernames = Array.from(checkedBoxes).map(cb => cb.value);
 
-            showLoading(true, "Menyimpan Data Pengajar...");
+            const santri = santriData.find(s => s.id_santri === editingSantriId);
+            const pengajarLama = santri ? santri.pengajar : '';
+
+            // Optimis: langsung update tampilan & tutup modal, tanpa menunggu server
+            if (santri) santri.pengajar = selectedUsernames.join(',');
+            closeEditPengajarModal();
+            renderHafidzList();
+
+            Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Menyimpan...', showConfirmButton: false, timer: 1200 });
+
             fetchAPI('updateSantriPengajar', { id_santri: editingSantriId, pengajar_usernames: selectedUsernames })
                 .then(function(res) {
-                    showLoading(false);
                     if (res.status === 'success') {
-                        const santri = santriData.find(s => s.id_santri === editingSantriId);
-                        if (santri) santri.pengajar = selectedUsernames.join(',');
-
-                        closeEditPengajarModal();
-                        renderHafidzList();
-
+                        try { safeStorage.setItem('lem_santri', JSON.stringify(santriData)); } catch(e){}
                         Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Pengajar berhasil diperbarui', showConfirmButton: false, timer: 1800 });
                     } else {
+                        // Rollback
+                        if (santri) santri.pengajar = pengajarLama;
+                        renderHafidzList();
                         Swal.fire({ icon: 'error', title: 'Gagal', text: res.message, confirmButtonColor: '#B8860B' });
                     }
                 })
                 .catch(function() {
-                    showLoading(false);
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.', confirmButtonColor: '#B8860B' });
+                    if (santri) santri.pengajar = pengajarLama;
+                    renderHafidzList();
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server. Perubahan dikembalikan.', confirmButtonColor: '#B8860B' });
                 });
         }
 
@@ -3187,21 +3234,31 @@
         }
 
         function hapusSantri(idSantri) {
-            showLoading(true, "Menghapus Santri...");
+            // Optimis: hapus langsung dari tampilan, simpan backup untuk rollback
+            const backupSantri = JSON.parse(JSON.stringify(santriData));
+            santriData = santriData.filter(s => s.id_santri !== idSantri);
+            renderHafidzList();
+
+            Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Menghapus...', showConfirmButton: false, timer: 1200 });
+
             fetchAPI('deleteSantri', { id_santri: idSantri })
                 .then(function(res) {
-                    showLoading(false);
                     if (res.status === 'success') {
-                        santriData = santriData.filter(s => s.id_santri !== idSantri);
-                        renderHafidzList();
+                        try { safeStorage.setItem('lem_santri', JSON.stringify(santriData)); } catch(e){}
                         Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Santri berhasil dihapus', showConfirmButton: false, timer: 1800 });
                     } else {
+                        // Rollback
+                        santriData = backupSantri;
+                        urutkanSantriByHafalan();
+                        renderHafidzList();
                         Swal.fire({ icon: 'error', title: 'Gagal', text: res.message, confirmButtonColor: '#B8860B' });
                     }
                 })
                 .catch(function() {
-                    showLoading(false);
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.', confirmButtonColor: '#B8860B' });
+                    santriData = backupSantri;
+                    urutkanSantriByHafalan();
+                    renderHafidzList();
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server. Santri dikembalikan.', confirmButtonColor: '#B8860B' });
                 });
         }
 
@@ -3225,33 +3282,46 @@
 
             if (updates.length === 0) return;
 
-            showLoading(true, "Menyimpan Progres Hafalan...");
+            // Optimis: terapkan langsung ke tampilan tanpa loader penuh, kirim di latar belakang
+            const backupSantri = JSON.parse(JSON.stringify(santriData));
+            const backupPending = JSON.parse(JSON.stringify(pendingHafalan));
+
+            updates.forEach(u => {
+                const santri = santriData.find(s => s.id_santri === u.id_santri);
+                if (santri) {
+                    santri.juz = u.juz;
+                    santri.halaman = u.halaman;
+                    santri.juz_takrir = u.juz_takrir;
+                    santri.halaman_takrir = u.halaman_takrir;
+                }
+            });
+            pendingHafalan = {};
+            urutkanSantriByHafalan();
+            renderHafidzList();
+
+            Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Menyimpan...', showConfirmButton: false, timer: 1200 });
+
             fetchAPI('saveHafalanBatch', { username: currentUser.username, updates: updates })
                 .then(function(res) {
-                    showLoading(false);
                     if (res.status === 'success') {
-                        // Terapkan perubahan ke data asli, lalu bersihkan pending
-                        updates.forEach(u => {
-                            const santri = santriData.find(s => s.id_santri === u.id_santri);
-                            if (santri) {
-                                santri.juz = u.juz;
-                                santri.halaman = u.halaman;
-                                santri.juz_takrir = u.juz_takrir;
-                                santri.halaman_takrir = u.halaman_takrir;
-                            }
-                        });
-                        pendingHafalan = {};
-                        urutkanSantriByHafalan();
-                        renderHafidzList();
-
+                        try { safeStorage.setItem('lem_santri', JSON.stringify(santriData)); } catch(e){}
                         Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: `${res.updated} progres hafalan tersimpan`, showConfirmButton: false, timer: 2000 });
                     } else {
-                        Swal.fire({ icon: 'error', title: 'Gagal', text: res.message, confirmButtonColor: '#B8860B' });
+                        // Gagal di server -> kembalikan tampilan ke kondisi sebelumnya (rollback)
+                        santriData = backupSantri;
+                        pendingHafalan = backupPending;
+                        urutkanSantriByHafalan();
+                        renderHafidzList();
+                        Swal.fire({ icon: 'error', title: 'Gagal Menyimpan', text: res.message, confirmButtonColor: '#B8860B' });
                     }
                 })
                 .catch(function() {
-                    showLoading(false);
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.', confirmButtonColor: '#B8860B' });
+                    // Gagal jaringan -> rollback juga
+                    santriData = backupSantri;
+                    pendingHafalan = backupPending;
+                    urutkanSantriByHafalan();
+                    renderHafidzList();
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server. Perubahan dikembalikan, silakan coba lagi.', confirmButtonColor: '#B8860B' });
                 });
         }
         function batalkanSemuaHafalan() {
