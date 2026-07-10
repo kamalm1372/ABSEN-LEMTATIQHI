@@ -310,9 +310,7 @@
                         <div class="flex-1 min-w-0 pr-3">
                             <p class="text-xs tracking-[0.15em] uppercase" style="color:#E2C158;">Assalamu'alaikum,</p>
                             <h2 class="text-white text-xl font-heading font-bold truncate" id="user-greeting-name">Nama Pengajar</h2>
-                            <span id="home-kategori-badge" class="inline-block bg-white/20 text-white text-[10px] font-medium px-2 py-0.5 rounded-md mt-1 backdrop-blur-sm border border-white/10">
-                                Kategori
-                            </span>
+                            <div id="home-kategori-badge-wrap" class="flex flex-wrap gap-1 mt-1"></div>
                         </div>
                         <div id="home-avatar-wrap" class="w-20 h-20 rounded-full flex items-center justify-center shrink-0 overflow-hidden shadow-lg border-2 border-white/30" style="background: rgba(212,175,55,0.25);">
                             <i id="home-avatar-placeholder" class="fa-solid fa-user-circle text-5xl" style="color:#F5E6B8;"></i>
@@ -330,7 +328,8 @@
                         </button>
                     </div>
 
-                    <div class="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/20 relative z-10 shadow-inner">
+                    <!-- Digunakan jika pengajar hanya punya 1 kategori (tampilan lama, 4 kotak sejajar) -->
+                    <div id="stat-single-kategori" class="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/20 relative z-10 shadow-inner">
                         <div class="text-center flex-1 border-r border-white/20" id="box-stat-sesi">
                             <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Sesi Hadir</p>
                             <p class="text-xl font-bold text-white font-heading leading-none" id="home-stat-sesi">0</p>
@@ -347,6 +346,11 @@
                             <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Persentase</p>
                             <p class="text-xl font-bold text-emas-300 font-heading leading-none" id="home-stat-persen">0%</p>
                         </div>
+                    </div>
+
+                    <!-- Digunakan jika pengajar punya lebih dari 1 kategori (kartu terpisah per kategori) -->
+                    <div id="stat-multi-kategori" class="hidden flex-col gap-2 relative z-10">
+                        <!-- Kartu per kategori diinjeksi via JS -->
                     </div>
                 </div>
 
@@ -383,67 +387,83 @@
                             <h3 class="font-heading font-semibold text-zamrud-900">Presensi Kehadiran</h3>
                         </div>
 
-                        <div id="no-jadwal-hari-ini" class="hidden text-center py-8 px-4">
-                            <i class="fa-solid fa-calendar-xmark text-4xl mb-3" style="color:#D4AF37;"></i>
-                            <p class="text-sm font-semibold text-zamrud-700 mb-1">Hari ini tidak ada jadwal Anda mengajar</p>
-                            <p class="text-xs text-zamrud-400" id="jadwal-anda-info">Jadwal Anda: -</p>
+                        <div id="no-jadwal-hari-ini" class="hidden text-center py-6 px-2">
+                            <i class="fa-solid fa-calendar-check text-4xl mb-3" style="color:#D4AF37;"></i>
+                            <p class="text-sm font-semibold text-zamrud-700 mb-1">Anda tidak dijadwalkan mengajar hari ini</p>
+                            <p class="text-xs text-zamrud-400 mb-4">Berikut jadwal mengajar Anda:</p>
+
+                            <div id="jadwal-anda-info" class="text-left flex flex-col gap-2">
+                                <!-- Kartu jadwal per hari diinjeksi via JS -->
+                            </div>
                         </div>
 
                         <div class="flex flex-col gap-3 mt-2" id="session-cards">
-                            
+                            <p id="label-kategori-tahfidz" class="hidden text-xs font-bold text-zamrud-500 uppercase tracking-wider mt-1 mb-[-6px]"><i class="fa-solid fa-book-quran mr-1"></i>Tahfidz</p>
+
                             <div id="card-PAGI" onclick="pilihSesi('PAGI')" class="flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
                                 <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 text-xl">
-                                        <i class="fa-solid fa-sun"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bold text-zamrud-900 text-base">Pagi</h4>
-                                        <p class="text-xs text-zamrud-300 mt-0.5">04:45 - 06:00</p>
-                                    </div>
+                                    <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 text-xl"><i class="fa-solid fa-sun"></i></div>
+                                    <div><h4 class="font-bold text-zamrud-900 text-base">Pagi</h4><p class="text-xs text-zamrud-300 mt-0.5">04:45 - 06:00</p></div>
                                 </div>
                                 <div id="badge-PAGI" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
                             </div>
 
                             <div id="card-SORE" onclick="pilihSesi('SORE')" class="flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
                                 <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 text-xl">
-                                        <i class="fa-solid fa-clock"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bold text-zamrud-900 text-base">Sore</h4>
-                                        <p class="text-xs text-zamrud-300 mt-0.5">15:45 - 16:45</p>
-                                    </div>
+                                    <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 text-xl"><i class="fa-solid fa-clock"></i></div>
+                                    <div><h4 class="font-bold text-zamrud-900 text-base">Sore</h4><p class="text-xs text-zamrud-300 mt-0.5">15:45 - 16:45</p></div>
                                 </div>
                                 <div id="badge-SORE" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
                             </div>
 
+                            <div id="card-MALAM" onclick="pilihSesi('MALAM')" class="flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 text-xl"><i class="fa-solid fa-moon"></i></div>
+                                    <div>
+                                        <h4 class="font-bold text-zamrud-900 text-base">Malam</h4>
+                                        <p class="text-xs text-zamrud-300 mt-0.5">19:30 - 20:30</p>
+                                        <p id="malam-hari-keterangan" class="hidden text-[10px] text-emas-600 font-medium mt-0.5"><i class="fa-solid fa-calendar-day mr-1"></i>Senin, Selasa, Rabu</p>
+                                        <p id="malam-materi-keterangan" class="hidden text-[10px] text-zamrud-500 font-medium mt-0.5"><i class="fa-solid fa-book-open text-emas-500 mr-1"></i><span id="malam-materi-text">-</span></p>
+                                    </div>
+                                </div>
+                                <div id="badge-MALAM" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
+                            </div>
+
+                            <p id="label-kategori-talimumum" class="hidden text-xs font-bold text-purple-500 uppercase tracking-wider mt-1 mb-[-6px]"><i class="fa-solid fa-mosque mr-1"></i>Ta'lim Umum</p>
+
+                            <div id="talimumum-no-jadwal" class="hidden bg-purple-50/60 border border-purple-100 rounded-2xl p-4">
+                                <div class="text-center mb-3">
+                                    <i class="fa-solid fa-calendar-check text-2xl mb-2" style="color:#a855f7;"></i>
+                                    <p class="text-xs font-semibold text-zamrud-700">Tidak dijadwalkan mengajar Ta'lim Umum hari ini</p>
+                                    <p class="text-[11px] text-zamrud-400 mt-0.5">Jadwal Ta'lim Umum Anda:</p>
+                                </div>
+                                <div id="talimumum-jadwal-info">-</div>
+                            </div>
+
                             <div id="card-MAGHRIB" onclick="pilihSesi('MAGHRIB')" class="hidden flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
                                 <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-purple-500 text-xl">
-                                        <i class="fa-solid fa-mosque"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bold text-zamrud-900 text-base">Maghrib</h4>
-                                        <p class="text-xs text-zamrud-300 mt-0.5">18:30 - 19:30</p>
-                                    </div>
+                                    <div class="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-purple-500 text-xl"><i class="fa-solid fa-mosque"></i></div>
+                                    <div><h4 class="font-bold text-zamrud-900 text-base">Maghrib</h4><p class="text-xs text-zamrud-300 mt-0.5">18:30 - 19:30</p></div>
                                 </div>
                                 <div id="badge-MAGHRIB" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
                             </div>
 
-                            <div id="card-MALAM" onclick="pilihSesi('MALAM')" class="flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
+                            <div id="card-MALAM-TALIMUMUM" onclick="pilihSesiAdmin('MALAM', &quot;Ta'lim Umum&quot;)" class="hidden flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
                                 <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 text-xl">
-                                        <i class="fa-solid fa-moon"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bold text-zamrud-900 text-base">Malam</h4>
-                                        <p class="text-xs text-zamrud-300 mt-0.5">19:30 - 20:30</p>
-                                        <p id="malam-hari-keterangan" class="hidden text-[10px] text-emas-600 font-medium mt-0.5">
-                                            <i class="fa-solid fa-calendar-day mr-1"></i>Senin, Selasa, Rabu
-                                        </p>
-                                    </div>
+                                    <div class="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-purple-500 text-xl"><i class="fa-solid fa-moon"></i></div>
+                                    <div><h4 class="font-bold text-zamrud-900 text-base">Malam (Ta'lim Umum)</h4><p class="text-xs text-zamrud-300 mt-0.5">19:30 - 20:30</p></div>
                                 </div>
-                                <div id="badge-MALAM" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
+                                <div class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
+                            </div>
+
+                            <p id="label-kategori-talimkhusus-admin" class="hidden text-xs font-bold text-indigo-500 uppercase tracking-wider mt-1 mb-[-6px]"><i class="fa-solid fa-moon mr-1"></i>Ta'lim Khusus</p>
+
+                            <div id="card-MALAM-TALIMKHUSUS" onclick="pilihSesiAdmin('MALAM', &quot;Ta'lim Khusus&quot;)" class="hidden flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 text-xl"><i class="fa-solid fa-moon"></i></div>
+                                    <div><h4 class="font-bold text-zamrud-900 text-base">Malam (Ta'lim Khusus)</h4><p class="text-xs text-zamrud-300 mt-0.5">19:30 - 20:30</p></div>
+                                </div>
+                                <div class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
                             </div>
                         </div>
                         
@@ -701,32 +721,29 @@
                 </div>
 
                 <!-- Summary Cards -->
-                <div id="summary-cards-sesi-hari" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
-                    <div class="bg-zamrud-600 rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
+                <div id="summary-cards-sesi-hari" class="grid grid-cols-3 gap-2 mb-5">
+                    <div class="bg-zamrud-600 rounded-2xl p-3 text-white shadow-md relative overflow-hidden">
                         <div class="relative z-10">
-                            <p class="text-sm font-medium mb-1">مجموع الحضور</p>
-                            <p class="text-4xl font-bold font-heading mb-1" id="stat-total-sesi">0</p>
-                            <p class="text-xs text-zamrud-100">Sesi Hadir</p>
+                            <p class="text-2xl font-bold font-heading mb-1" id="stat-total-sesi">0</p>
+                            <p class="text-[10px] text-zamrud-100 leading-tight">Sesi Hadir</p>
                         </div>
-                        <i class="fa-solid fa-calendar-check absolute -right-2 -bottom-4 text-7xl opacity-20"></i>
+                        <i class="fa-solid fa-calendar-check absolute -right-2 -bottom-3 text-4xl opacity-20"></i>
                     </div>
                     
-                    <div class="bg-zamrud-500 rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
+                    <div class="bg-zamrud-500 rounded-2xl p-3 text-white shadow-md relative overflow-hidden">
                         <div class="relative z-10">
-                            <p class="text-sm font-medium mb-1">مجموع أيام الحضور</p>
-                            <p class="text-4xl font-bold font-heading mb-1" id="stat-total-hari">0</p>
-                            <p class="text-xs text-zamrud-100">Total Hari Hadir</p>
+                            <p class="text-2xl font-bold font-heading mb-1" id="stat-total-hari">0</p>
+                            <p class="text-[10px] text-zamrud-100 leading-tight">Total Hari Hadir</p>
                         </div>
-                        <i class="fa-solid fa-calendar-day absolute -right-2 -bottom-4 text-7xl opacity-20"></i>
+                        <i class="fa-solid fa-calendar-day absolute -right-2 -bottom-3 text-4xl opacity-20"></i>
                     </div>
 
-                    <div class="bg-emas-600 rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
+                    <div class="bg-emas-600 rounded-2xl p-3 text-white shadow-md relative overflow-hidden">
                         <div class="relative z-10">
-                            <p class="text-sm font-medium mb-1">مجموع الحضور الكلي</p>
-                            <p class="text-4xl font-bold font-heading mb-1" id="stat-total-hadir">0</p>
-                            <p class="text-xs text-emas-50">Total Hadir</p>
+                            <p class="text-2xl font-bold font-heading mb-1" id="stat-total-hadir">0</p>
+                            <p class="text-[10px] text-emas-50 leading-tight">Total Hadir</p>
                         </div>
-                        <i class="fa-solid fa-star absolute -right-2 -bottom-4 text-7xl opacity-20"></i>
+                        <i class="fa-solid fa-star absolute -right-2 -bottom-3 text-4xl opacity-20"></i>
                     </div>
                 </div>
 
@@ -757,7 +774,7 @@
                     </div>
                     
                     <!-- Wadah untuk list kartu (Tidak menggunakan table lagi) -->
-                    <div id="admin-rekap-table" class="p-3 flex flex-col gap-3 max-h-[65vh] overflow-y-auto hide-scroll">
+                    <div id="admin-rekap-table" class="p-3 flex flex-col gap-3">
                         <!-- Data diinjeksi via JS -->
                     </div>
                 </div>
@@ -946,24 +963,29 @@
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label class="block text-xs font-semibold text-zamrud-600 mb-1">Kategori</label>
-                    <select id="user-form-kategori" onchange="toggleJadwalTalimUmum()" class="w-full border border-zamrud-100 rounded-xl px-3 py-2.5 text-sm outline-none">
-                        <option value="">- Pilih Kategori -</option>
-                        <option value="Tahfidz">Tahfidz</option>
-                        <option value="Ta'lim Umum">Ta'lim Umum</option>
-                        <option value="Ta'lim Khusus">Ta'lim Khusus</option>
-                    </select>
+                    <label class="block text-xs font-semibold text-zamrud-600 mb-1">Kategori (bisa lebih dari satu)</label>
+                    <div id="user-form-kategori-checks" class="flex flex-col gap-2 border border-zamrud-100 rounded-xl p-3">
+                        <label class="flex items-center gap-2 text-sm">
+                            <input type="checkbox" value="Tahfidz" class="user-kategori-checkbox accent-emas-500" onchange="toggleJadwalTalimUmum()">
+                            Tahfidz
+                        </label>
+                        <label class="flex items-center gap-2 text-sm">
+                            <input type="checkbox" value="Ta'lim Umum" class="user-kategori-checkbox accent-emas-500" onchange="toggleJadwalTalimUmum()">
+                            Ta'lim Umum
+                        </label>
+                        <label class="flex items-center gap-2 text-sm">
+                            <input type="checkbox" value="Ta'lim Khusus" class="user-kategori-checkbox accent-emas-500" onchange="toggleJadwalTalimUmum()">
+                            Ta'lim Khusus
+                        </label>
+                    </div>
                 </div>
                 <div class="mb-3" id="user-form-materi-wrap">
-                    <label class="block text-xs font-semibold text-zamrud-600 mb-1">Materi</label>
-                    <select id="user-form-materi" class="w-full border border-zamrud-100 rounded-xl px-3 py-2.5 text-sm outline-none">
-                        <option value="">- Pilih Materi -</option>
-                        <option value="Tilawah">Tilawah</option>
-                        <option value="Tajwid">Tajwid</option>
-                        <option value="Barzanji">Barzanji</option>
-                        <option value="Kitab At-Tibyan">Kitab At-Tibyan</option>
-                        <option value="Tartil">Tartil</option>
-                    </select>
+                    <label class="block text-xs font-semibold text-zamrud-600 mb-1">Materi per Hari</label>
+                    <p class="text-[10px] text-zamrud-300 mb-2">Muncul otomatis untuk hari yang dijadwalkan di bawah (Maghrib/Malam)</p>
+                    <div id="user-form-materi-rows" class="flex flex-col gap-2">
+                        <!-- Baris materi per hari diinjeksi via JS -->
+                        <p class="text-xs text-zamrud-300 text-center py-2">Pilih jadwal hari terlebih dahulu di bawah</p>
+                    </div>
                 </div>                
 
                 <div id="user-form-jadwal-wrap" class="hidden mb-2 p-3 bg-zamrud-50 rounded-xl">
@@ -1049,6 +1071,16 @@
         let selectedKategoriRekap = 'Tahfidz';
         let statBulanOffset = 0; // 0 = bulan berjalan, -1 = 1 bulan lalu, dst. Tidak bisa lebih dari 0 (masa depan).
         let santriData = safeParse('lem_santri', []); // Data asli dari server (cache lokal untuk tampilan instan)
+
+        // Buang cache jika usianya lebih dari 10 menit -- mencegah data basi dipakai dan menimpa progres terbaru
+        (function validasiCacheSantri() {
+            const cacheTime = parseInt(safeStorage.getItem('lem_santri_time') || '0', 10);
+            const sepuluhMenit = 10 * 60 * 1000;
+            if (Date.now() - cacheTime > sepuluhMenit) {
+                santriData = [];
+                safeStorage.removeItem('lem_santri');
+            }
+        })();
         let pendingHafalan = {}; // { id_santri: { juz, halaman } } - perubahan yang belum disimpan
         let selectedTingkatHafidz = 'ALL';
 
@@ -1090,8 +1122,8 @@
                     .filter(Boolean)
             );
 
-            // Selalu sertakan kategori profil saat ini juga, meskipun belum pernah absen sama sekali
-            if (currentUser.kategori) kategoriUnik.add(currentUser.kategori);
+            // Selalu sertakan SEMUA kategori profil saat ini juga (dipecah per kategori), meskipun belum pernah absen sama sekali
+            getKategoriUserList().forEach(k => kategoriUnik.add(k));
 
             if (kategoriUnik.size <= 1) {
                 // Hanya 1 kategori (atau kosong) -> sembunyikan seluruh baris filter
@@ -1264,7 +1296,7 @@
 
             // Logika Halaman Hafidz
             if (screenName === 'hafidz') {
-                const bolehAksesHafidz = (currentUser.role === 'admin' || currentUser.kategori === 'Tahfidz');
+                const bolehAksesHafidz = (currentUser.role === 'admin' || userPunyaKategori('Tahfidz'));
                 if (!bolehAksesHafidz) return navigate('home');
 
                 loadHafidzData();
@@ -1368,7 +1400,12 @@
             }
 
             document.getElementById('user-greeting-name').innerText = currentUser.name;
-            document.getElementById('home-kategori-badge').innerText = currentUser.kategori;
+            const badgeWrap = document.getElementById('home-kategori-badge-wrap');
+            if (badgeWrap) {
+                badgeWrap.innerHTML = getKategoriUserList().map(k =>
+                    `<span class="inline-block bg-white/20 text-white text-[10px] font-medium px-2 py-0.5 rounded-md backdrop-blur-sm border border-white/10">${escapeHtml(k)}</span>`
+                ).join('');
+            }
             document.getElementById('profile-name').innerText = currentUser.name;
             renderProfilePhoto();
             document.getElementById('profile-role').innerText =
@@ -1386,13 +1423,28 @@
                 adminNavBtn.classList.remove('flex');
             }
 
-            // Tampilkan keterangan hari khusus Ta'lim Khusus di kartu sesi Malam
+            // Tampilkan keterangan hari & materi khusus Ta'lim Khusus di kartu sesi Malam
             const malamHariKeterangan = document.getElementById('malam-hari-keterangan');
-            if (malamHariKeterangan) {
-                if (currentUser.kategori === "Ta'lim Khusus") {
+            const malamMateriKeterangan = document.getElementById('malam-materi-keterangan');
+            const malamMateriText = document.getElementById('malam-materi-text');
+
+            if (malamHariKeterangan && malamMateriKeterangan) {
+                if (userPunyaKategori("Ta'lim Khusus")) {
                     malamHariKeterangan.classList.remove('hidden');
+                    malamMateriKeterangan.classList.remove('hidden');
+
+                    const materiPerHari = {
+                        'Senin': "Ta'lim Tahsin Qur'an/Iqra'",
+                        'Selasa': "Ta'lim Tahfidz",
+                        'Rabu': "Ta'lim Fiqih"
+                    };
+                    const hariIni = getNamaHariIni();
+                    if (malamMateriText) {
+                        malamMateriText.innerText = materiPerHari[hariIni] || '-';
+                    }
                 } else {
                     malamHariKeterangan.classList.add('hidden');
+                    malamMateriKeterangan.classList.add('hidden');
                 }
             }
 
@@ -1406,9 +1458,9 @@
                 menuKelolaUser.classList.remove('flex');
             }
 
-            // Menu Hafidz hanya untuk Admin atau pengajar kategori Tahfidz
+            // Menu Hafidz hanya untuk Admin atau pengajar dengan salah satu kategorinya Tahfidz
             const hafidzNavBtn = document.getElementById('nav-hafidz');
-            const bolehAksesHafidz = (currentUser.role === 'admin' || currentUser.kategori === 'Tahfidz');
+            const bolehAksesHafidz = (currentUser.role === 'admin' || userPunyaKategori('Tahfidz'));
 
             if (bolehAksesHafidz) {
                 hafidzNavBtn.classList.remove('hidden');
@@ -1455,16 +1507,34 @@
         }
 
         function lockSession(sesiList) {
+            // Khusus admin: tampilkan kartu Malam tambahan + label kategori untuk uji coba (Tahfidz/Ta'lim Umum/Ta'lim Khusus)
+            const isAdminUser = (currentUser.role === 'admin');
+            const cardMalamKhusus = document.getElementById('card-MALAM-TALIMKHUSUS');
+            const cardMalamUmum = document.getElementById('card-MALAM-TALIMUMUM');
+            const labelTalimKhususAdmin = document.getElementById('label-kategori-talimkhusus-admin');
+
+            if (cardMalamKhusus) cardMalamKhusus.classList.toggle('hidden', !isAdminUser);
+            if (cardMalamUmum) cardMalamUmum.classList.toggle('hidden', !isAdminUser);
+            if (labelTalimKhususAdmin) labelTalimKhususAdmin.classList.toggle('hidden', !isAdminUser);
+
             const sesiAll = ['PAGI', 'SORE', 'MAGHRIB', 'MALAM'];
             let adaKartuTampil = false;
+            let adaKartuTahfidzTampil = false;
+            let adaKartuTalimUmumTampil = false;
 
             sesiAll.forEach(sesi => {
                 const card = document.getElementById(`card-${sesi}`);
                 const badge = document.getElementById(`badge-${sesi}`);
                 if(!card || !badge) return;
+                // Materi Ta'lim Umum hanya tampil jika HARI INI memang jadwal Ta'lim Umum untuk sesi tersebut
                 let containerMateri = card.querySelector('.materi-container');
-                if (currentUser.kategori === "Ta'lim Umum") {
-                    // Cari div info (icon+teks) di dalam card -- itu yang perlu dibungkus jadi kolom vertikal
+                const iniJadwalTalimUmumHariIni =
+                    (sesi === 'MAGHRIB' && cekJadwalHariIni(currentUser.jadwal_maghrib)) ||
+                    (sesi === 'MALAM' && cekJadwalHariIni(currentUser.jadwal_malam));
+
+                if (userPunyaKategori("Ta'lim Umum") && iniJadwalTalimUmumHariIni) {
+                    const materiHariIni = getMateriHariIni(currentUser.materi, sesi);
+
                     const infoWrap = card.querySelector('.flex.items-center.gap-4 > div:last-child');
                     if (infoWrap && !containerMateri) {
                         containerMateri = document.createElement('p');
@@ -1472,7 +1542,7 @@
                         infoWrap.appendChild(containerMateri);
                     }
                     if (containerMateri) {
-                        containerMateri.innerHTML = `<i class="fa-solid fa-book-open text-emas-500"></i> Materi: <span class="font-semibold text-zamrud-700">${currentUser.materi || '-'}</span>`;
+                        containerMateri.innerHTML = `<i class="fa-solid fa-book-open text-emas-500"></i> Materi: <span class="font-semibold text-zamrud-700">${materiHariIni}</span>`;
                     }
                 } else if (containerMateri) {
                     containerMateri.remove();
@@ -1482,22 +1552,58 @@
                 const statusWaktu = getStatusWaktuSesi(sesi);
                 const tersediaUntukKategori = isSesiTersediaUntukKategori(sesi);
 
-                // --- LOGIKA LIBUR KHUSUS TAHFIDZ ---
                 let isLiburTahfidz = false;
-                if (currentUser.kategori === 'Tahfidz') {
+                if (userPunyaKategori('Tahfidz')) {
                     const hariIni = getNamaHariIni();
-                    if (hariIni === 'Kamis' && sesi === 'MALAM') isLiburTahfidz = true;
-                    if (hariIni === 'Jumat' && sesi === 'PAGI') isLiburTahfidz = true;
+
+                    // Cek apakah kategori LAIN (Ta'lim Khusus / Ta'lim Umum) tetap membuka sesi ini hari ini,
+                    // agar "Libur Tahfidz" tidak menutupi sesi yang sebenarnya masih aktif untuk kategori lain
+                    const adaKategoriLainAktif =
+                        (sesi === 'MALAM' && userPunyaKategori("Ta'lim Khusus") && ["Senin","Selasa","Rabu"].includes(hariIni)) ||
+                        (sesi === 'MALAM' && userPunyaKategori("Ta'lim Umum") && cekJadwalHariIni(currentUser.jadwal_malam)) ||
+                        (sesi === 'MAGHRIB' && userPunyaKategori("Ta'lim Umum") && cekJadwalHariIni(currentUser.jadwal_maghrib));
+
+                    if (!adaKategoriLainAktif) {
+                        if (hariIni === 'Kamis' && sesi === 'MALAM') isLiburTahfidz = true;
+                        if (hariIni === 'Jumat' && sesi === 'PAGI') isLiburTahfidz = true;
+                    }
                 }
 
-                // Sembunyikan kartu yang memang tidak berlaku untuk kategori/jadwal pengajar ini
-                // Kecuali kalau sudah pernah tercatat hadir (data lama tetap ditampilkan sebagai riwayat)
                 if (currentUser.role !== 'admin' && !tersediaUntukKategori && !sudahHadir) {
                     card.classList.add('hidden');
                     return;
                 } else {
                     card.classList.remove('hidden');
                     adaKartuTampil = true;
+
+                    if (sesi === 'PAGI' || sesi === 'SORE') adaKartuTahfidzTampil = true;
+                    if (sesi === 'MAGHRIB') adaKartuTalimUmumTampil = true;
+                    if (sesi === 'MALAM') {
+                        // Tentukan pemilik kartu Malam murni berdasarkan kategori yang MEMANG dimiliki pengajar,
+                        // bukan tergantung status libur/tersedia hari ini
+                        const malamMilikTalimKhususHariIni =
+                            userPunyaKategori("Ta'lim Khusus") && ["Senin","Selasa","Rabu"].includes(getNamaHariIni());
+                        const malamMilikTalimUmumHariIni =
+                            userPunyaKategori("Ta'lim Umum") && cekJadwalHariIni(currentUser.jadwal_malam);
+
+                        const cardMalamEl = document.getElementById('card-MALAM');
+
+                        if (malamMilikTalimKhususHariIni || malamMilikTalimUmumHariIni) {
+                            adaKartuTalimUmumTampil = true;
+                            // Pindahkan kartu Malam ke posisi paling akhir (area Ta'lim Umum, setelah Maghrib)
+                            const sessionCards = document.getElementById('session-cards');
+                            if (cardMalamEl && sessionCards && sessionCards.lastElementChild !== cardMalamEl) {
+                                sessionCards.appendChild(cardMalamEl);
+                            }
+                        } else if (userPunyaKategori('Tahfidz')) {
+                            adaKartuTahfidzTampil = true;
+                            // Pindahkan kartu Malam kembali ke bawah kartu Sore (area Tahfidz)
+                            const cardSoreEl = document.getElementById('card-SORE');
+                            if (cardMalamEl && cardSoreEl && cardSoreEl.nextElementSibling !== cardMalamEl) {
+                                cardSoreEl.insertAdjacentElement('afterend', cardMalamEl);
+                            }
+                        }
+                    }
                 }
 
                 if (sudahHadir) {
@@ -1529,6 +1635,36 @@
                 }
             });
 
+            // Tampilkan/sembunyikan label kategori sesuai kartu yang aktif
+            const labelTahfidz = document.getElementById('label-kategori-tahfidz');
+            const labelTalimUmum = document.getElementById('label-kategori-talimumum');
+            const talimUmumNoJadwal = document.getElementById('talimumum-no-jadwal');
+            const talimUmumJadwalInfo = document.getElementById('talimumum-jadwal-info');
+
+            if (labelTahfidz) labelTahfidz.classList.toggle('hidden', !(adaKartuTahfidzTampil || isAdminUser));
+
+            // Label "Ta'lim Umum" sebagai penanda kelompok hanya relevan untuk pengajar MULTI-KATEGORI
+            // (pengajar Ta'lim Umum tunggal tidak perlu label kelompok karena semua kartu memang miliknya)
+            // Admin selalu melihat label ini karena bisa uji coba semua kategori sekaligus
+            const punyaKategoriTalimUmum = userPunyaKategori("Ta'lim Umum");
+            const isMultiKategoriCek = getKategoriUserList().length > 1;
+            if (labelTalimUmum) labelTalimUmum.classList.toggle('hidden', !(isAdminUser || (punyaKategoriTalimUmum && isMultiKategoriCek)));
+
+            // Blok khusus per-kategori ini HANYA untuk pengajar MULTI-KATEGORI.
+            // Untuk pengajar Ta'lim Umum tunggal, cukup blok umum "no-jadwal-hari-ini" di bawah yang menangani.
+            const isMultiKategori = getKategoriUserList().length > 1;
+
+            if (talimUmumNoJadwal) {
+                if (isMultiKategori && punyaKategoriTalimUmum && !adaKartuTalimUmumTampil) {
+                    talimUmumNoJadwal.classList.remove('hidden');
+                    if (talimUmumJadwalInfo) {
+                        talimUmumJadwalInfo.innerHTML = buatRingkasanJadwalTalimUmum();
+                    }
+                } else {
+                    talimUmumNoJadwal.classList.add('hidden');
+                }
+            }
+
             // Tampilkan keterangan kosong jika tidak ada satupun kartu sesi yang tampil hari ini
             const noJadwalEl = document.getElementById('no-jadwal-hari-ini');
             const jadwalInfoEl = document.getElementById('jadwal-anda-info');
@@ -1536,30 +1672,138 @@
                 if (!adaKartuTampil && currentUser.role !== 'admin') {
                     noJadwalEl.classList.remove('hidden');
                     if (jadwalInfoEl) {
-                        jadwalInfoEl.innerText = `Jadwal Anda: ${buatKeteranganJadwal()}`;
+                        jadwalInfoEl.innerHTML = buatKeteranganJadwal();
                     }
                 } else {
                     noJadwalEl.classList.add('hidden');
                 }
             }
         }
+        // Ringkasan jadwal Ta'lim Umum berupa daftar kartu rapi (dipakai di kartu "tidak ada jadwal hari ini" per kategori)
+        function buatRingkasanJadwalTalimUmum() {
+            const hariMaghrib = String(currentUser.jadwal_maghrib || '').split(',').map(h => h.trim()).filter(Boolean)
+                .sort((a, b) => HARI_LIST.indexOf(a) - HARI_LIST.indexOf(b));
+            const hariMalam = String(currentUser.jadwal_malam || '').split(',').map(h => h.trim()).filter(Boolean)
+                .sort((a, b) => HARI_LIST.indexOf(a) - HARI_LIST.indexOf(b));
 
-        // Membuat teks ringkas jadwal pengajar berdasarkan kategori
+            if (hariMaghrib.length === 0 && hariMalam.length === 0) {
+                return `<p class="text-[11px] text-zamrud-400 text-center">Jadwal belum diatur, hubungi admin.</p>`;
+            }
+
+            let html = '<div class="flex flex-col gap-2 text-left">';
+
+            hariMaghrib.forEach(hari => {
+                const materi = getMateriUntukHariSesi(currentUser.materi, 'MAGHRIB', hari);
+                html += `
+                    <div class="bg-white border border-purple-100 rounded-xl p-2.5 flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-500 shrink-0">
+                            <i class="fa-solid fa-mosque text-xs"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-bold text-zamrud-800">${hari} <span class="font-normal text-zamrud-400">• Maghrib</span></p>
+                            ${materi ? `<p class="text-[10px] text-emas-600 font-semibold"><i class="fa-solid fa-book-open mr-1"></i>${escapeHtml(materi)}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            hariMalam.forEach(hari => {
+                const materi = getMateriUntukHariSesi(currentUser.materi, 'MALAM', hari);
+                html += `
+                    <div class="bg-white border border-purple-100 rounded-xl p-2.5 flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 shrink-0">
+                            <i class="fa-solid fa-moon text-xs"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-bold text-zamrud-800">${hari} <span class="font-normal text-zamrud-400">• Malam</span></p>
+                            ${materi ? `<p class="text-[10px] text-emas-600 font-semibold"><i class="fa-solid fa-book-open mr-1"></i>${escapeHtml(materi)}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            return html;
+        }
+        // Membuat HTML kartu jadwal pengajar berdasarkan kategori (dengan materi jika Ta'lim Umum)
         function buatKeteranganJadwal() {
-            const kategori = currentUser.kategori;
+            const kategoriList = getKategoriUserList();
+            let html = '';
 
-            if (kategori === "Ta'lim Khusus") {
-                return "Senin, Selasa, Rabu (Sesi Malam)";
+            if (kategoriList.includes("Ta'lim Khusus")) {
+                html += `
+                    <div class="bg-white border border-zamrud-100 rounded-xl p-3 flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 shrink-0">
+                            <i class="fa-solid fa-moon text-sm"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-bold text-zamrud-800">Ta'lim Khusus <span class="font-normal text-zamrud-400">• Malam</span></p>
+                            <p class="text-[11px] text-zamrud-500 mt-0.5">Senin, Selasa, Rabu</p>
+                        </div>
+                    </div>
+                `;
             }
 
-            if (kategori === "Ta'lim Umum") {
-                const daftar = [];
-                if (currentUser.jadwal_maghrib) daftar.push(`${currentUser.jadwal_maghrib} (Maghrib)`);
-                if (currentUser.jadwal_malam) daftar.push(`${currentUser.jadwal_malam} (Malam)`);
-                return daftar.length > 0 ? daftar.join(' • ') : 'Belum ada jadwal diatur, hubungi admin.';
+            if (kategoriList.includes("Ta'lim Umum")) {
+                const hariMaghrib = String(currentUser.jadwal_maghrib || '').split(',').map(h => h.trim()).filter(Boolean)
+                    .sort((a, b) => HARI_LIST.indexOf(a) - HARI_LIST.indexOf(b));
+                const hariMalam = String(currentUser.jadwal_malam || '').split(',').map(h => h.trim()).filter(Boolean)
+                    .sort((a, b) => HARI_LIST.indexOf(a) - HARI_LIST.indexOf(b));
+
+                if (hariMaghrib.length === 0 && hariMalam.length === 0) {
+                    html += `
+                        <div class="bg-white border border-zamrud-100 rounded-xl p-3 text-center">
+                            <p class="text-[11px] text-zamrud-400">Jadwal Ta'lim Umum belum diatur, hubungi admin.</p>
+                        </div>
+                    `;
+                } else {
+                    hariMaghrib.forEach(hari => {
+                        const materi = getMateriUntukHariSesi(currentUser.materi, 'MAGHRIB', hari);
+                        html += `
+                            <div class="bg-white border border-zamrud-100 rounded-xl p-3 flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-purple-50 flex items-center justify-center text-purple-500 shrink-0">
+                                    <i class="fa-solid fa-mosque text-sm"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs font-bold text-zamrud-800">${hari} <span class="font-normal text-zamrud-400">• Maghrib</span></p>
+                                    ${materi ? `<p class="text-[11px] text-emas-600 font-semibold mt-0.5"><i class="fa-solid fa-book-open mr-1"></i>${escapeHtml(materi)}</p>` : `<p class="text-[11px] text-zamrud-400 mt-0.5">Materi belum diatur</p>`}
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    hariMalam.forEach(hari => {
+                        const materi = getMateriUntukHariSesi(currentUser.materi, 'MALAM', hari);
+                        html += `
+                            <div class="bg-white border border-zamrud-100 rounded-xl p-3 flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 shrink-0">
+                                    <i class="fa-solid fa-moon text-sm"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs font-bold text-zamrud-800">${hari} <span class="font-normal text-zamrud-400">• Malam</span></p>
+                                    ${materi ? `<p class="text-[11px] text-emas-600 font-semibold mt-0.5"><i class="fa-solid fa-book-open mr-1"></i>${escapeHtml(materi)}</p>` : `<p class="text-[11px] text-zamrud-400 mt-0.5">Materi belum diatur</p>`}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
             }
 
-            return 'Setiap hari (Pagi, Sore, Malam)';
+            if (kategoriList.includes('Tahfidz')) {
+                html += `
+                    <div class="bg-white border border-zamrud-100 rounded-xl p-3 flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-zamrud-50 flex items-center justify-center text-zamrud-600 shrink-0">
+                            <i class="fa-solid fa-book-quran text-sm"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-bold text-zamrud-800">Tahfidz</p>
+                            <p class="text-[11px] text-zamrud-500 mt-0.5">Setiap hari (Pagi, Sore, Malam) — kecuali libur Kamis Malam & Jumat Pagi</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return html || `<p class="text-[11px] text-zamrud-400 text-center">Belum ada jadwal diatur.</p>`;
         }
 
         function normalizeTanggal(raw) {
@@ -1923,8 +2167,36 @@
 
         const NAMA_HARI = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 
+        function getKategoriUserList() {
+            return String(currentUser.kategori || '').split(',').map(k => k.trim()).filter(Boolean);
+        }
+
+        function userPunyaKategori(kategori) {
+            return getKategoriUserList().includes(kategori);
+        }
+
         function getNamaHariIni() {
             return NAMA_HARI[new Date().getDay()];
+        }
+
+        // Mengambil materi untuk sesi & HARI TERTENTU (bukan selalu hari ini) dari format "MAGHRIB-Senin:Tilawah,MALAM-Senin:Barzanji"
+        function getMateriUntukHariSesi(materiStr, sesi, hari) {
+            if (!materiStr) return '';
+            const targetKey = `${sesi}-${hari}`;
+            const pairs = String(materiStr).split(',');
+            for (const pair of pairs) {
+                const [key, materi] = pair.split(':');
+                if (key && key.trim() === targetKey) {
+                    return materi ? materi.trim() : '';
+                }
+            }
+            return '';
+        }
+
+        // Mengambil materi untuk sesi & hari ini
+        function getMateriHariIni(materiStr, sesi) {
+            const hariIni = getNamaHariIni();
+            return getMateriUntukHariSesi(materiStr, sesi, hariIni) || '-';
         }
 
         // Cek apakah string jadwal (dipisah koma) mengandung hari ini
@@ -1934,27 +2206,25 @@
             return daftarHari.includes(getNamaHariIni());
         }
 
-        // Cek apakah sesi tertentu tersedia untuk kategori & jadwal pengajar saat ini
+        // Sekarang mengecek SEMUA kategori milik pengajar -- sesi tersedia jika SALAH SATU kategori mengizinkannya
         function isSesiTersediaUntukKategori(sesi) {
-            const kategori = currentUser.kategori;
+            const kategoriList = getKategoriUserList();
+            if (kategoriList.length === 0) return true; // fallback aman jika kategori kosong
 
-            // --- Ta'lim Khusus: hanya sesi MALAM, hanya hari Senin/Selasa/Rabu (berlaku sama untuk semua pengajar kategori ini) ---
-            if (kategori === "Ta'lim Khusus") {
-                const hariDiizinkan = ["Senin", "Selasa", "Rabu"];
-                if (sesi !== 'MALAM') return false;
-                return hariDiizinkan.includes(getNamaHariIni());
+            for (const kategori of kategoriList) {
+                if (kategori === "Ta'lim Khusus") {
+                    const hariDiizinkan = ["Senin", "Selasa", "Rabu"];
+                    if (sesi === 'MALAM' && hariDiizinkan.includes(getNamaHariIni())) return true;
+                }
+                else if (kategori === "Ta'lim Umum") {
+                    if (sesi === 'MAGHRIB' && cekJadwalHariIni(currentUser.jadwal_maghrib)) return true;
+                    if (sesi === 'MALAM' && cekJadwalHariIni(currentUser.jadwal_malam)) return true;
+                }
+                else if (kategori === 'Tahfidz') {
+                    if (sesi !== 'MAGHRIB') return true; // Pagi/Sore/Malam normal untuk Tahfidz
+                }
             }
-
-            // --- Ta'lim Umum: hanya sesi MAGHRIB & MALAM, jadwal berbeda per pengajar (dari Sheets) ---
-            if (kategori === "Ta'lim Umum") {
-                if (sesi === 'MAGHRIB') return cekJadwalHariIni(currentUser.jadwal_maghrib);
-                if (sesi === 'MALAM') return cekJadwalHariIni(currentUser.jadwal_malam);
-                return false; // Pagi & Sore tidak berlaku untuk Ta'lim Umum
-            }
-
-            // --- Tahfidz & kategori lain: semua sesi normal (kecuali MAGHRIB yang memang khusus Ta'lim Umum) ---
-            if (sesi === 'MAGHRIB') return false;
-            return true;
+            return false;
         }
 
         // Mengembalikan status waktu sesi: 'BELUM_MULAI' | 'AKTIF' | 'TERLEWAT'
@@ -1968,7 +2238,13 @@
             if (menitSekarang > range.selesai) return 'TERLEWAT';
             return 'AKTIF';
         }
-
+        // Khusus admin: memilih sesi Malam dengan kategori spesifik (untuk uji coba, bebas hari/jam)
+        function pilihSesiAdmin(sesi, kategoriPaksa) {
+            if (currentUser.role !== 'admin') return;
+            activeSesi = sesi;
+            window._adminKategoriPaksa = kategoriPaksa; // dipakai saat simpan absen
+            triggerCamera();
+        }
         function pilihSesi(sesi) {
             const status = getStatusWaktuSesi(sesi);
             const range = SESI_RANGE[sesi];
@@ -2093,15 +2369,15 @@
             });
         }
 
-        // --- ABSENSI LOGIC ---
         function prosesKirimAbsen() {
             showLoading(true, "Menyimpan Absensi...");
+            window._adminKategoriPaksa = window._adminKategoriPaksa || null; // reset setelah dipakai, di bawah
 
             const dataAbsen = {
                 id_absen: 'ABS-' + Date.now(),
                 username: currentUser.username,
                 nama: currentUser.name,
-                kategori: currentUser.kategori,
+                kategori: window._adminKategoriPaksa || currentUser.kategori,
                 tanggal: getFormattedDateISO(),
                 waktu: getFormattedTime(),
                 sesi: activeSesi,
@@ -2569,6 +2845,7 @@
                         </div>
                         <p class="text-[11px] text-zamrud-400">@${escapeHtml(user.username)}</p>
                         ${user.kategori ? `<p class="text-[11px] text-zamrud-500 mt-0.5"><i class="fa-solid fa-tag mr-1"></i>${escapeHtml(user.kategori)}</p>` : ''}
+                        ${user.materi ? `<p class="text-[10px] text-zamrud-400 mt-0.5"><i class="fa-solid fa-book-open mr-1"></i>${escapeHtml(user.materi.split(',').map(p => { const [k,v]=p.split(':'); const [s,h]=(k||'').split('-'); return h && v ? `${h} ${s==='MAGHRIB'?'Maghrib':'Malam'}: ${v}` : ''; }).filter(Boolean).join(' • '))}</p>` : ''}
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
                         <button type="button" onclick="openEditUserModal('${user.username}')" class="w-9 h-9 rounded-full bg-zamrud-50 text-zamrud-600 border border-zamrud-200 flex items-center justify-center active:scale-95 transition">
@@ -2583,18 +2860,21 @@
             });
         }
 
+        function getKategoriChecked() {
+            return Array.from(document.querySelectorAll('.user-kategori-checkbox:checked')).map(cb => cb.value);
+        }
+
         function toggleJadwalTalimUmum() {
-            const kategori = document.getElementById('user-form-kategori').value;
+            const kategoriTerpilih = getKategoriChecked();
             const wrap = document.getElementById('user-form-jadwal-wrap');
             const materiWrap = document.getElementById('user-form-materi-wrap');
 
-            if (kategori === "Ta'lim Umum") {
+            if (kategoriTerpilih.includes("Ta'lim Umum")) {
                 wrap.classList.remove('hidden');
                 materiWrap.classList.remove('hidden');
             } else {
                 wrap.classList.add('hidden');
                 materiWrap.classList.add('hidden');
-                document.getElementById('user-form-materi').value = ''; // Reset pilihan materi jika kategori diganti
             }
         }
 
@@ -2617,6 +2897,68 @@
                 btn.classList.add('bg-emas-500', 'text-white', 'border-emas-600');
                 btn.classList.remove('bg-white', 'text-zamrud-500', 'border-zamrud-200');
             }
+            renderMateriRows(); // Refresh baris materi setiap kali jadwal hari berubah
+        }
+
+        const DAFTAR_MATERI = ["Tilawah", "Tajwid", "Barzanji", "Kitab At-Tibyan", "Tartil"];
+
+        function renderMateriRows(materiTersimpanStr) {
+            const container = document.getElementById('user-form-materi-rows');
+            const hariMaghrib = getJadwalTerpilih('user-form-jadwal-maghrib').split(',').filter(Boolean)
+                .sort((a, b) => HARI_LIST.indexOf(a) - HARI_LIST.indexOf(b));
+            const hariMalam = getJadwalTerpilih('user-form-jadwal-malam').split(',').filter(Boolean)
+                .sort((a, b) => HARI_LIST.indexOf(a) - HARI_LIST.indexOf(b));
+
+            if (hariMaghrib.length === 0 && hariMalam.length === 0) {
+                container.innerHTML = `<p class="text-xs text-zamrud-300 text-center py-2">Pilih jadwal hari terlebih dahulu di bawah</p>`;
+                return;
+            }
+
+            // Parse materi tersimpan (format "MAGHRIB-Senin:Tilawah,MALAM-Senin:Barzanji") jadi objek
+            const materiMap = {};
+            if (materiTersimpanStr) {
+                materiTersimpanStr.split(',').forEach(pair => {
+                    const [key, materi] = pair.split(':');
+                    if (key && materi) materiMap[key.trim()] = materi.trim();
+                });
+            }
+
+            function buatBarisSesi(sesiLabel, sesiKey, daftarHari) {
+                if (daftarHari.length === 0) return '';
+                const rows = daftarHari.map(hari => {
+                    const mapKey = `${sesiKey}-${hari}`;
+                    const materiTerpilih = materiMap[mapKey] || '';
+                    const options = DAFTAR_MATERI.map(m => `<option value="${m}" ${m === materiTerpilih ? 'selected' : ''}>${m}</option>`).join('');
+                    return `
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-zamrud-600 w-16 shrink-0">${hari}</span>
+                            <select data-key="${mapKey}" class="materi-per-sesi-select flex-1 border border-zamrud-100 rounded-lg px-2 py-1.5 text-xs outline-none">
+                                <option value="">- Pilih -</option>
+                                ${options}
+                            </select>
+                        </div>
+                    `;
+                }).join('');
+                return `
+                    <div class="mb-2">
+                        <p class="text-[10px] font-bold text-emas-600 uppercase mb-1">${sesiLabel}</p>
+                        <div class="flex flex-col gap-1.5">${rows}</div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML =
+                buatBarisSesi("Sesi Maghrib", "MAGHRIB", hariMaghrib) +
+                buatBarisSesi("Sesi Malam", "MALAM", hariMalam);
+        }
+
+        function getMateriPerHariTerpilih() {
+            const selects = document.querySelectorAll('.materi-per-sesi-select');
+            const pairs = [];
+            selects.forEach(sel => {
+                if (sel.value) pairs.push(`${sel.dataset.key}:${sel.value}`);
+            });
+            return pairs.join(',');
         }
 
         function getJadwalTerpilih(containerId) {
@@ -2633,11 +2975,11 @@
             document.getElementById('user-form-password-hint').innerText = '';
             document.getElementById('user-form-name').value = '';
             document.getElementById('user-form-role').value = 'pengajar';
-            document.getElementById('user-form-kategori').value = '';
-            document.getElementById('user-form-materi').value = '';
+            document.querySelectorAll('.user-kategori-checkbox').forEach(cb => cb.checked = false);
             renderJadwalChips('user-form-jadwal-maghrib', '');
             renderJadwalChips('user-form-jadwal-malam', '');
             toggleJadwalTalimUmum();
+            renderMateriRows();
 
             const modal = document.getElementById('userFormModal');
             modal.classList.remove('hidden');
@@ -2656,11 +2998,14 @@
             document.getElementById('user-form-password-hint').innerText = '(kosongkan jika tidak diubah)';
             document.getElementById('user-form-name').value = user.name;
             document.getElementById('user-form-role').value = user.role;
-            document.getElementById('user-form-kategori').value = user.kategori || '';
-            document.getElementById('user-form-materi').value = user.materi || '';
+            const kategoriUserList = String(user.kategori || '').split(',').map(k => k.trim()).filter(Boolean);
+            document.querySelectorAll('.user-kategori-checkbox').forEach(cb => {
+                cb.checked = kategoriUserList.includes(cb.value);
+            });
             renderJadwalChips('user-form-jadwal-maghrib', user.jadwal_maghrib);
             renderJadwalChips('user-form-jadwal-malam', user.jadwal_malam);
             toggleJadwalTalimUmum();
+            renderMateriRows(user.materi);
 
             const modal = document.getElementById('userFormModal');
             modal.classList.remove('hidden');
@@ -2679,8 +3024,13 @@
             const password = document.getElementById('user-form-password').value;
             const name = document.getElementById('user-form-name').value.trim();
             const role = document.getElementById('user-form-role').value;
-            const kategori = document.getElementById('user-form-kategori').value;
-            const materi = document.getElementById('user-form-materi').value;
+            const kategori = getKategoriChecked().join(',');
+            const materi = getMateriPerHariTerpilih();
+
+            if (!kategori) {
+                Swal.fire({ icon: 'warning', text: 'Pilih minimal 1 kategori.', confirmButtonColor: '#B8860B' });
+                return;
+            }
             const jadwalMaghrib = getJadwalTerpilih('user-form-jadwal-maghrib');
             const jadwalMalam = getJadwalTerpilih('user-form-jadwal-malam');
 
@@ -2792,9 +3142,11 @@
                 .then(function(data) {
                     if (!adaCacheLokal) showLoading(false);
 
-                    // Jangan timpa perubahan yang sedang diedit user (pendingHafalan tetap dipertahankan)
                     santriData = data || [];
-                    try { safeStorage.setItem('lem_santri', JSON.stringify(santriData)); } catch(e){}
+                    try {
+                        safeStorage.setItem('lem_santri', JSON.stringify(santriData));
+                        safeStorage.setItem('lem_santri_time', String(Date.now()));
+                    } catch(e){}
 
                     urutkanSantriByHafalan();
                     if (isAdmin) populateHafidzFilterDropdowns();
@@ -2856,13 +3208,15 @@
             });
         }
 
-        // type: 'ziyadah' atau 'takrir'
         function getCurrentHafalan(santri, type) {
             const pending = pendingHafalan[santri.id_santri];
             if (pending && pending[type]) return pending[type];
 
             if (type === 'takrir') {
-                return { juz: santri.juz_takrir || 1, halaman: santri.halaman_takrir || 1 };
+                // Gunakan nilai asli hanya jika benar-benar berupa angka valid (mencegah reset diam-diam ke 1 akibat data cacat/cache basi)
+                const juz = (typeof santri.juz_takrir === 'number' && santri.juz_takrir > 0) ? santri.juz_takrir : 1;
+                const halaman = (typeof santri.halaman_takrir === 'number' && santri.halaman_takrir > 0) ? santri.halaman_takrir : 1;
+                return { juz, halaman };
             }
             return { juz: santri.juz, halaman: santri.halaman };
         }
@@ -2877,13 +3231,14 @@
 
             totalHalaman += delta;
 
-            // --- BATASAN ZIYADAH ---
-            // Ziyadah tidak bisa dikurangi lebih rendah dari data asli di server
-            if (type === 'ziyadah') {
-                const nilaiAsli = (santri.juz - 1) * HAL_PER_JUZ + santri.halaman;
-                if (totalHalaman < nilaiAsli) {
-                    totalHalaman = nilaiAsli;
-                }
+            // --- BATASAN: baik Ziyadah maupun Takriran tidak bisa dikurangi lebih rendah dari data terakhir di server ---
+            // Mencegah tombol "-" ditekan berlebihan sehingga menghasilkan setoran negatif di laporan
+            const juzAsli = (type === 'ziyadah') ? santri.juz : (santri.juz_takrir || 1);
+            const halAsli = (type === 'ziyadah') ? santri.halaman : (santri.halaman_takrir || 1);
+            const nilaiAsli = (juzAsli - 1) * HAL_PER_JUZ + halAsli;
+
+            if (totalHalaman < nilaiAsli) {
+                totalHalaman = nilaiAsli;
             }
 
             if (totalHalaman < 1) totalHalaman = 1;
@@ -3555,9 +3910,9 @@
                     jadwal_malam: u.jadwal_malam || ''
                 }));
 
-            // 2. Filter Kategori
+            // 2. Filter Kategori -- gunakan includes agar pengajar multi-kategori tetap muncul
             if (filterKategori !== 'ALL') {
-                userList = userList.filter(u => u.kategori === filterKategori);
+                userList = userList.filter(u => String(u.kategori || '').split(',').map(k => k.trim()).includes(filterKategori));
             }
 
             // 3. Filter data absensi berdasarkan Bulan
@@ -3579,7 +3934,12 @@
             let totalHariGlobal = new Set();
 
             userList = userList.map(user => {
-                const userAbsen = filteredAbsen.filter(a => a.username === user.username);
+                // Jika filter kategori spesifik aktif, hitung HANYA dari absen kategori itu
+                // (penting untuk pengajar multi-kategori agar statistiknya tidak tercampur)
+                let userAbsen = filteredAbsen.filter(a => a.username === user.username);
+                if (filterKategori !== 'ALL') {
+                    userAbsen = userAbsen.filter(a => a.kategori === filterKategori);
+                }
                 const totalSesi = userAbsen.length;
                 const totalHari = new Set(userAbsen.map(a => a.tanggal)).size;
                 return { ...user, totalSesi, totalHari, userAbsen };
@@ -3597,8 +3957,12 @@
                     totalSesiGlobal += totalSesi;
                     userAbsen.forEach(a => totalHariGlobal.add(a.tanggal + '_' + a.username));
 
-                    const targetSesi = hitungTargetSesiUntukUser(user, filterBulanDate.getFullYear(), filterBulanDate.getMonth());
-                    const realisasi = hitungRealisasiUntukUser(user, userAbsen);
+                    // Saat filter kategori spesifik aktif, hitung target/realisasi berdasarkan kategori itu saja
+                    const pseudoUserUntukHitung = filterKategori !== 'ALL'
+                        ? { ...user, kategori: filterKategori }
+                        : user;
+                    const targetSesi = hitungTargetSesiUntukUser(pseudoUserUntukHitung, filterBulanDate.getFullYear(), filterBulanDate.getMonth());
+                    const realisasi = hitungRealisasiUntukUser(pseudoUserUntukHitung, userAbsen);
                     let persentase = 0;
                     if (realisasi > 0 && targetSesi > 0) {
                         persentase = Math.min(100, Math.round((realisasi / targetSesi) * 100));
@@ -3626,37 +3990,98 @@
                         </div>
                         
                         <!-- Bagian Tengah Kartu: Angka Statistik -->
-                        ${user.kategori === "Ta'lim Umum" || user.kategori === "Ta'lim Khusus" ? `
-                        <div class="flex items-center justify-between bg-slate-50 rounded-lg p-2 mt-1">
-                            <div class="text-center flex-1 border-r border-gray-200">
-                                <p class="text-[9px] text-gray-500 uppercase tracking-wide">Hadir</p>
-                                <p class="font-bold text-emas-600 text-sm">${realisasi}</p>
+                        ${(function(){
+                            const userKategoriListCard = String(user.kategori || '').split(',').map(k => k.trim()).filter(Boolean);
+                            const isMultiKategoriCard = userKategoriListCard.length > 1;
+
+                            // --- MODE "Semua Kategori" + pengajar multi-kategori: pecah per kategori ---
+                            if (filterKategori === 'ALL' && isMultiKategoriCard) {
+                                return userKategoriListCard.map(kat => {
+                                    const absenKatIni = user.userAbsen.filter(a => a.kategori === kat);
+                                    const sesiKat = absenKatIni.length;
+                                    const hariKat = new Set(absenKatIni.map(a => a.tanggal)).size;
+                                    const pseudoUserKat = { ...user, kategori: kat };
+                                    const targetKat = hitungTargetSesiUntukUser(pseudoUserKat, filterBulanDate.getFullYear(), filterBulanDate.getMonth());
+                                    const realisasiKat = hitungRealisasiUntukUser(pseudoUserKat, absenKatIni);
+                                    const persenKat = (realisasiKat > 0 && targetKat > 0) ? Math.min(100, Math.round((realisasiKat / targetKat) * 100)) : 0;
+                                    const kategoriTanpaSesiKat = (kat === "Ta'lim Umum" || kat === "Ta'lim Khusus");
+
+                                    const totalKat = kategoriTanpaSesiKat ? realisasiKat : (sesiKat + hariKat);
+
+                                    const isiKat = kategoriTanpaSesiKat
+                                        ? `<div class="text-center flex-1 border-r border-gray-200">
+                                               <p class="text-[9px] text-gray-500 uppercase tracking-wide">Hadir</p>
+                                               <p class="font-bold text-emas-600 text-sm">${realisasiKat}</p>
+                                           </div>`
+                                        : `<div class="text-center flex-1 border-r border-gray-200">
+                                               <p class="text-[9px] text-gray-500 uppercase tracking-wide">Sesi</p>
+                                               <p class="font-bold text-blue-600 text-sm">${sesiKat}</p>
+                                           </div>
+                                           <div class="text-center flex-1 border-r border-gray-200">
+                                               <p class="text-[9px] text-gray-500 uppercase tracking-wide">Hari</p>
+                                               <p class="font-bold text-zamrud-600 text-sm">${hariKat}</p>
+                                           </div>
+                                           <div class="text-center flex-1 border-r border-gray-200">
+                                               <p class="text-[9px] text-gray-500 uppercase tracking-wide">Total</p>
+                                               <p class="font-bold text-emas-600 text-sm">${totalKat}</p>
+                                           </div>`;
+
+                                    return `
+                                        <div class="mt-1">
+                                            <p class="text-[9px] font-bold text-zamrud-500 uppercase mb-1">${escapeHtml(kat)}</p>
+                                            <div class="flex items-center justify-between bg-slate-50 rounded-lg p-2">
+                                                ${isiKat}
+                                                <div class="text-center flex-1">
+                                                    <p class="text-[9px] text-gray-500 uppercase tracking-wide">Persen</p>
+                                                    <p class="font-bold text-sm ${persenKat >= 75 ? 'text-zamrud-600' : persenKat >= 40 ? 'text-orange-600' : 'text-red-600'}">${persenKat}%</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('');
+                            }
+
+                            // --- MODE filter kategori spesifik AKTIF (atau pengajar single-kategori): card tunggal seperti sebelumnya ---
+                            const kategoriUntukTampilan = filterKategori !== 'ALL'
+                                ? filterKategori
+                                : userKategoriListCard[0];
+
+                            if (kategoriUntukTampilan === "Ta'lim Umum" || kategoriUntukTampilan === "Ta'lim Khusus") {
+                                return `
+                                <div class="flex items-center justify-between bg-slate-50 rounded-lg p-2 mt-1">
+                                    <div class="text-center flex-1 border-r border-gray-200">
+                                        <p class="text-[9px] text-gray-500 uppercase tracking-wide">Hadir</p>
+                                        <p class="font-bold text-emas-600 text-sm">${realisasi}</p>
+                                    </div>
+                                    <div class="text-center flex-1">
+                                        <p class="text-[9px] text-gray-500 uppercase tracking-wide">Persentase</p>
+                                        <p class="font-bold ${textColor} text-sm">${persentase}%</p>
+                                    </div>
+                                </div>
+                                `;
+                            }
+
+                            return `
+                            <div class="flex items-center justify-between bg-slate-50 rounded-lg p-2 mt-1">
+                                <div class="text-center flex-1 border-r border-gray-200">
+                                    <p class="text-[9px] text-gray-500 uppercase tracking-wide">Sesi Hadir</p>
+                                    <p class="font-bold text-blue-600 text-sm">${totalSesi}</p>
+                                </div>
+                                <div class="text-center flex-1 border-r border-gray-200">
+                                    <p class="text-[9px] text-gray-500 uppercase tracking-wide">Hari Hadir</p>
+                                    <p class="font-bold text-zamrud-600 text-sm">${totalHari}</p>
+                                </div>
+                                <div class="text-center flex-1 border-r border-gray-200">
+                                    <p class="text-[9px] text-gray-500 uppercase tracking-wide">Total Hadir</p>
+                                    <p class="font-bold text-emas-600 text-sm">${totalSesi + totalHari}</p>
+                                </div>
+                                <div class="text-center flex-1">
+                                    <p class="text-[9px] text-gray-500 uppercase tracking-wide">Persentase</p>
+                                    <p class="font-bold ${textColor} text-sm">${persentase}%</p>
+                                </div>
                             </div>
-                            <div class="text-center flex-1">
-                                <p class="text-[9px] text-gray-500 uppercase tracking-wide">Persentase</p>
-                                <p class="font-bold ${textColor} text-sm">${persentase}%</p>
-                            </div>
-                        </div>
-                        ` : `
-                        <div class="flex items-center justify-between bg-slate-50 rounded-lg p-2 mt-1">
-                            <div class="text-center flex-1 border-r border-gray-200">
-                                <p class="text-[9px] text-gray-500 uppercase tracking-wide">Sesi Hadir</p>
-                                <p class="font-bold text-blue-600 text-sm">${totalSesi}</p>
-                            </div>
-                            <div class="text-center flex-1 border-r border-gray-200">
-                                <p class="text-[9px] text-gray-500 uppercase tracking-wide">Hari Hadir</p>
-                                <p class="font-bold text-zamrud-600 text-sm">${totalHari}</p>
-                            </div>
-                            <div class="text-center flex-1 border-r border-gray-200">
-                                <p class="text-[9px] text-gray-500 uppercase tracking-wide">Total Hadir</p>
-                                <p class="font-bold text-emas-600 text-sm">${totalSesi + totalHari}</p>
-                            </div>
-                            <div class="text-center flex-1">
-                                <p class="text-[9px] text-gray-500 uppercase tracking-wide">Persentase</p>
-                                <p class="font-bold ${textColor} text-sm">${persentase}%</p>
-                            </div>
-                        </div>
-                        `}
+                            `;
+                        })()}
                         
                         <!-- Bagian Bawah Kartu: Progress Bar -->
                         <div class="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden mt-1">
@@ -4000,7 +4425,9 @@
 
         // Versi generik: menghitung target sesi seharusnya dalam sebulan untuk USER MANAPUN (bukan hanya currentUser)
         function hitungTargetSesiUntukUser(user, tahun, bulanIndex) {
-            if (user.kategori === "Ta'lim Khusus") {
+            const userKategoriList = String(user.kategori || '').split(',').map(k => k.trim());
+
+            if (userKategoriList.includes("Ta'lim Khusus")) {
                 return hitungJumlahHariDalamBulan("Senin,Selasa,Rabu", tahun, bulanIndex);
             }
             if (user.kategori === "Ta'lim Umum") {
@@ -4024,12 +4451,13 @@
             return totalTargetSesi;
         }
 
-        // Menghitung realisasi "hadir" (jumlah yang dibandingkan dengan target) untuk USER MANAPUN
         function hitungRealisasiUntukUser(user, userAbsen) {
-            if (user.kategori === "Ta'lim Khusus") {
+            const userKategoriList = String(user.kategori || '').split(',').map(k => k.trim());
+
+            if (userKategoriList.includes("Ta'lim Khusus")) {
                 return new Set(userAbsen.map(a => a.tanggal)).size; // per hari (1 sesi/hari)
             }
-            if (user.kategori === "Ta'lim Umum") {
+            if (userKategoriList.includes("Ta'lim Umum")) {
                 return userAbsen.length; // per sesi (bisa 2 sesi/hari)
             }
             return userAbsen.length; // Tahfidz -> per sesi seperti sebelumnya
@@ -4070,6 +4498,39 @@
             updateHomeStats();
         }
 
+        // Menghitung statistik untuk SATU kategori spesifik (dipakai baik untuk mode single maupun multi kategori)
+        function hitungStatistikKategori(kategori, myAbsenBulanIni, targetDate) {
+            const absenKategori = myAbsenBulanIni.filter(a => a.kategori === kategori);
+            const kategoriTanpaSesi = (kategori === "Ta'lim Umum" || kategori === "Ta'lim Khusus");
+
+            let totalHadir, persentase, totalSesi = 0, totalHari = 0;
+
+            if (kategoriTanpaSesi) {
+                if (kategori === "Ta'lim Umum") {
+                    totalHadir = absenKategori.length;
+                } else {
+                    totalHadir = new Set(absenKategori.map(a => a.tanggal)).size;
+                }
+                const pseudoUser = { kategori, jadwal_maghrib: currentUser.jadwal_maghrib, jadwal_malam: currentUser.jadwal_malam };
+                const targetSesi = hitungTargetSesiUntukUser(pseudoUser, targetDate.getFullYear(), targetDate.getMonth());
+                persentase = targetSesi > 0 ? Math.min(100, Math.round((totalHadir / targetSesi) * 100)) : 0;
+            } else {
+                totalSesi = absenKategori.length;
+                totalHari = new Set(absenKategori.map(a => a.tanggal)).size;
+                const MAX_SESI = 60;
+                persentase = totalSesi > 0 ? Math.min(100, Math.round((totalSesi / MAX_SESI) * 100)) : 0;
+                totalHadir = totalSesi + totalHari;
+            }
+
+            return { kategoriTanpaSesi, totalHadir, totalSesi, totalHari, persentase };
+        }
+
+        const BADGE_KATEGORI_STYLE = {
+            'Tahfidz': { bg: 'bg-zamrud-500/30', border: 'border-zamrud-300/40', text: 'text-white', icon: 'fa-book-quran' },
+            "Ta'lim Umum": { bg: 'bg-purple-500/30', border: 'border-purple-300/40', text: 'text-white', icon: 'fa-mosque' },
+            "Ta'lim Khusus": { bg: 'bg-indigo-500/30', border: 'border-indigo-300/40', text: 'text-white', icon: 'fa-moon' }
+        };
+
         function updateHomeStats() {
             if (!currentUser) return;
 
@@ -4077,62 +4538,103 @@
             const targetDate = new Date(now.getFullYear(), now.getMonth() + statBulanOffset, 1);
             const targetBulan = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}`;
 
-            // Ambil hanya absensi milik user ini DAN khusus di bulan yang sedang dilihat
             const myAbsenBulanIni = absensiData.filter(item => 
                 item.username === currentUser.username && 
                 item.tanggal.startsWith(targetBulan)
             );
 
-            const statSesiEl = document.getElementById('home-stat-sesi');
-            const statHariEl = document.getElementById('home-stat-hari');
-            const statTotalEl = document.getElementById('home-stat-total');
-            const statPersenEl = document.getElementById('home-stat-persen');
             const statBulanLabelEl = document.getElementById('home-stat-bulan-label');
             const btnNext = document.getElementById('btn-stat-next');
             const btnPrev = document.getElementById('btn-stat-prev');
-            const boxSesi = document.getElementById('box-stat-sesi');
-            const boxHari = document.getElementById('box-stat-hari');
-            const labelTotal = document.getElementById('label-stat-total');
 
-            const kategoriTanpaSesi = (currentUser.kategori === "Ta'lim Umum" || currentUser.kategori === "Ta'lim Khusus");
+            const kategoriList = getKategoriUserList();
+            const singleBox = document.getElementById('stat-single-kategori');
+            const multiBox = document.getElementById('stat-multi-kategori');
 
-            let totalHadir, persentase;
+            let totalHadirKeseluruhan = 0; // dipakai untuk kartu Honor di bawah
 
-            if (kategoriTanpaSesi) {
-                // Ta'lim Khusus: 1 sesi per hari -> hitung per hari hadir
-                // Ta'lim Umum: bisa 2 sesi (Maghrib+Malam) per hari -> hitung per SESI hadir, bukan per hari
-                if (currentUser.kategori === "Ta'lim Umum") {
-                    totalHadir = myAbsenBulanIni.length; // Jumlah baris absen (per sesi)
+            if (kategoriList.length > 1) {
+                // --- MODE MULTI KATEGORI: kartu terpisah per kategori ---
+                singleBox.classList.add('hidden');
+                multiBox.classList.remove('hidden');
+                multiBox.classList.add('flex');
+
+                multiBox.innerHTML = kategoriList.map(kat => {
+                    const stat = hitungStatistikKategori(kat, myAbsenBulanIni, targetDate);
+                    totalHadirKeseluruhan += stat.totalHadir;
+                    const style = BADGE_KATEGORI_STYLE[kat] || BADGE_KATEGORI_STYLE['Tahfidz'];
+
+                    const detailHtml = stat.kategoriTanpaSesi
+                        ? `<div class="text-center flex-1">
+                               <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Hadir</p>
+                               <p class="text-lg font-bold text-white font-heading leading-none">${stat.totalHadir}</p>
+                           </div>`
+                        : `<div class="text-center flex-1 border-r border-white/20">
+                               <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Sesi</p>
+                               <p class="text-lg font-bold text-white font-heading leading-none">${stat.totalSesi}</p>
+                           </div>
+                           <div class="text-center flex-1 border-r border-white/20">
+                               <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Hari</p>
+                               <p class="text-lg font-bold text-white font-heading leading-none">${stat.totalHari}</p>
+                           </div>
+                           <div class="text-center flex-1">
+                               <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Total</p>
+                               <p class="text-lg font-bold text-white font-heading leading-none">${stat.totalHadir}</p>
+                           </div>`;
+
+                    return `
+                        <div class="bg-white/10 backdrop-blur-md rounded-xl p-2.5 border border-white/20 shadow-inner">
+                            <div class="flex items-center gap-1.5 mb-1.5">
+                                <span class="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full ${style.bg} ${style.border} ${style.text} border">
+                                    <i class="fa-solid ${style.icon}"></i>${escapeHtml(kat)}
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                ${detailHtml}
+                                <div class="text-center flex-1 border-l border-white/20">
+                                    <p class="text-[9px] text-emas-100/80 uppercase tracking-wider mb-0.5 font-medium">Persen</p>
+                                    <p class="text-lg font-bold text-emas-300 font-heading leading-none">${stat.persentase}%</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } else {
+                // --- MODE SINGLE KATEGORI: tampilan lama, 4 kotak sejajar ---
+                singleBox.classList.remove('hidden');
+                multiBox.classList.add('hidden');
+                multiBox.classList.remove('flex');
+
+                const kategoriTunggal = kategoriList[0] || currentUser.kategori;
+                const stat = hitungStatistikKategori(kategoriTunggal, myAbsenBulanIni, targetDate);
+                totalHadirKeseluruhan = stat.totalHadir;
+
+                const statSesiEl = document.getElementById('home-stat-sesi');
+                const statHariEl = document.getElementById('home-stat-hari');
+                const statTotalEl = document.getElementById('home-stat-total');
+                const statPersenEl = document.getElementById('home-stat-persen');
+                const boxSesi = document.getElementById('box-stat-sesi');
+                const boxHari = document.getElementById('box-stat-hari');
+                const labelTotal = document.getElementById('label-stat-total');
+
+                if (stat.kategoriTanpaSesi) {
+                    if (boxSesi) boxSesi.classList.add('hidden');
+                    if (boxHari) boxHari.classList.add('hidden');
+                    if (labelTotal) labelTotal.innerText = 'Hadir';
                 } else {
-                    const hariHadirSet = new Set(myAbsenBulanIni.map(a => a.tanggal));
-                    totalHadir = hariHadirSet.size;
+                    if (statSesiEl) statSesiEl.innerText = stat.totalSesi;
+                    if (statHariEl) statHariEl.innerText = stat.totalHari;
+                    if (boxSesi) boxSesi.classList.remove('hidden');
+                    if (boxHari) boxHari.classList.remove('hidden');
+                    if (labelTotal) labelTotal.innerText = 'Total Hadir';
                 }
 
-                const targetHari = hitungTargetHariBulanIni(targetDate.getFullYear(), targetDate.getMonth());
-                persentase = targetHari > 0 ? Math.min(100, Math.round((totalHadir / targetHari) * 100)) : 0;
-
-                if (boxSesi) boxSesi.classList.add('hidden');
-                if (boxHari) boxHari.classList.add('hidden');
-                if (labelTotal) labelTotal.innerText = 'Hadir';
-            } else {
-                // Tahfidz & kategori lain: logika lama (Sesi + Hari terpisah)
-                const totalSesi = myAbsenBulanIni.length;
-                const hariHadirSet = new Set(myAbsenBulanIni.map(a => a.tanggal));
-                const totalHari = hariHadirSet.size;
-
-                const MAX_SESI = 60;
-                persentase = totalSesi > 0 ? Math.min(100, Math.round((totalSesi / MAX_SESI) * 100)) : 0;
-                totalHadir = totalSesi + totalHari;
-
-                if (statSesiEl) statSesiEl.innerText = totalSesi;
-                if (statHariEl) statHariEl.innerText = totalHari;
-                if (boxSesi) boxSesi.classList.remove('hidden');
-                if (boxHari) boxHari.classList.remove('hidden');
-                if (labelTotal) labelTotal.innerText = 'Total Hadir';
+                if (statTotalEl) statTotalEl.innerText = stat.totalHadir;
+                if (statPersenEl) statPersenEl.innerText = `${stat.persentase}%`;
             }
 
-            if (statTotalEl) statTotalEl.innerText = totalHadir;
-            if (statPersenEl) statPersenEl.innerText = `${persentase}%`;
+            const totalHadir = totalHadirKeseluruhan;
 
             // Label bulan yang sedang ditampilkan
             const bulanArr = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -4421,19 +4923,27 @@
                             jadwal_maghrib: u.jadwal_maghrib || '',
                             jadwal_malam: u.jadwal_malam || ''
                         }));
-                    if (filterKategori !== 'ALL') userList = userList.filter(u => u.kategori === filterKategori);
+
+                    // Filter kategori -- gunakan includes agar pengajar multi-kategori tetap muncul
+                    if (filterKategori !== 'ALL') {
+                        userList = userList.filter(u => String(u.kategori || '').split(',').map(k => k.trim()).includes(filterKategori));
+                    }
 
                     // 2. Filter Absensi
                     let filteredAbsen = absensiData;
                     if (filterBulanVal) filteredAbsen = filteredAbsen.filter(item => item.tanggal.startsWith(filterBulanVal));
 
-                    // 3. Hitung statistik per user, lalu urutkan (Total Sesi + Total Hari Hadir terbanyak)
+                    // 3. Hitung statistik per user
                     const pdfBulanDate = filterBulanVal
                         ? new Date(parseInt(filterBulanVal.split('-')[0], 10), parseInt(filterBulanVal.split('-')[1], 10) - 1, 1)
                         : new Date();
 
                     userList = userList.map(user => {
-                        const userAbsen = filteredAbsen.filter(a => a.username === user.username);
+                        // Jika filter kategori spesifik aktif, hitung HANYA dari absen kategori itu
+                        let userAbsen = filteredAbsen.filter(a => a.username === user.username);
+                        if (filterKategori !== 'ALL') {
+                            userAbsen = userAbsen.filter(a => a.kategori === filterKategori);
+                        }
                         const totalSesi = userAbsen.length;
                         const totalHari = new Set(userAbsen.map(a => a.tanggal)).size;
                         return { ...user, totalSesi, totalHari, userAbsen };
@@ -4442,24 +4952,59 @@
                     userList.sort((a, b) => (b.totalSesi + b.totalHari) - (a.totalSesi + a.totalHari));
 
                     // 4. Siapkan baris (rows) untuk tabel PDF
+                    // Untuk pengajar multi-kategori saat filter "Semua Kategori" -> pecah jadi beberapa baris (1 per kategori)
                     const tableRows = [];
-                    userList.forEach((user, index) => {
-                        const { totalSesi, totalHari, userAbsen } = user;
-                        const kategoriTanpaSesi = (user.kategori === "Ta'lim Umum" || user.kategori === "Ta'lim Khusus");
+                    let nomorUrut = 1;
 
-                        const targetSesi = hitungTargetSesiUntukUser(user, pdfBulanDate.getFullYear(), pdfBulanDate.getMonth());
-                        const realisasi = hitungRealisasiUntukUser(user, userAbsen);
-                        const persentase = (realisasi > 0 && targetSesi > 0) ? Math.min(100, Math.round((realisasi / targetSesi) * 100)) : 0;
+                    userList.forEach((user) => {
+                        const userKategoriListPdf = String(user.kategori || '').split(',').map(k => k.trim()).filter(Boolean);
+                        const isMultiKategoriPdf = userKategoriListPdf.length > 1;
 
-                        tableRows.push([
-                            index + 1,
-                            user.nama,
-                            user.kategori,
-                            kategoriTanpaSesi ? '-' : totalSesi,
-                            kategoriTanpaSesi ? '-' : totalHari,
-                            realisasi,
-                            `${persentase}%`
-                        ]);
+                        if (filterKategori === 'ALL' && isMultiKategoriPdf) {
+                            // Pecah per kategori
+                            userKategoriListPdf.forEach(kat => {
+                                const absenKatIni = user.userAbsen.filter(a => a.kategori === kat);
+                                const sesiKat = absenKatIni.length;
+                                const hariKat = new Set(absenKatIni.map(a => a.tanggal)).size;
+                                const pseudoUserKat = { ...user, kategori: kat };
+                                const targetKat = hitungTargetSesiUntukUser(pseudoUserKat, pdfBulanDate.getFullYear(), pdfBulanDate.getMonth());
+                                const realisasiKat = hitungRealisasiUntukUser(pseudoUserKat, absenKatIni);
+                                const persenKat = (realisasiKat > 0 && targetKat > 0) ? Math.min(100, Math.round((realisasiKat / targetKat) * 100)) : 0;
+                                const kategoriTanpaSesiKat = (kat === "Ta'lim Umum" || kat === "Ta'lim Khusus");
+                                // Total Hadir: untuk Tahfidz = Sesi+Hari, untuk Ta'lim Umum/Khusus = realisasi (sudah per hadir)
+                                const totalHadirKat = kategoriTanpaSesiKat ? realisasiKat : (sesiKat + hariKat);
+
+                                tableRows.push([
+                                    nomorUrut++,
+                                    user.nama,
+                                    kat,
+                                    kategoriTanpaSesiKat ? '-' : sesiKat,
+                                    kategoriTanpaSesiKat ? '-' : hariKat,
+                                    totalHadirKat,
+                                    `${persenKat}%`
+                                ]);
+                            });
+                        } else {
+                            // Single kategori, atau filter spesifik sudah aktif (userAbsen sudah terfilter sebelumnya)
+                            const kategoriUntukHitung = filterKategori !== 'ALL' ? filterKategori : userKategoriListPdf[0];
+                            const pseudoUser = { ...user, kategori: kategoriUntukHitung };
+                            const kategoriTanpaSesi = (kategoriUntukHitung === "Ta'lim Umum" || kategoriUntukHitung === "Ta'lim Khusus");
+
+                            const targetSesi = hitungTargetSesiUntukUser(pseudoUser, pdfBulanDate.getFullYear(), pdfBulanDate.getMonth());
+                            const realisasi = hitungRealisasiUntukUser(pseudoUser, user.userAbsen);
+                            const persentase = (realisasi > 0 && targetSesi > 0) ? Math.min(100, Math.round((realisasi / targetSesi) * 100)) : 0;
+                            const totalHadir = kategoriTanpaSesi ? realisasi : (user.totalSesi + user.totalHari);
+
+                            tableRows.push([
+                                nomorUrut++,
+                                user.nama,
+                                kategoriUntukHitung,
+                                kategoriTanpaSesi ? '-' : user.totalSesi,
+                                kategoriTanpaSesi ? '-' : user.totalHari,
+                                totalHadir,
+                                `${persentase}%`
+                            ]);
+                        }
                     });
 
                     if (tableRows.length === 0) {
@@ -4579,9 +5124,9 @@
                     doc.setFillColor(20, 83, 45); // Zamrud
                     doc.roundedRect(14, finalY, 182, 16, 2, 2, 'FD');
 
-                    const totalSesiSum = tableRows.reduce((s, r) => s + r[3], 0);
-                    const totalHariSum = tableRows.reduce((s, r) => s + r[4], 0);
-                    const totalHadirSum = totalSesiSum + totalHariSum;
+                    const totalSesiSum = tableRows.reduce((s, r) => s + (typeof r[3] === 'number' ? r[3] : 0), 0);
+                    const totalHariSum = tableRows.reduce((s, r) => s + (typeof r[4] === 'number' ? r[4] : 0), 0);
+                    const totalHadirSum = tableRows.reduce((s, r) => s + (typeof r[5] === 'number' ? r[5] : 0), 0);
 
                     doc.setTextColor(180, 220, 195);
                     doc.setFontSize(7);
@@ -4633,6 +5178,21 @@
                 }
             }, 500); // Jeda sedikit agar loading screen sempat muncul
         }
+        function tentukanKategoriUntukSesi(sesi) {
+            if (sesi === 'PAGI' || sesi === 'SORE') return 'Tahfidz';
+            if (sesi === 'MAGHRIB') return "Ta'lim Umum";
+            if (sesi === 'MALAM') {
+                const malamMilikTalimKhususHariIni =
+                    userPunyaKategori("Ta'lim Khusus") && ["Senin","Selasa","Rabu"].includes(getNamaHariIni());
+                const malamMilikTalimUmumHariIni =
+                    userPunyaKategori("Ta'lim Umum") && cekJadwalHariIni(currentUser.jadwal_malam);
+
+                if (malamMilikTalimKhususHariIni) return "Ta'lim Khusus";
+                if (malamMilikTalimUmumHariIni) return "Ta'lim Umum";
+                return 'Tahfidz';
+            }
+            return currentUser.kategori; // fallback untuk pengajar single-kategori
+        }        
         // --- FUNGSI REFRESH MANUAL ---
         function refreshAllData() {
             if (!navigator.onLine) {
