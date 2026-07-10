@@ -449,21 +449,29 @@
                             </div>
 
                             <div id="card-MALAM-TALIMUMUM" onclick="pilihSesiAdmin('MALAM', &quot;Ta'lim Umum&quot;)" class="hidden flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-purple-500 text-xl"><i class="fa-solid fa-moon"></i></div>
-                                    <div><h4 class="font-bold text-zamrud-900 text-base">Malam (Ta'lim Umum)</h4><p class="text-xs text-zamrud-300 mt-0.5">19:30 - 20:30</p></div>
+                                <div class="flex items-center gap-4 min-w-0">
+                                    <div class="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-purple-500 text-xl shrink-0"><i class="fa-solid fa-moon"></i></div>
+                                    <div class="min-w-0">
+                                        <h4 class="font-bold text-zamrud-900 text-base leading-tight">Malam</h4>
+                                        <p class="text-[10px] font-semibold text-purple-500 uppercase tracking-wide leading-tight">Ta'lim Umum</p>
+                                        <p class="text-xs text-zamrud-300 mt-0.5">19:30 - 20:30</p>
+                                    </div>
                                 </div>
-                                <div class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
+                                <div id="badge-MALAM-TALIMUMUM" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200 shrink-0 whitespace-nowrap self-center">Belum Absen</div>
                             </div>
 
                             <p id="label-kategori-talimkhusus-admin" class="hidden text-xs font-bold text-indigo-500 uppercase tracking-wider mt-1 mb-[-6px]"><i class="fa-solid fa-moon mr-1"></i>Ta'lim Khusus</p>
 
                             <div id="card-MALAM-TALIMKHUSUS" onclick="pilihSesiAdmin('MALAM', &quot;Ta'lim Khusus&quot;)" class="hidden flex items-center justify-between p-4 bg-white border border-emas-100 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 text-xl"><i class="fa-solid fa-moon"></i></div>
-                                    <div><h4 class="font-bold text-zamrud-900 text-base">Malam (Ta'lim Khusus)</h4><p class="text-xs text-zamrud-300 mt-0.5">19:30 - 20:30</p></div>
+                                <div class="flex items-center gap-4 min-w-0">
+                                    <div class="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 text-xl shrink-0"><i class="fa-solid fa-moon"></i></div>
+                                    <div class="min-w-0">
+                                        <h4 class="font-bold text-zamrud-900 text-base leading-tight">Malam</h4>
+                                        <p class="text-[10px] font-semibold text-indigo-500 uppercase tracking-wide leading-tight">Ta'lim Khusus</p>
+                                        <p class="text-xs text-zamrud-300 mt-0.5">19:30 - 20:30</p>
+                                    </div>
                                 </div>
-                                <div class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200">Belum Absen</div>
+                                <div id="badge-MALAM-TALIMKHUSUS" class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200 shrink-0 whitespace-nowrap self-center">Belum Absen</div>
                             </div>
                         </div>
                         
@@ -1516,6 +1524,41 @@
             if (cardMalamKhusus) cardMalamKhusus.classList.toggle('hidden', !isAdminUser);
             if (cardMalamUmum) cardMalamUmum.classList.toggle('hidden', !isAdminUser);
             if (labelTalimKhususAdmin) labelTalimKhususAdmin.classList.toggle('hidden', !isAdminUser);
+
+            // Update status Hadir/Belum Absen untuk 2 kartu Malam tambahan khusus admin
+            // (tidak masuk loop utama karena tidak ada di sesiAll, jadi dicek manual dari absensiData hari ini)
+            if (isAdminUser) {
+                const todayISO = getFormattedDateISO();
+                ['Ta\'lim Umum', 'Ta\'lim Khusus'].forEach(kat => {
+                    const cardId = kat === "Ta'lim Umum" ? 'card-MALAM-TALIMUMUM' : 'card-MALAM-TALIMKHUSUS';
+                    const badgeId = kat === "Ta'lim Umum" ? 'badge-MALAM-TALIMUMUM' : 'badge-MALAM-TALIMKHUSUS';
+                    const cardEl = document.getElementById(cardId);
+                    const badgeEl = document.getElementById(badgeId);
+                    if (!cardEl || !badgeEl) return;
+
+                    const sudahAbsenKat = absensiData.some(a =>
+                        a.username === currentUser.username &&
+                        a.tanggal === todayISO &&
+                        a.sesi === 'MALAM' &&
+                        a.kategori === kat &&
+                        a.status !== 'DIBATALKAN'
+                    );
+
+                    if (sudahAbsenKat) {
+                        cardEl.onclick = null;
+                        cardEl.classList.remove('cursor-pointer', 'hover:shadow-md');
+                        cardEl.classList.add('opacity-70');
+                        badgeEl.className = 'text-xs font-semibold px-3 py-1 rounded-full bg-green-50 text-green-600 border border-green-200';
+                        badgeEl.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Hadir';
+                    } else {
+                        cardEl.onclick = () => pilihSesiAdmin('MALAM', kat);
+                        cardEl.classList.add('cursor-pointer', 'hover:shadow-md');
+                        cardEl.classList.remove('opacity-70');
+                        badgeEl.className = 'text-xs font-semibold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-200';
+                        badgeEl.innerText = 'Belum Absen';
+                    }
+                });
+            }
 
             const sesiAll = ['PAGI', 'SORE', 'MAGHRIB', 'MALAM'];
             let adaKartuTampil = false;
@@ -4101,13 +4144,19 @@
             const boxSesiHari = document.getElementById('summary-cards-sesi-hari');
             const boxHadirOnly = document.getElementById('summary-card-hadir-only');
 
+            // Kumpulkan username yang berrole admin, supaya bisa dikecualikan dari perhitungan ringkasan
+            const usernameAdminList = allUsersData.filter(u => u.role === 'admin').map(u => u.username);
+
             if (kategoriTerpilihTanpaSesi) {
                 // Hitung total hadir sesuai jenis kategori (per sesi utk Ta'lim Umum, per hari utk Ta'lim Khusus)
+                // Kecualikan admin -- data absen admin murni untuk uji coba, bukan pengajar sungguhan
+                const filteredAbsenNonAdmin = filteredAbsen.filter(a => !usernameAdminList.includes(a.username));
+
                 let totalHadirKategori = 0;
                 if (filterKategori === "Ta'lim Umum") {
-                    totalHadirKategori = filteredAbsen.filter(a => a.kategori === filterKategori).length;
+                    totalHadirKategori = filteredAbsenNonAdmin.filter(a => a.kategori === filterKategori).length;
                 } else {
-                    totalHadirKategori = new Set(filteredAbsen.filter(a => a.kategori === filterKategori).map(a => a.tanggal + '_' + a.username)).size;
+                    totalHadirKategori = new Set(filteredAbsenNonAdmin.filter(a => a.kategori === filterKategori).map(a => a.tanggal + '_' + a.username)).size;
                 }
                 document.getElementById('stat-hadir-only').innerText = totalHadirKategori;
 
