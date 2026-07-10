@@ -3982,7 +3982,8 @@
             userList = userList.map(user => {
                 // Jika filter kategori spesifik aktif, hitung HANYA dari absen kategori itu
                 // (penting untuk pengajar multi-kategori agar statistiknya tidak tercampur)
-                let userAbsen = filteredAbsen.filter(a => a.username === user.username);
+                // Kecualikan juga absen yang statusnya DIBATALKAN
+                let userAbsen = filteredAbsen.filter(a => a.username === user.username && a.status !== 'DIBATALKAN');
                 if (filterKategori !== 'ALL') {
                     userAbsen = userAbsen.filter(a => a.kategori === filterKategori);
                 }
@@ -4150,7 +4151,8 @@
             if (kategoriTerpilihTanpaSesi) {
                 // Hitung total hadir sesuai jenis kategori (per sesi utk Ta'lim Umum, per hari utk Ta'lim Khusus)
                 // Kecualikan admin -- data absen admin murni untuk uji coba, bukan pengajar sungguhan
-                const filteredAbsenNonAdmin = filteredAbsen.filter(a => !usernameAdminList.includes(a.username));
+                // Kecualikan juga absen yang statusnya DIBATALKAN
+                const filteredAbsenNonAdmin = filteredAbsen.filter(a => !usernameAdminList.includes(a.username) && a.status !== 'DIBATALKAN');
 
                 let totalHadirKategori = 0;
                 if (filterKategori === "Ta'lim Umum") {
@@ -4592,7 +4594,8 @@
 
             const myAbsenBulanIni = absensiData.filter(item => 
                 item.username === currentUser.username && 
-                item.tanggal.startsWith(targetBulan)
+                item.tanggal.startsWith(targetBulan) &&
+                item.status !== 'DIBATALKAN'
             );
 
             const statBulanLabelEl = document.getElementById('home-stat-bulan-label');
@@ -4724,10 +4727,10 @@
 
                 const displayBulan = `${displayDate.getFullYear()}-${String(displayDate.getMonth() + 1).padStart(2, '0')}`;
 
-                // Hitung ulang total hadir KHUSUS untuk bulan efektif ini (bukan selalu bulan kalender berjalan)
                 const absenBulanEfektif = absensiData.filter(item =>
                     item.username === currentUser.username &&
-                    item.tanggal.startsWith(displayBulan)
+                    item.tanggal.startsWith(displayBulan) &&
+                    item.status !== 'DIBATALKAN'
                 );
 
                 // Samakan logika dengan kartu statistik Beranda:
