@@ -2371,13 +2371,16 @@
 
         function prosesKirimAbsen() {
             showLoading(true, "Menyimpan Absensi...");
-            window._adminKategoriPaksa = window._adminKategoriPaksa || null; // reset setelah dipakai, di bawah
+
+            // Tentukan kategori final: prioritas kartu admin (Malam Ta'lim Umum/Khusus) > logika otomatis per-sesi
+            const kategoriFinal = window._adminKategoriPaksa || tentukanKategoriUntukSesi(activeSesi);
+            window._adminKategoriPaksa = null; // reset setelah dipakai
 
             const dataAbsen = {
                 id_absen: 'ABS-' + Date.now(),
                 username: currentUser.username,
                 nama: currentUser.name,
-                kategori: window._adminKategoriPaksa || currentUser.kategori,
+                kategori: kategoriFinal,
                 tanggal: getFormattedDateISO(),
                 waktu: getFormattedTime(),
                 sesi: activeSesi,
@@ -5189,10 +5192,10 @@
 
                 if (malamMilikTalimKhususHariIni) return "Ta'lim Khusus";
                 if (malamMilikTalimUmumHariIni) return "Ta'lim Umum";
-                return 'Tahfidz';
+                return 'Tahfidz'; // Untuk admin (tanpa kategori sendiri) atau pengajar Tahfidz, default kartu Malam = Tahfidz
             }
-            return currentUser.kategori; // fallback untuk pengajar single-kategori
-        }        
+            return 'Tahfidz'; // fallback aman -- bukan lagi currentUser.kategori yang bisa berisi "LEMTATIQHI"/nama institusi
+        }       
         // --- FUNGSI REFRESH MANUAL ---
         function refreshAllData() {
             if (!navigator.onLine) {
