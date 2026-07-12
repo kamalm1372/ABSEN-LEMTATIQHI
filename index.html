@@ -2450,13 +2450,15 @@
         }
 
         function prosesKirimAbsen() {
-            window._adminKategoriPaksa = window._adminKategoriPaksa || null;
+            // Tentukan kategori final: prioritas paksa dari kartu admin > logika otomatis per-sesi
+            const kategoriFinal = window._adminKategoriPaksa || tentukanKategoriUntukSesi(activeSesi);
+            window._adminKategoriPaksa = null; // WAJIB direset unconditional, supaya tidak "nyangkut" ke absen berikutnya
 
             const dataAbsen = {
                 id_absen: 'ABS-' + Date.now(),
                 username: currentUser.username,
                 nama: currentUser.name,
-                kategori: window._adminKategoriPaksa || currentUser.kategori,
+                kategori: kategoriFinal,
                 tanggal: getFormattedDateISO(),
                 waktu: getFormattedTime(),
                 sesi: activeSesi,
