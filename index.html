@@ -1412,10 +1412,13 @@
 
         function initApp() {
 
-            // Set filter kategori Riwayat Absen default sesuai kategori pengajar yang login
-            // (Admin tetap default ke Tahfidz karena mereka melihat semua kategori)
-            if (currentUser.role !== 'admin' && currentUser.kategori) {
-                selectedKategoriRekap = currentUser.kategori;
+            // Set filter kategori Riwayat Absen default sesuai kategori pengajar yang login.
+            // Jika pengajar punya LEBIH DARI SATU kategori, default ke "Semua" (bukan string gabungan
+            // seperti "Tahfidz,Ta'lim Umum" yang tidak akan pernah cocok dengan chip manapun).
+            // Admin tetap default ke Tahfidz karena mereka melihat semua kategori.
+            if (currentUser.role !== 'admin') {
+                const kategoriListLogin = getKategoriUserList();
+                selectedKategoriRekap = (kategoriListLogin.length === 1) ? kategoriListLogin[0] : 'ALL';
             }
 
             document.getElementById('user-greeting-name').innerText = currentUser.name;
