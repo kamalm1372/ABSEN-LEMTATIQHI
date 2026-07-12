@@ -1493,17 +1493,23 @@
             navigate("home");
 
             const adaCacheAbsensi = absensiData.length > 0;
+            const sesiTodayCache = ambilSesiTodayCache();
 
             if (adaCacheAbsensi) {
-                // Sudah punya data dari sesi sebelumnya -> langsung tampilkan, TANPA skeleton sama sekali
                 loadRekap();
                 updateHomeStats();
-                lockSession([]); // Buka dulu semua kartu sesi sesuai kategori, nanti dikunci ulang begitu status asli didapat
             } else {
-                // Kunjungan pertama tanpa cache sama sekali -> baru tampilkan skeleton
                 showHomeSkeleton(true);
                 loadRekap();
                 updateHomeStats();
+            }
+
+            if (sesiTodayCache !== null) {
+                // Ada cache status hari ini yang valid -> langsung tampilkan status SEBENARNYA, tanpa "Belum Absen" palsu
+                lockSession(sesiTodayCache);
+            } else {
+                // Belum ada cache sama sekali untuk hari ini -> tampilkan loading, bukan "Belum Absen" yang bisa salah
+                tampilkanLoadingBadgeSemuaSesi();
             }
 
             // Selalu sinkronisasi ke server di latar belakang (senyap jika sudah ada cache)
@@ -1514,17 +1520,47 @@
                 })
             ])
             .then(([_, sesiList]) => {
+                simpanSesiTodayCache(sesiList);
                 lockSession(sesiList);
                 if (!adaCacheAbsensi) showHomeSkeleton(false);
             })
             .catch(err => {
                 console.error(err);
                 if (!adaCacheAbsensi) showHomeSkeleton(false);
-                // Jika ada cache, kegagalan sinkronisasi diabaikan senyap -- user tetap bisa lihat data lama
+                // Jika gagal total dan tidak ada cache sama sekali, minimal buka kartu (fallback aman)
+                if (sesiTodayCache === null) lockSession([]);
             });
 
         }
+        // Cache status sesi hari ini, supaya saat buka Beranda tidak perlu menampilkan
+        // "Belum Absen" yang salah dulu sebelum data asli dari server didapat
+        function getSesiTodayCacheKey() {
+            const today = getFormattedDateISO();
+            return `lem_sesi_today_${currentUser.username}_${today}`;
+        }
 
+        function simpanSesiTodayCache(sesiList) {
+            try { safeStorage.setItem(getSesiTodayCacheKey(), JSON.stringify(sesiList)); } catch(e){}
+        }
+
+        function ambilSesiTodayCache() {
+            const raw = safeParse(getSesiTodayCacheKey(), null);
+            return raw; // null jika belum ada cache untuk hari ini
+        }
+
+        // Tampilkan badge "Memuat..." pada semua kartu sesi yang terlihat, dipakai HANYA saat
+        // sama sekali belum ada cache status hari ini (kunjungan pertama di hari itu)
+        function tampilkanLoadingBadgeSemuaSesi() {
+            const semuaIdBadge = ['badge-PAGI', 'badge-SORE', 'badge-MAGHRIB', 'badge-MALAM'];
+            semuaIdBadge.forEach(id => {
+                const badge = document.getElementById(id);
+                const card = document.getElementById(id.replace('badge-', 'card-'));
+                if (!badge) return;
+                badge.className = 'text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 text-gray-400 border border-gray-200';
+                badge.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i>Memuat';
+                if (card) card.onclick = null;
+            });
+        }
         function lockSession(sesiList) {
             const isAdminUser = (currentUser.role === 'admin');
             const cardMalamKhusus = document.getElementById('card-MALAM-TALIMKHUSUS');
@@ -1929,6 +1965,7 @@
                     pendingHafalan = {};
                     santriData = [];
                     safeStorage.removeItem('lem_santri');
+                    if (currentUser) safeStorage.removeItem(getSesiTodayCacheKey());
                     const saveBar = document.getElementById('hafidz-save-bar');
                     if (saveBar) saveBar.classList.add('hidden');
 
@@ -2480,6 +2517,13 @@
             loadRekap();
             updateHomeStats();
             showLoading(false);
+
+            // Update juga cache status hari ini supaya konsisten dengan kartu yang baru saja berubah jadi "Hadir"
+            const cacheSesiSaatIni = ambilSesiTodayCache() || [];
+            if (!cacheSesiSaatIni.includes(sesiSaatIni)) {
+                cacheSesiSaatIni.push(sesiSaatIni);
+                simpanSesiTodayCache(cacheSesiSaatIni);
+            }
 
             Swal.fire({
                 toast: true,
