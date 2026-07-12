@@ -2386,7 +2386,7 @@
         async function processCapturedPhotoForAbsen(dataUrl) {
             showLoading(true, "Memproses Foto...");
             try {
-                capturedPhotoBase64 = await compressImage(dataUrl, 360, 0.45);
+                capturedPhotoBase64 = await compressImage(dataUrl, 280, 0.35);
                 showLoading(false);
                     
                     Swal.fire({
@@ -2450,17 +2450,13 @@
         }
 
         function prosesKirimAbsen() {
-            showLoading(true, "Menyimpan Absensi...");
-
-            // Tentukan kategori final: prioritas kartu admin (Malam Ta'lim Umum/Khusus) > logika otomatis per-sesi
-            const kategoriFinal = window._adminKategoriPaksa || tentukanKategoriUntukSesi(activeSesi);
-            window._adminKategoriPaksa = null; // reset setelah dipakai
+            window._adminKategoriPaksa = window._adminKategoriPaksa || null;
 
             const dataAbsen = {
                 id_absen: 'ABS-' + Date.now(),
                 username: currentUser.username,
                 nama: currentUser.name,
-                kategori: kategoriFinal,
+                kategori: window._adminKategoriPaksa || currentUser.kategori,
                 tanggal: getFormattedDateISO(),
                 waktu: getFormattedTime(),
                 sesi: activeSesi,
@@ -2473,62 +2469,74 @@
                 return;
             }
 
-            fetchAPI('saveAbsen', dataAbsen)
-                .then(function(response) {
-                    showLoading(false);
-                    if (response.status === 'success') {
-                        absensiData.unshift(dataAbsen);
-                        try { safeStorage.setItem('lem_absensi', JSON.stringify(absensiData)); } catch(e){}
-
-                        // Langsung ubah status tombol
-                        updateSessionUI(activeSesi);
-
-                        // Langsung refresh rekap dari data lokal
-                        loadRekap();
-                        updateHomeStats();
-
-                        Swal.fire({
-                            toast: true,
-                            position: "top-end",
-                            icon: "success",
-                            title: `Absen ${activeSesi} berhasil`,
-                            showConfirmButton: false,
-                            timer: 1800,
-                            timerProgressBar: true
-                        });
-                        // Refresh data di background
-                        setTimeout(() => {
-                            fetchRiwayat();
-                        }, 300);                        
-                    } else {
-                        Swal.fire({ icon: 'error', title: 'Gagal', text: response.message, confirmButtonColor: '#B8860B' });
-                    }
-                })
-                .catch(function(error) {
-                    // Gagal karena masalah jaringan (bukan error logika dari server) -> antrikan
-                    queueAbsenOffline(dataAbsen);
-                });
-        }
-
-        function queueAbsenOffline(dataAbsen) {
-            pendingQueue.push(dataAbsen);
-            savePendingQueue();
-
-            // Tampilkan juga di rekap lokal secara optimis, ditandai "Menunggu Sinkronisasi"
-            absensiData.unshift({ ...dataAbsen, _pending: true });
+            // --- OPTIMISTIC UPDATE: langsung tampil sukses, tanpa menunggu server ---
+            const sesiSaatIni = activeSesi;
+            absensiData.unshift(dataAbsen);
             try { safeStorage.setItem('lem_absensi', JSON.stringify(absensiData)); } catch(e){}
 
-            updateSessionUI(activeSesi);
+            updateSessionUI(sesiSaatIni);
             loadRekap();
             updateHomeStats();
             showLoading(false);
 
             Swal.fire({
-                icon: 'info',
-                title: 'Tersimpan Sementara',
-                text: `Absen ${activeSesi} disimpan di perangkat dan akan otomatis dikirim saat koneksi tersedia.`,
-                confirmButtonColor: '#B8860B'
+                toast: true,
+                position: "top-end",
+                icon: "success",
+                title: `Absen ${sesiSaatIni} berhasil`,
+                showConfirmButton: false,
+                timer: 1800,
+                timerProgressBar: true
             });
+
+            // --- Kirim ke server di LATAR BELAKANG, tanpa menahan UI ---
+            fetchAPI('saveAbsen', dataAbsen)
+                .then(function(response) {
+                    if (response.status !== 'success') {
+                        // Server menolak (misal ternyata sudah absen) -> rollback tampilan
+                        absensiData = absensiData.filter(a => a.id_absen !== dataAbsen.id_absen);
+                        try { safeStorage.setItem('lem_absensi', JSON.stringify(absensiData)); } catch(e){}
+                        loadRekap();
+                        updateHomeStats();
+                        fetchRiwayat(); // Ambil status asli dari server untuk mengunci ulang kartu sesi
+                        Swal.fire({ icon: 'error', title: 'Gagal Disimpan', text: response.message, confirmButtonColor: '#B8860B' });
+                    } else {
+                        // Sukses -> sinkron senyap di belakang layar
+                        setTimeout(() => { fetchRiwayat(); }, 300);
+                    }
+                })
+                .catch(function(error) {
+                    // Gagal jaringan -> masukkan ke antrian offline (data tetap tampil optimis di layar)
+                    queueAbsenOffline(dataAbsen, true); // true = jangan render ulang lagi, sudah optimis di atas
+                });
+        }
+
+        function queueAbsenOffline(dataAbsen, sudahOptimisTampil) {
+            pendingQueue.push(dataAbsen);
+            savePendingQueue();
+
+            if (!sudahOptimisTampil) {
+                // Jalur lama: dipanggil langsung saat offline terdeteksi sejak awal
+                absensiData.unshift({ ...dataAbsen, _pending: true });
+                try { safeStorage.setItem('lem_absensi', JSON.stringify(absensiData)); } catch(e){}
+                updateSessionUI(activeSesi);
+                loadRekap();
+                updateHomeStats();
+                showLoading(false);
+
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Tersimpan Sementara',
+                    text: `Absen ${activeSesi} disimpan di perangkat dan akan otomatis dikirim saat koneksi tersedia.`,
+                    confirmButtonColor: '#B8860B'
+                });
+            } else {
+                // Jalur baru: sudah tampil optimis dari prosesKirimAbsen, tinggal tandai _pending saja
+                const target = absensiData.find(a => a.id_absen === dataAbsen.id_absen);
+                if (target) target._pending = true;
+                try { safeStorage.setItem('lem_absensi', JSON.stringify(absensiData)); } catch(e){}
+                loadRekap(); // refresh badge "menunggu sinkronisasi" tanpa toast tambahan
+            }
         }
 
         function syncPendingQueue() {
