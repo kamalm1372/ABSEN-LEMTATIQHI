@@ -1965,6 +1965,7 @@
                     pendingHafalan = {};
                     santriData = [];
                     safeStorage.removeItem('lem_santri');
+                    safeStorage.removeItem('lem_santri_time');
                     if (currentUser) safeStorage.removeItem(getSesiTodayCacheKey());
                     const saveBar = document.getElementById('hafidz-save-bar');
                     if (saveBar) saveBar.classList.add('hidden');
@@ -3262,7 +3263,10 @@
             const action = isAdmin ? 'getAllSantri' : 'getSantriByPengajar';
             const payload = isAdmin ? {} : { username: currentUser.username };
 
-            const adaCacheLokal = santriData.length > 0;
+            // Cek keberadaan cache berdasarkan TIMESTAMP, bukan panjang array --
+            // supaya pengajar yang memang tidak punya santri sama sekali (hasil valid = array kosong)
+            // tidak selalu dianggap "belum ada cache" dan tidak perlu loading berulang tiap buka tab ini
+            const adaCacheLokal = !!safeStorage.getItem('lem_santri_time');
 
             // 1. Jika ada cache -> render INSTAN tanpa loader sama sekali
             if (adaCacheLokal) {
@@ -3270,7 +3274,7 @@
                 if (isAdmin) populateHafidzFilterDropdowns();
                 renderHafidzList();
             } else {
-                // Tidak ada cache (kunjungan pertama) -> baru tampilkan loader
+                // Benar-benar belum pernah ada cache (kunjungan pertama) -> baru tampilkan loader
                 showLoading(true, "Memuat Data Santri...");
             }
 
