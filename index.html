@@ -1526,15 +1526,29 @@
         }
 
         function lockSession(sesiList) {
-            // Khusus admin: tampilkan kartu Malam tambahan + label kategori untuk uji coba (Tahfidz/Ta'lim Umum/Ta'lim Khusus)
             const isAdminUser = (currentUser.role === 'admin');
             const cardMalamKhusus = document.getElementById('card-MALAM-TALIMKHUSUS');
             const cardMalamUmum = document.getElementById('card-MALAM-TALIMUMUM');
             const labelTalimKhususAdmin = document.getElementById('label-kategori-talimkhusus-admin');
+            const cardMalamDefault = document.getElementById('card-MALAM');
 
-            if (cardMalamKhusus) cardMalamKhusus.classList.toggle('hidden', !isAdminUser);
-            if (cardMalamUmum) cardMalamUmum.classList.toggle('hidden', !isAdminUser);
-            if (labelTalimKhususAdmin) labelTalimKhususAdmin.classList.toggle('hidden', !isAdminUser);
+            // Cek apakah hari ini Malam punya LEBIH DARI SATU kategori yang sah untuk pengajar ini
+            // (bukan hanya admin) -- kalau ya, pecah jadi kartu terpisah supaya tidak ada tebakan otomatis
+            const malamKhususAktifHariIni = userPunyaKategori("Ta'lim Khusus") && ["Senin","Selasa","Rabu"].includes(getNamaHariIni());
+            const malamUmumAktifHariIni = userPunyaKategori("Ta'lim Umum") && cekJadwalHariIni(currentUser.jadwal_malam);
+            const malamTahfidzAktifHariIni = userPunyaKategori('Tahfidz') && !malamKhususAktifHariIni && !malamUmumAktifHariIni;
+
+            const jumlahKategoriMalamAktif = [malamKhususAktifHariIni, malamUmumAktifHariIni, userPunyaKategori('Tahfidz')].filter(Boolean).length;
+            const perluPecahKartuMalam = !isAdminUser && jumlahKategoriMalamAktif > 1 && (malamKhususAktifHariIni || malamUmumAktifHariIni);
+
+            if (cardMalamKhusus) cardMalamKhusus.classList.toggle('hidden', !(isAdminUser || (perluPecahKartuMalam && malamKhususAktifHariIni)));
+            if (cardMalamUmum) cardMalamUmum.classList.toggle('hidden', !(isAdminUser || (perluPecahKartuMalam && malamUmumAktifHariIni)));
+            if (labelTalimKhususAdmin) labelTalimKhususAdmin.classList.toggle('hidden', !(isAdminUser || (perluPecahKartuMalam && malamKhususAktifHariIni)));
+
+            // Sembunyikan kartu Malam default kalau sudah dipecah ke kartu spesifik (mencegah dobel/ambigu)
+            if (cardMalamDefault && perluPecahKartuMalam) {
+                cardMalamDefault.classList.add('hidden');
+            }
 
             // Update status Hadir/Belum Absen untuk 2 kartu Malam tambahan khusus admin
             // (tidak masuk loop utama karena tidak ada di sesiAll, jadi dicek manual dari absensiData hari ini)
@@ -2292,11 +2306,23 @@
             if (menitSekarang > range.selesai) return 'TERLEWAT';
             return 'AKTIF';
         }
-        // Khusus admin: memilih sesi Malam dengan kategori spesifik (untuk uji coba, bebas hari/jam)
+        // Memilih sesi Malam dengan kategori spesifik.
+        // Admin: bebas hari/jam (untuk uji coba). Pengajar biasa: tetap divalidasi jam bukanya.
         function pilihSesiAdmin(sesi, kategoriPaksa) {
-            if (currentUser.role !== 'admin') return;
+            if (currentUser.role !== 'admin') {
+                const status = getStatusWaktuSesi(sesi);
+                const range = SESI_RANGE[sesi];
+                if (status === 'BELUM_MULAI') {
+                    Swal.fire({ icon: 'info', title: 'Belum Waktunya', text: `Sesi ini baru aktif jam ${range.label}.`, confirmButtonColor: '#B8860B' });
+                    return;
+                }
+                if (status === 'TERLEWAT') {
+                    Swal.fire({ icon: 'warning', title: 'Waktu Absen Terlewat', text: `Jam absen sesi ini (${range.label}) sudah berakhir.`, confirmButtonColor: '#B8860B' });
+                    return;
+                }
+            }
             activeSesi = sesi;
-            window._adminKategoriPaksa = kategoriPaksa; // dipakai saat simpan absen
+            window._adminKategoriPaksa = kategoriPaksa;
             triggerCamera();
         }
         function pilihSesi(sesi) {
