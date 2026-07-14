@@ -559,7 +559,6 @@
                 </select>
 
                 <div id="rekap-filter-kategori-row" class="flex gap-2 overflow-x-auto hide-scroll pb-1">
-                    <button type="button" data-kategori="ALL" onclick="setKategoriRekapFilter(this)" class="filter-chip flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border border-zamrud-100 text-zamrud-600 bg-white transition">Semua</button>
                     <button type="button" data-kategori="Tahfidz" onclick="setKategoriRekapFilter(this)" class="filter-chip flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border border-zamrud-100 text-zamrud-600 bg-white transition">Tahfidz</button>
                     <button type="button" data-kategori="Ta'lim Umum" onclick="setKategoriRekapFilter(this)" class="filter-chip flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border border-zamrud-100 text-zamrud-600 bg-white transition">Ta'lim Umum</button>
                     <button type="button" data-kategori="Ta'lim Khusus" onclick="setKategoriRekapFilter(this)" class="filter-chip flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border border-zamrud-100 text-zamrud-600 bg-white transition">Ta'lim Khusus</button>
@@ -1151,23 +1150,27 @@
                 // Hanya 1 kategori (atau kosong) -> sembunyikan seluruh baris filter
                 filterRow.classList.add('hidden');
                 filterRow.classList.remove('flex');
-                // Pastikan filter tetap mengarah ke satu-satunya kategori yang ada
                 if (kategoriUnik.size === 1) {
                     selectedKategoriRekap = Array.from(kategoriUnik)[0];
                 }
             } else {
-                // Lebih dari 1 kategori -> tampilkan baris filter, tapi hanya chip yang relevan + "Semua"
+                // Lebih dari 1 kategori -> tampilkan baris filter, tanpa chip "Semua" (sudah dihapus)
                 filterRow.classList.remove('hidden');
                 filterRow.classList.add('flex');
 
                 filterRow.querySelectorAll('.filter-chip').forEach(el => {
                     const kat = el.dataset.kategori;
-                    if (kat === 'ALL' || kategoriUnik.has(kat)) {
+                    if (kategoriUnik.has(kat)) {
                         el.classList.remove('hidden');
                     } else {
                         el.classList.add('hidden');
                     }
                 });
+
+                // Pastikan kategori yang sedang dipilih memang termasuk yang tersedia; kalau tidak, jatuh ke kategori pertama
+                if (!kategoriUnik.has(selectedKategoriRekap)) {
+                    selectedKategoriRekap = Array.from(kategoriUnik)[0];
+                }
             }
 
             sinkronkanChipAktifRekap();
@@ -1421,7 +1424,8 @@
             // Admin tetap default ke Tahfidz karena mereka melihat semua kategori.
             if (currentUser.role !== 'admin') {
                 const kategoriListLogin = getKategoriUserList();
-                selectedKategoriRekap = (kategoriListLogin.length === 1) ? kategoriListLogin[0] : 'ALL';
+                // Filter "Semua" dihapus -- selalu default ke kategori pertama, baik single maupun multi-kategori
+                selectedKategoriRekap = kategoriListLogin.length > 0 ? kategoriListLogin[0] : 'Tahfidz';
             }
 
             document.getElementById('user-greeting-name').innerText = currentUser.name;
@@ -2785,7 +2789,7 @@
                     const dataMalam = user.sesi['MALAM'];
 
                     // Kategori Ta'lim Umum tidak punya sesi Pagi/Sore, jadi cukup tampilkan Maghrib & Malam
-                    const isTalimUmum = currentUser.kategori === "Ta'lim Umum";
+                    const isTalimUmum = userPunyaKategori("Ta'lim Umum");
 
                     const badgePagi = dataPagi ? buatBadgeSesi(dataPagi, 'Pagi', 'P', 'amber') : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">P</div>`;
                     const badgeSore = dataSore ? buatBadgeSesi(dataSore, 'Sore', 'S', 'blue') : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">S</div>`;
@@ -2798,7 +2802,7 @@
                     card.className = 'rekap-group bg-white p-3.5 rounded-xl shadow-sm border border-emas-100 flex items-center justify-between mb-3';
 
                     const badgeHtml = isTalimUmum
-                        ? `${badgeMaghrib}${badgeMalam}`
+                        ? `${badgePagi}${badgeMaghrib}${badgeMalam}`
                         : `${badgePagi}${badgeSore}${badgeMalam}`;
                     
                     card.innerHTML = `
@@ -2834,7 +2838,7 @@
                         const dataMaghrib = user.sesi['MAGHRIB'];
                         const dataMalam = user.sesi['MALAM'];
 
-                        const isTalimUmum = user.kategori === "Ta'lim Umum";
+                        const isTalimUmum = String(user.kategori || '').split(',').map(k => k.trim()).includes("Ta'lim Umum");
 
                         const badgePagi = dataPagi ? buatBadgeSesi(dataPagi, 'Pagi', 'P', 'amber') : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">P</div>`;
                         const badgeSore = dataSore ? buatBadgeSesi(dataSore, 'Sore', 'S', 'blue') : `<div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-300 font-bold text-xs flex items-center justify-center border border-gray-100">S</div>`;
