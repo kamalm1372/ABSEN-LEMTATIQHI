@@ -1645,15 +1645,19 @@
 
                 if (userPunyaKategori("Ta'lim Umum") && iniJadwalTalimUmumHariIni) {
                     const materiHariIni = getMateriHariIni(currentUser.materi, sesi);
+                    const lokasiHariIni = getLokasiUntukHariSesi(currentUser.lokasi, sesi, getNamaHariIni());
 
                     const infoWrap = card.querySelector('.flex.items-center.gap-4 > div:last-child');
                     if (infoWrap && !containerMateri) {
                         containerMateri = document.createElement('p');
-                        containerMateri.className = 'materi-container text-[10px] text-zamrud-500 font-medium mt-1 flex items-center gap-1';
+                        containerMateri.className = 'materi-container text-[10px] text-zamrud-500 font-medium mt-1 flex flex-col gap-0.5';
                         infoWrap.appendChild(containerMateri);
                     }
                     if (containerMateri) {
-                        containerMateri.innerHTML = `<i class="fa-solid fa-book-open text-emas-500"></i> Materi: <span class="font-semibold text-zamrud-700">${materiHariIni}</span>`;
+                        containerMateri.innerHTML = `
+                            <span><i class="fa-solid fa-book-open text-emas-500"></i> Materi: <span class="font-semibold text-zamrud-700">${materiHariIni}</span></span>
+                            ${lokasiHariIni ? `<span><i class="fa-solid fa-location-dot text-emas-500"></i> <span class="font-semibold text-zamrud-700">${escapeHtml(lokasiHariIni)}</span></span>` : ''}
+                        `;
                     }
                 } else if (containerMateri) {
                     containerMateri.remove();
@@ -1829,6 +1833,7 @@
 
             hariPagi.forEach(hari => {
                 const materi = getMateriUntukHariSesi(currentUser.materi, 'PAGI', hari);
+                const lokasi = getLokasiUntukHariSesi(currentUser.lokasi, 'PAGI', hari);
                 html += `
                     <div class="bg-white border border-purple-100 rounded-xl p-2.5 flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 shrink-0">
@@ -1837,6 +1842,7 @@
                         <div class="flex-1 min-w-0">
                             <p class="text-xs font-bold text-zamrud-800">${hari} <span class="font-normal text-zamrud-400">• Pagi</span></p>
                             ${materi ? `<p class="text-[10px] text-emas-600 font-semibold"><i class="fa-solid fa-book-open mr-1"></i>${escapeHtml(materi)}</p>` : ''}
+                            ${lokasi ? `<p class="text-[10px] text-zamrud-500"><i class="fa-solid fa-location-dot mr-1"></i>${escapeHtml(lokasi)}</p>` : ''}
                         </div>
                     </div>
                 `;
@@ -1844,6 +1850,7 @@
 
             hariMaghrib.forEach(hari => {
                 const materi = getMateriUntukHariSesi(currentUser.materi, 'MAGHRIB', hari);
+                const lokasi = getLokasiUntukHariSesi(currentUser.lokasi, 'MAGHRIB', hari);
                 html += `
                     <div class="bg-white border border-purple-100 rounded-xl p-2.5 flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-500 shrink-0">
@@ -1852,6 +1859,7 @@
                         <div class="flex-1 min-w-0">
                             <p class="text-xs font-bold text-zamrud-800">${hari} <span class="font-normal text-zamrud-400">• Maghrib</span></p>
                             ${materi ? `<p class="text-[10px] text-emas-600 font-semibold"><i class="fa-solid fa-book-open mr-1"></i>${escapeHtml(materi)}</p>` : ''}
+                            ${lokasi ? `<p class="text-[10px] text-zamrud-500"><i class="fa-solid fa-location-dot mr-1"></i>${escapeHtml(lokasi)}</p>` : ''}
                         </div>
                     </div>
                 `;
@@ -1859,6 +1867,7 @@
 
             hariMalam.forEach(hari => {
                 const materi = getMateriUntukHariSesi(currentUser.materi, 'MALAM', hari);
+                const lokasi = getLokasiUntukHariSesi(currentUser.lokasi, 'MALAM', hari);
                 html += `
                     <div class="bg-white border border-purple-100 rounded-xl p-2.5 flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 shrink-0">
@@ -1867,6 +1876,7 @@
                         <div class="flex-1 min-w-0">
                             <p class="text-xs font-bold text-zamrud-800">${hari} <span class="font-normal text-zamrud-400">• Malam</span></p>
                             ${materi ? `<p class="text-[10px] text-emas-600 font-semibold"><i class="fa-solid fa-book-open mr-1"></i>${escapeHtml(materi)}</p>` : ''}
+                            ${lokasi ? `<p class="text-[10px] text-zamrud-500"><i class="fa-solid fa-location-dot mr-1"></i>${escapeHtml(lokasi)}</p>` : ''}
                         </div>
                     </div>
                 `;
@@ -1911,6 +1921,7 @@
                 } else {
                     hariPagi.forEach(hari => {
                         const materi = getMateriUntukHariSesi(currentUser.materi, 'PAGI', hari);
+                        const lokasi = getLokasiUntukHariSesi(currentUser.lokasi, 'PAGI', hari);
                         html += `
                             <div class="bg-white border border-purple-100 rounded-xl p-2.5 flex items-center gap-2.5">
                                 <div class="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 shrink-0">
@@ -1919,12 +1930,14 @@
                                 <div class="flex-1 min-w-0">
                                     <p class="text-xs font-bold text-zamrud-800">${hari} <span class="font-normal text-zamrud-400">• Pagi</span></p>
                                     ${materi ? `<p class="text-[10px] text-emas-600 font-semibold"><i class="fa-solid fa-book-open mr-1"></i>${escapeHtml(materi)}</p>` : ''}
+                                    ${lokasi ? `<p class="text-[10px] text-zamrud-500"><i class="fa-solid fa-location-dot mr-1"></i>${escapeHtml(lokasi)}</p>` : ''}
                                 </div>
                             </div>
                         `;
                     });
                     hariMaghrib.forEach(hari => {
                         const materi = getMateriUntukHariSesi(currentUser.materi, 'MAGHRIB', hari);
+                        const lokasi = getLokasiUntukHariSesi(currentUser.lokasi, 'MAGHRIB', hari);
                         html += `
                             <div class="bg-white border border-zamrud-100 rounded-xl p-3 flex items-center gap-3">
                                 <div class="w-9 h-9 rounded-full bg-purple-50 flex items-center justify-center text-purple-500 shrink-0">
@@ -1933,6 +1946,7 @@
                                 <div class="flex-1 min-w-0">
                                     <p class="text-xs font-bold text-zamrud-800">${hari} <span class="font-normal text-zamrud-400">• Maghrib</span></p>
                                     ${materi ? `<p class="text-[11px] text-emas-600 font-semibold mt-0.5"><i class="fa-solid fa-book-open mr-1"></i>${escapeHtml(materi)}</p>` : `<p class="text-[11px] text-zamrud-400 mt-0.5">Materi belum diatur</p>`}
+                                    ${lokasi ? `<p class="text-[11px] text-zamrud-500 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>${escapeHtml(lokasi)}</p>` : ''}
                                 </div>
                             </div>
                         `;
@@ -1940,6 +1954,7 @@
 
                     hariMalam.forEach(hari => {
                         const materi = getMateriUntukHariSesi(currentUser.materi, 'MALAM', hari);
+                        const lokasi = getLokasiUntukHariSesi(currentUser.lokasi, 'MALAM', hari);
                         html += `
                             <div class="bg-white border border-zamrud-100 rounded-xl p-3 flex items-center gap-3">
                                 <div class="w-9 h-9 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 shrink-0">
@@ -1948,6 +1963,7 @@
                                 <div class="flex-1 min-w-0">
                                     <p class="text-xs font-bold text-zamrud-800">${hari} <span class="font-normal text-zamrud-400">• Malam</span></p>
                                     ${materi ? `<p class="text-[11px] text-emas-600 font-semibold mt-0.5"><i class="fa-solid fa-book-open mr-1"></i>${escapeHtml(materi)}</p>` : `<p class="text-[11px] text-zamrud-400 mt-0.5">Materi belum diatur</p>`}
+                                    ${lokasi ? `<p class="text-[11px] text-zamrud-500 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>${escapeHtml(lokasi)}</p>` : ''}
                                 </div>
                             </div>
                         `;
@@ -2347,7 +2363,17 @@
             return NAMA_HARI[new Date().getDay()];
         }
 
-        // Mengambil materi untuk sesi & HARI TERTENTU (bukan selalu hari ini) dari format "MAGHRIB-Senin:Tilawah,MALAM-Senin:Barzanji"
+        function getLokasiUntukHariSesi(lokasiStr, sesi, hari) {
+            if (!lokasiStr) return '';
+            const targetKey = `${sesi}-${hari}`;
+            const pairs = String(lokasiStr).split(',');
+            for (const pair of pairs) {
+                const [key, lokasi] = pair.split(':');
+                if (key && key.trim() === targetKey) return lokasi ? lokasi.trim() : '';
+            }
+            return '';
+        }
+
         function getMateriUntukHariSesi(materiStr, sesi, hari) {
             if (!materiStr) return '';
             const targetKey = `${sesi}-${hari}`;
@@ -3098,12 +3124,19 @@
                 btn.classList.add('bg-emas-500', 'text-white', 'border-emas-600');
                 btn.classList.remove('bg-white', 'text-zamrud-500', 'border-zamrud-200');
             }
-            renderMateriRows(); // Refresh baris materi setiap kali jadwal hari berubah
+            renderMateriRows(user.materi); // Refresh baris materi setiap kali jadwal hari berubah
         }
 
         const DAFTAR_MATERI = ["Tilawah", "Tajwid", "Barzanji", "Kitab At-Tibyan", "Tartil"];
+        const DAFTAR_LOKASI = [
+            "Musholla Lemtatiqhi Kampus H",
+            "Musholla Reguler Kampus H",
+            "Masjid Al-Anud Jahz Safar",
+            "Masjid Nurisa Talipin",
+            "Masjid Hamid Nuri"
+        ];
 
-        function renderMateriRows(materiTersimpanStr) {
+        function renderMateriRows(materiTersimpanStr, lokasiTersimpanStr) {
             const container = document.getElementById('user-form-materi-rows');
             const hariPagi = getJadwalTerpilih('user-form-jadwal-pagi').split(',').filter(Boolean)
                 .sort((a, b) => HARI_LIST.indexOf(a) - HARI_LIST.indexOf(b));
@@ -3117,12 +3150,19 @@
                 return;
             }
 
-            // Parse materi tersimpan (format "MAGHRIB-Senin:Tilawah,MALAM-Senin:Barzanji") jadi objek
+            // Parse materi & lokasi tersimpan (format "MAGHRIB-Senin:Tilawah") jadi objek
             const materiMap = {};
             if (materiTersimpanStr) {
                 materiTersimpanStr.split(',').forEach(pair => {
                     const [key, materi] = pair.split(':');
                     if (key && materi) materiMap[key.trim()] = materi.trim();
+                });
+            }
+            const lokasiMap = {};
+            if (lokasiTersimpanStr) {
+                lokasiTersimpanStr.split(',').forEach(pair => {
+                    const [key, lokasi] = pair.split(':');
+                    if (key && lokasi) lokasiMap[key.trim()] = lokasi.trim();
                 });
             }
 
@@ -3131,21 +3171,32 @@
                 const rows = daftarHari.map(hari => {
                     const mapKey = `${sesiKey}-${hari}`;
                     const materiTerpilih = materiMap[mapKey] || '';
-                    const options = DAFTAR_MATERI.map(m => `<option value="${m}" ${m === materiTerpilih ? 'selected' : ''}>${m}</option>`).join('');
+                    const lokasiTerpilih = lokasiMap[mapKey] || '';
+                    const optionsMateri = DAFTAR_MATERI.map(m => `<option value="${m}" ${m === materiTerpilih ? 'selected' : ''}>${m}</option>`).join('');
+                    const optionsLokasi = DAFTAR_LOKASI.map(l => `<option value="${l}" ${l === lokasiTerpilih ? 'selected' : ''}>${l}</option>`).join('');
                     return `
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-semibold text-zamrud-600 w-16 shrink-0">${hari}</span>
-                            <select data-key="${mapKey}" class="materi-per-sesi-select flex-1 border border-zamrud-100 rounded-lg px-2 py-1.5 text-xs outline-none">
-                                <option value="">- Pilih -</option>
-                                ${options}
-                            </select>
+                        <div class="mb-2">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xs font-semibold text-zamrud-600 w-16 shrink-0">${hari}</span>
+                                <select data-key="${mapKey}" class="materi-per-sesi-select flex-1 border border-zamrud-100 rounded-lg px-2 py-1.5 text-xs outline-none">
+                                    <option value="">- Materi -</option>
+                                    ${optionsMateri}
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs w-16 shrink-0"></span>
+                                <select data-key="${mapKey}" class="lokasi-per-sesi-select flex-1 border border-zamrud-100 rounded-lg px-2 py-1.5 text-xs outline-none">
+                                    <option value="">- Lokasi -</option>
+                                    ${optionsLokasi}
+                                </select>
+                            </div>
                         </div>
                     `;
                 }).join('');
                 return `
                     <div class="mb-2">
                         <p class="text-[10px] font-bold text-emas-600 uppercase mb-1">${sesiLabel}</p>
-                        <div class="flex flex-col gap-1.5">${rows}</div>
+                        <div class="flex flex-col">${rows}</div>
                     </div>
                 `;
             }
@@ -3154,6 +3205,15 @@
                 buatBarisSesi("Sesi Pagi", "PAGI", hariPagi) +
                 buatBarisSesi("Sesi Maghrib", "MAGHRIB", hariMaghrib) +
                 buatBarisSesi("Sesi Malam", "MALAM", hariMalam);
+        }
+
+        function getLokasiPerHariTerpilih() {
+            const selects = document.querySelectorAll('.lokasi-per-sesi-select');
+            const pairs = [];
+            selects.forEach(sel => {
+                if (sel.value) pairs.push(`${sel.dataset.key}:${sel.value}`);
+            });
+            return pairs.join(',');
         }
 
         function getMateriPerHariTerpilih() {
@@ -3184,7 +3244,7 @@
             renderJadwalChips('user-form-jadwal-maghrib', '');
             renderJadwalChips('user-form-jadwal-malam', '');
             toggleJadwalTalimUmum();
-            renderMateriRows();
+            renderMateriRows(user.materi);
 
             const modal = document.getElementById('userFormModal');
             modal.classList.remove('hidden');
@@ -3211,7 +3271,7 @@
             renderJadwalChips('user-form-jadwal-maghrib', user.jadwal_maghrib);
             renderJadwalChips('user-form-jadwal-malam', user.jadwal_malam);
             toggleJadwalTalimUmum();
-            renderMateriRows(user.materi);
+            renderMateriRows(user.materi, user.lokasi);
 
             const modal = document.getElementById('userFormModal');
             modal.classList.remove('hidden');
@@ -3232,6 +3292,7 @@
             const role = document.getElementById('user-form-role').value;
             const kategori = getKategoriChecked().join(',');
             const materi = getMateriPerHariTerpilih();
+            const lokasi = getLokasiPerHariTerpilih();
 
             if (!kategori) {
                 Swal.fire({ icon: 'warning', text: 'Pilih minimal 1 kategori.', confirmButtonColor: '#B8860B' });
@@ -3258,6 +3319,7 @@
                 role: role,
                 kategori: kategori,
                 materi: materi,
+                lokasi: lokasi,
                 jadwal_pagi: getJadwalTerpilih('user-form-jadwal-pagi'),
                 jadwal_maghrib: jadwalMaghrib,
                 jadwal_malam: jadwalMalam
