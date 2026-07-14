@@ -1814,16 +1814,33 @@
         }
         // Ringkasan jadwal Ta'lim Umum berupa daftar kartu rapi (dipakai di kartu "tidak ada jadwal hari ini" per kategori)
         function buatRingkasanJadwalTalimUmum() {
+            const hariPagi = String(currentUser.jadwal_pagi || '').split(',').map(h => h.trim()).filter(Boolean)
+                .sort((a, b) => HARI_LIST.indexOf(a) - HARI_LIST.indexOf(b));
             const hariMaghrib = String(currentUser.jadwal_maghrib || '').split(',').map(h => h.trim()).filter(Boolean)
                 .sort((a, b) => HARI_LIST.indexOf(a) - HARI_LIST.indexOf(b));
             const hariMalam = String(currentUser.jadwal_malam || '').split(',').map(h => h.trim()).filter(Boolean)
                 .sort((a, b) => HARI_LIST.indexOf(a) - HARI_LIST.indexOf(b));
 
-            if (hariMaghrib.length === 0 && hariMalam.length === 0) {
+            if (hariPagi.length === 0 && hariMaghrib.length === 0 && hariMalam.length === 0) {
                 return `<p class="text-[11px] text-zamrud-400 text-center">Jadwal belum diatur, hubungi admin.</p>`;
             }
 
             let html = '<div class="flex flex-col gap-2 text-left">';
+
+            hariPagi.forEach(hari => {
+                const materi = getMateriUntukHariSesi(currentUser.materi, 'PAGI', hari);
+                html += `
+                    <div class="bg-white border border-purple-100 rounded-xl p-2.5 flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 shrink-0">
+                            <i class="fa-solid fa-sun text-xs"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-bold text-zamrud-800">${hari} <span class="font-normal text-zamrud-400">• Pagi</span></p>
+                            ${materi ? `<p class="text-[10px] text-emas-600 font-semibold"><i class="fa-solid fa-book-open mr-1"></i>${escapeHtml(materi)}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
 
             hariMaghrib.forEach(hari => {
                 const materi = getMateriUntukHariSesi(currentUser.materi, 'MAGHRIB', hari);
