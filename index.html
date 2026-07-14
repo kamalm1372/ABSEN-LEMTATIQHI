@@ -3029,7 +3029,7 @@
                         </div>
                         <p class="text-[11px] text-zamrud-400">@${escapeHtml(user.username)}</p>
                         ${user.kategori ? `<p class="text-[11px] text-zamrud-500 mt-0.5"><i class="fa-solid fa-tag mr-1"></i>${escapeHtml(user.kategori)}</p>` : ''}
-                        ${user.materi ? `<p class="text-[10px] text-zamrud-400 mt-0.5"><i class="fa-solid fa-book-open mr-1"></i>${escapeHtml(user.materi.split(',').map(p => { const [k,v]=p.split(':'); const [s,h]=(k||'').split('-'); return h && v ? `${h} ${s==='MAGHRIB'?'Maghrib':'Malam'}: ${v}` : ''; }).filter(Boolean).join(' • '))}</p>` : ''}
+                        ${user.materi ? `<p class="text-[10px] text-zamrud-400 mt-0.5"><i class="fa-solid fa-book-open mr-1"></i>${escapeHtml(user.materi.split(',').map(p => { const [k,v]=p.split(':'); const [s,h]=(k||'').split('-'); const labelSesi = s==='PAGI' ? 'Pagi' : s==='MAGHRIB' ? 'Maghrib' : 'Malam'; return h && v ? `${h} ${labelSesi}: ${v}` : ''; }).filter(Boolean).join(' • '))}</p>` : ''}
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
                         <button type="button" onclick="openEditUserModal('${user.username}')" class="w-9 h-9 rounded-full bg-zamrud-50 text-zamrud-600 border border-zamrud-200 flex items-center justify-center active:scale-95 transition">
@@ -5123,6 +5123,7 @@
                             username: u.username,
                             nama: u.name,
                             kategori: u.kategori || '-',
+                            jadwal_pagi: u.jadwal_pagi || '',
                             jadwal_maghrib: u.jadwal_maghrib || '',
                             jadwal_malam: u.jadwal_malam || ''
                         }));
