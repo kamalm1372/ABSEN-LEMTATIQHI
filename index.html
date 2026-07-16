@@ -3571,9 +3571,11 @@
             const btnTambah = document.getElementById('btn-tambah-santri');
             const filterTingkatRow = document.getElementById('hafidz-filter-tingkat');
 
-            // Tampilkan kotak pencarian & filter, ubah subjudul khusus admin
+            // Kotak pencarian nama: tampil untuk SEMUA role (admin maupun pengajar)
+            searchInput.classList.remove('hidden');
+
+            // Filter Kelas/Pengajar/Tingkat & tombol Tambah: tetap khusus admin
             if (isAdmin) {
-                searchInput.classList.remove('hidden');
                 filterRow.classList.remove('hidden');
                 filterRow.classList.add('grid');
                 filterTingkatRow.classList.remove('hidden');
@@ -3581,7 +3583,6 @@
                 btnTambah.classList.remove('hidden');
                 subtitle.innerText = `Seluruh santri (${santriData.length} orang)`;
             } else {
-                searchInput.classList.add('hidden');
                 filterRow.classList.add('hidden');
                 filterRow.classList.remove('grid');
                 filterTingkatRow.classList.add('hidden');
@@ -3598,8 +3599,8 @@
                 return;
             }
 
-            // Filter berdasarkan pencarian nama, tingkat, kelas, dan pengajar (khusus admin)
-            const keyword = isAdmin ? (searchInput.value || '').toLowerCase().trim() : '';
+            // Filter berdasarkan pencarian nama (semua role), tingkat, kelas, dan pengajar (khusus admin)
+            const keyword = (searchInput.value || '').toLowerCase().trim();
             const selectedKelas = isAdmin ? kelasDropdown.value : 'ALL';
             const selectedPengajar = isAdmin ? pengajarDropdown.value : 'ALL';
             const selectedTingkat = isAdmin ? selectedTingkatHafidz : 'ALL';
