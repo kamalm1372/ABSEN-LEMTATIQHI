@@ -2851,7 +2851,7 @@
                         const adaPending = Object.values(user.sesi).some(s => s._pending);
 
                         const badgeHtml = isTalimUmum
-                            ? `${badgeMaghrib}${badgeMalam}`
+                            ? `${badgePagi}${badgeMaghrib}${badgeMalam}`
                             : `${badgePagi}${badgeSore}${badgeMalam}`;
                         
                         userCard.innerHTML = `
@@ -4717,10 +4717,11 @@
             if (userKategoriList.includes("Ta'lim Khusus")) {
                 return hitungJumlahHariDalamBulan("Senin,Selasa,Rabu", tahun, bulanIndex);
             }
-            if (user.kategori === "Ta'lim Umum") {
+            if (userKategoriList.includes("Ta'lim Umum")) {
+                const targetPagi = hitungJumlahHariDalamBulan(user.jadwal_pagi, tahun, bulanIndex);
                 const targetMaghrib = hitungJumlahHariDalamBulan(user.jadwal_maghrib, tahun, bulanIndex);
                 const targetMalam = hitungJumlahHariDalamBulan(user.jadwal_malam, tahun, bulanIndex);
-                return targetMaghrib + targetMalam;
+                return targetPagi + targetMaghrib + targetMalam;
             }
 
             // Tahfidz: setiap hari ada 3 sesi (Pagi, Sore, Malam),
@@ -4758,11 +4759,12 @@
             }
 
             if (currentUser.kategori === "Ta'lim Umum") {
-                // Jumlahkan (bukan gabungkan) target Maghrib + target Malam,
-                // supaya hari yang punya 2 jadwal sekaligus dihitung 2, bukan 1
+                // Jumlahkan (bukan gabungkan) target Pagi + Maghrib + Malam,
+                // supaya hari yang punya lebih dari 1 jadwal sekaligus dihitung sesuai jumlahnya, bukan 1
+                const targetPagi = hitungJumlahHariDalamBulan(currentUser.jadwal_pagi, tahun, bulanIndex);
                 const targetMaghrib = hitungJumlahHariDalamBulan(currentUser.jadwal_maghrib, tahun, bulanIndex);
                 const targetMalam = hitungJumlahHariDalamBulan(currentUser.jadwal_malam, tahun, bulanIndex);
-                return targetMaghrib + targetMalam;
+                return targetPagi + targetMaghrib + targetMalam;
             }
 
             return 0; // Tidak dipakai untuk kategori lain (Tahfidz pakai MAX_SESI seperti biasa)
