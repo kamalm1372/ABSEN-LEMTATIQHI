@@ -3541,6 +3541,82 @@
 
             renderHafidzList();
         }
+        // Buka dropdown Juz & Halaman untuk edit manual (Ziyadah maupun Takriran)
+        function bukaEditManualHafalan(idSantri, type) {
+            const santri = santriData.find(s => s.id_santri === idSantri);
+            if (!santri) return;
+            const current = getCurrentHafalan(santri, type);
+            const judul = (type === 'ziyadah') ? 'Edit Manual Ziyadah' : 'Edit Manual Takriran';
+            const keterangan = (type === 'ziyadah')
+                ? 'Posisi ziyadah hanya bisa maju, tidak bisa diatur mundur dari data terakhir di server.'
+                : 'Posisi takriran bisa diatur maju maupun mundur secara bebas.';
+
+            let optionsJuz = '';
+            for (let j = 1; j <= MAX_JUZ; j++) {
+                optionsJuz += `<option value="${j}" ${j === current.juz ? 'selected' : ''}>Juz ${j}</option>`;
+            }
+            let optionsHal = '';
+            for (let h = 1; h <= HAL_PER_JUZ; h++) {
+                optionsHal += `<option value="${h}" ${h === current.halaman ? 'selected' : ''}>Hal. ${h}</option>`;
+            }
+
+            Swal.fire({
+                title: judul,
+                html: `
+                    <p class="text-xs text-zamrud-500 mb-3 text-left">${keterangan}</p>
+                    <div class="flex gap-2">
+                        <select id="swal-manual-juz" class="swal2-select" style="width:48%;margin:0;">${optionsJuz}</select>
+                        <select id="swal-manual-hal" class="swal2-select" style="width:48%;margin:0;">${optionsHal}</select>
+                    </div>
+                `,
+                confirmButtonText: 'Simpan',
+                confirmButtonColor: '#B8860B',
+                showCancelButton: true,
+                cancelButtonText: 'Batal',
+                preConfirm: () => ({
+                    juz: parseInt(document.getElementById('swal-manual-juz').value, 10),
+                    halaman: parseInt(document.getElementById('swal-manual-hal').value, 10)
+                })
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    setHafalanManual(idSantri, type, result.value.juz, result.value.halaman);
+                }
+            });
+        }
+
+        // Set posisi hafalan secara manual. Takriran boleh mundur dari data server, Ziyadah TIDAK BOLEH.
+        function setHafalanManual(idSantri, type, juz, halaman) {
+            const santri = santriData.find(s => s.id_santri === idSantri);
+            if (!santri) return;
+
+            if (type === 'ziyadah') {
+                const totalBaru = (juz - 1) * HAL_PER_JUZ + halaman;
+                const totalAsli = (santri.juz - 1) * HAL_PER_JUZ + santri.halaman;
+                if (totalBaru < totalAsli) {
+                    Swal.fire({
+                        icon: 'warning',
+                        text: `Ziyadah tidak bisa diatur mundur dari posisi terakhir (Juz ${santri.juz} • Hal. ${santri.halaman}).`,
+                        confirmButtonColor: '#B8860B'
+                    });
+                    return;
+                }
+            }
+
+            if (!pendingHafalan[idSantri]) pendingHafalan[idSantri] = {};
+
+            const isOriginal = (type === 'ziyadah')
+                ? (juz === santri.juz && halaman === santri.halaman)
+                : (juz === (santri.juz_takrir || 1) && halaman === (santri.halaman_takrir || 1));
+
+            if (isOriginal) {
+                if (pendingHafalan[idSantri][type]) delete pendingHafalan[idSantri][type];
+                if (Object.keys(pendingHafalan[idSantri]).length === 0) delete pendingHafalan[idSantri];
+            } else {
+                pendingHafalan[idSantri][type] = { juz, halaman };
+            }
+
+            renderHafidzList();
+        }
 
         // Lompat sejumlah halaman manual (bisa dipakai untuk setoran 3/5/10/20 halaman)
         function lompatHafalan(idSantri, type, inputId) {
@@ -3690,10 +3766,15 @@
                     <div class="bg-zamrud-50/60 rounded-xl p-2.5 mb-2">
                         <div class="flex items-center justify-between mb-2">
                             <p class="text-xs font-bold text-zamrud-700"><i class="fa-solid fa-star mr-1 text-emas-500"></i>Ziyadah</p>
-                            <p class="text-xs font-semibold ${hasChangeZiyadah ? 'text-emas-600' : 'text-zamrud-600'}">
-                                Juz ${currentZiyadah.juz} • Hal. ${currentZiyadah.halaman}
-                                ${hasChangeZiyadah ? '<span class="text-[9px] text-emas-500 ml-1">(belum disimpan)</span>' : ''}
-                            </p>
+                            <div class="flex items-center gap-1.5">
+                                <p class="text-xs font-semibold ${hasChangeZiyadah ? 'text-emas-600' : 'text-zamrud-600'}">
+                                    Juz ${currentZiyadah.juz} • Hal. ${currentZiyadah.halaman}
+                                    ${hasChangeZiyadah ? '<span class="text-[9px] text-emas-500 ml-1">(belum disimpan)</span>' : ''}
+                                </p>
+                                <button type="button" onclick="bukaEditManualHafalan('${santri.id_santri}', 'ziyadah')" class="w-5 h-5 rounded-full bg-zamrud-100 text-zamrud-700 border border-zamrud-200 flex items-center justify-center active:scale-95 transition shrink-0" title="Edit manual">
+                                    <i class="fa-solid fa-pen text-[9px]"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="flex items-center gap-2">
                             <button type="button" onclick="ubahHafalan('${santri.id_santri}', 'ziyadah', -1)" class="flex-1 py-1.5 rounded-lg bg-red-50 text-red-500 border border-red-200 flex items-center justify-center active:scale-95 transition">
@@ -3709,10 +3790,15 @@
                     <div class="bg-emas-50/60 rounded-xl p-2.5">
                         <div class="flex items-center justify-between mb-2">
                             <p class="text-xs font-bold text-emas-700"><i class="fa-solid fa-rotate mr-1 text-emas-500"></i>Takriran</p>
-                            <p class="text-xs font-semibold ${hasChangeTakrir ? 'text-emas-600' : 'text-zamrud-600'}">
-                                Juz ${currentTakrir.juz} • Hal. ${currentTakrir.halaman}
-                                ${hasChangeTakrir ? '<span class="text-[9px] text-emas-500 ml-1">(belum disimpan)</span>' : ''}
-                            </p>
+                            <div class="flex items-center gap-1.5">
+                                <p class="text-xs font-semibold ${hasChangeTakrir ? 'text-emas-600' : 'text-zamrud-600'}">
+                                    Juz ${currentTakrir.juz} • Hal. ${currentTakrir.halaman}
+                                    ${hasChangeTakrir ? '<span class="text-[9px] text-emas-500 ml-1">(belum disimpan)</span>' : ''}
+                                </p>
+                                <button type="button" onclick="bukaEditManualHafalan('${santri.id_santri}', 'takrir')" class="w-5 h-5 rounded-full bg-emas-100 text-emas-700 border border-emas-200 flex items-center justify-center active:scale-95 transition shrink-0" title="Edit manual">
+                                    <i class="fa-solid fa-pen text-[9px]"></i>
+                                </button>
+                            </div>
                         </div>
                         
                         <!-- Deretan Tombol Cepat (Quick Jump) -->
